@@ -1,11 +1,11 @@
-<<<<<<< HEAD
+
 #libarary
 library(ggplot2)
 library(cowplot)
 
 #import the file
 trait<-read.table('woody_trait.0625.txt',header=TRUE, stringsAsFactors=FALSE, sep="\t", dec=".",fileEncoding="latin1")
-#all speccies for the bivariate regression
+#2_0) all speccies for the bivariate regression
 xy<-trait
 names(xy)
 summary(model<-lm(P50~TLP,data=xy))
@@ -152,8 +152,115 @@ fig3<-plot_grid(P50_TLP,slope_TLP,slope_P50, WD_TLP,
 fig3
 
 ggsave(fig3,filename = '/Users/liudy/Downloads/broadleaf.tiff',width = 16,height = 16)
-=======
-#import the file
-trait<-read.table('woody_trait.0625.txt',header=TRUE, 
-                  stringsAsFactors=FALSE, sep="\t", dec=".",fileEncoding="latin1")
->>>>>>> d9fe87cf1c0f27e896110ece9d41dcb117465faf
+#######################################################################################################################################
+#2_3) Multi-bivariiate Broadleaf
+#LMA~TLP #only one variable and do not test
+
+
+
+#TLP ~other traits
+trait_g<-trait[trait$group!="CC",]
+xy<-trait_g
+names(xy)
+xy1<-xy[,c("LMA","LS","WD","P50","TLP")]
+xy2<-na.omit(xy1)
+model<-sma_regress_multivar(xy2)
+pred<-model$intercept_R+model$slope_R.y1*xy2$LMA+
+  model$slope_R.y2*xy2$LS+model$slope_R.y3*xy2$WD+model$slope_R.y4*(xy2$P50)
+res<-xy2$TLP-pred
+rmse<-sqrt(mean(res^2))
+rmse
+plot(pred,xy2$TLP)
+abline(0, 1)
+
+xy2$pred<-pred
+model1<-sma(pred~TLP,data=xy2,method=c("SMA"))
+model1
+summary(model<-lm(pred~TLP,data=xy2))
+tlp<-ggplot(xy2, aes(x=TLP, y=pred)) +geom_point(color="red") +labs(title = "y=0.5x+0.27, R2=0.3438,R2_adj=0.3408,p<0.001")+geom_smooth(method=lm, se=FALSE)+
+  scale_x_continuous(name = "TLP_act",) +
+  scale_y_continuous(name = "TLP_pred")+
+  geom_abline(slope=1)
+
+
+#3 out-smaple test (choose 150)
+trait_g<-trait[trait$group!="CC",]
+xy<-trait_g
+names(xy)
+xy1<-xy[,c("LMA","LS","WD","P50","TLP")]
+xy2<-na.omit(xy1)
+xy2_out<-xy2[c(1:150),]
+model<-sma_regress_multivar(xy2_out)
+model
+pred<-model$intercept_R+model$slope_R.y1*xy2_out$LMA+
+  model$slope_R.y2*xy2_out$LS+model$slope_R.y3*xy2_out$WD+model$slope_R.y4*(xy2_out$P50)
+res<-xy2_out$TLP-pred
+rmse<-sqrt(mean(res^2))
+rmse
+
+xy2_out$pred<-pred
+summary(model<-lm(pred~TLP,data=xy2_out))
+tlp<-ggplot(xy2_out, aes(x=TLP, y=pred)) +geom_point(color="red") +labs(title = "y=0.47x+0.27, R2=0.3074,R2_adj=0.3028,p<0.001")+geom_smooth(method=lm, se=FALSE)+
+  scale_x_continuous(name = "TLP_act",) +
+  scale_y_continuous(name = "TLP_pred")+
+  geom_abline(slope=1)
+
+#rest sp 73
+xy2_out2<-xy2[c(151:223),]
+pred<-model$intercept_R+model$slope_R.y1*xy2_out2$LMA+
+  model$slope_R.y2*xy2_out2$LS+model$slope_R.y3*xy2_out2$WD+model$slope_R.y4*(xy2_out2$P50)
+res<-xy2_out2$TLP-pred
+rmse<-sqrt(mean(res^2))
+rmse
+
+xy2_out2$pred<-pred
+summary(model<-lm(pred~TLP,data=xy2_out2))
+tlp<-ggplot(xy2_out2, aes(x=TLP, y=pred)) +geom_point(color="red") +labs(title = "y=0.53x+0.26, R2=0.3658,R2_adj=0.3569,p<0.001")+geom_smooth(method=lm, se=FALSE)+
+  scale_x_continuous(name = "TLP_act",) +
+  scale_y_continuous(name = "TLP_pred")+
+  geom_abline(slope=1)
+tlp
+
+
+
+#5test for bivariate regressioon wiith best correlatiom
+trait_g<-trait[trait$group!="CC",]
+xy<-trait_g
+names(xy)
+xy1<-na.omit(xy[,c("P50","TLP")])
+model1<-sma(TLP~P50,data=xy1,method=c("SMA"))
+model1
+res<-residuals(model1)
+rmse<-sqrt(mean(res^2))
+rmse
+
+xy1<-na.omit(xy[,c("LMA","TLP")])
+model1<-sma(TLP~LMA,data=xy1,method=c("SMA"))
+model1
+res<-residuals(model1)
+rmse<-sqrt(mean(res^2))
+rmse
+
+#for 223 sp get the TLP prediction
+trait_g<-trait[trait$group!="CC",]
+xy<-trait_g
+names(xy)
+xy1<-xy[,c("LMA","LS","WD","P50","TLP")]
+xy2<-na.omit(xy1)
+model1<-sma(TLP~LMA,data=xy2,method=c("SMA"))
+model1
+res<-residuals(model1)
+rmse<-sqrt(mean(res^2))
+rmse
+
+result<-merge(xy1_pre,xy2_pred,by="P50")
+names(result)
+summary(model<-lm(pred~pre,data=result))
+plot_pre<-ggplot(result, aes(x=pre, y=pred)) +geom_point(color="red") +labs(title = "y=0.5x+0.27, R2=0.28,R2_adj=0.27,p<0.001")+geom_smooth(method=lm, se=FALSE)+
+  scale_x_continuous(name = "pre_bi",) +
+  scale_y_continuous(name = "pre_mbi")+
+  geom_abline(slope=1)
+plot_pre
+#####test the other traits that are working
+
+
