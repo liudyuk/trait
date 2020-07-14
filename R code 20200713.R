@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #libarary
 library(ggplot2)
 library(cowplot)
@@ -151,3 +152,8 @@ fig3<-plot_grid(P50_TLP,slope_TLP,slope_P50, WD_TLP,
 fig3
 
 ggsave(fig3,filename = '/Users/liudy/Downloads/broadleaf.tiff',width = 16,height = 16)
+=======
+#import the file
+trait<-read.table('woody_trait.0625.txt',header=TRUE, 
+                  stringsAsFactors=FALSE, sep="\t", dec=".",fileEncoding="latin1")
+>>>>>>> d9fe87cf1c0f27e896110ece9d41dcb117465faf
