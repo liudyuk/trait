@@ -357,10 +357,12 @@ for (dd in 1:ndata) {
       LMA_e[dd]=mod_LMA$intercept_R + mod_LMA$slope_R.y1*TLP_e_last + mod_LMA$slope_R.y2*LS_e[dd]
       TLP_e[dd]=mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50_e_last + mod_TLP$slope_R.y2*LS_e[dd] + mod_TLP$slope_R.y3*LMA_e_last+mod_TLP$slope_R.y4*WD_e_last
     }
-    #Estimate P50 from TLP and kstem
+    # Estimate P50 from TLP and kstem
     P50_e[dd]=mod_P50$intercept_R + mod_P50$slope_R.y1*TLP_e_last + mod_P50$slope_R.y2*Ks_e[dd]
-    #Estimate WD from P50, TLP and LMA
-    WD_e[dd]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e_last + mod_WD$slope_R.y2*P50_e_last + mod_WD$slope_R.y3*LMA_e_last
+    # Estimate WD from P50, TLP and LMA
+    #WD_e[dd]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e_last + mod_WD$slope_R.y2*P50_e_last + mod_WD$slope_R.y3*LMA_e_last
+    # Test taking WD from a simple bivariate relationship (because not converging with the above multivariate one - need to sort out the multivariate fit!)
+    WD_e[dd] = mod_TLP_WD$regression.results$Slope[3]*TLP_e_last + mod_TLP_WD$regression.results$Intercept[3]
     
     if (limitdataranges) {
       #Do not go beyond observed limits of data
