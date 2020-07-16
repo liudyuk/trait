@@ -155,9 +155,8 @@ ggsave(fig3,filename = '/Users/liudy/Downloads/broadleaf.tiff',width = 16,height
 #######################################################################################################################################
 #2_3) Multi-bivariiate Broadleaf
 #LMA~TLP #only one variable and do not test
-
-
-
+###################################################################
+#run the function from Tom's developed multivariable
 #TLP ~other traits
 trait_g<-trait[trait$group!="CC",]
 xy<-trait_g
