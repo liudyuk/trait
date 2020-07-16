@@ -1,4 +1,0 @@
-
-#import the file
-trait<-read.table('woody_trait.0625.txt',header=TRUE, 
-                               stringsAsFactors=FALSE, sep="\t", dec=".",fileEncoding="latin1")
