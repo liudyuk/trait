@@ -330,7 +330,8 @@ for (dd in 1:ndata) {
       LS_e[dd]=mod_LS$intercept_R + mod_LS$slope_R.y1*LMA_e_last + mod_LS$slope_R.y2*LS_Hmax_e
       LMA_e[dd]=mod_LMA$intercept_R + mod_LMA$slope_R.y1*TLP_e_last + mod_LMA$slope_R.y2*LS_e_last
       TLP_e[dd]=mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50_e_last + mod_TLP$slope_R.y2*LS_e_last + mod_TLP$slope_R.y3*LMA_e_last+mod_TLP$slope_R.y4*WD_e_last
-    }
+    #now we need to add WD...Do not understand
+      }
     else {
       LMA_e[dd]=mod_LMA$intercept_R + mod_LMA$slope_R.y1*TLP_e_last + mod_LMA$slope_R.y2*LS_e[dd]
       TLP_e[dd]=mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50_e_last + mod_TLP$slope_R.y2*LS_e[dd] + mod_TLP$slope_R.y3*LMA_e_last+mod_TLP$slope_R.y4*WD_e_last
