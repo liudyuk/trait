@@ -8,18 +8,15 @@
 
 #setwd('/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/Daijun_processed_data_240520')
 
-traitfile='woody_trait.0625.txt'
+traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
 
+#traitfile='woody_trait.0625.txt'
 source('sma_multivar_regress.R')
 
 #--- Read in the trait data ---
-
-traits=read.table(traitfile)
-
-attach(traits)
-detach(traits)
-detach(traits[traits$group=="BE",])
-detach(traits[traits$group!="CC",])
+#traits=read.table(traitfile)
+#attach(traits)
+#detach(traits)
 
 traitb<-subset(traits,group!="CC",drop = T)
 #this is to delete the level that should not exist after subsetting
@@ -27,7 +24,7 @@ traitb<-droplevels(traitb)
 str(traitb)
 attach(traitb)
 
-P50
+
 #TOM CODE
 #--- Select a subset of the trait variables to work with ---
 #treesonly=T
@@ -117,6 +114,9 @@ plot(mod_leafN_LMA,"SMA",pch=16,xlab="leafN",ylab="LMA",main="leafN vs LMA")
 mod_Ks_Hmax_LS <- lmodel2(LS ~ Ks_Hmax)
 plot(mod_Ks_Hmax_LS,"SMA",pch=16,xlab="Ks_Hmax",ylab="LS",main="Ks_Hmax vs LS")
 
+mod_Ks_LMA <- lmodel2(Ks ~ LMA)
+plot(mod_Ks_LMA,"SMA",pch=16,xlab="LMA",ylab="Ks",main="Ks vs LMA")
+
 
 #Use up remaining unallocated plots and set back to single plot
 #plot.new()
@@ -158,7 +158,7 @@ length(which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP) & !is.na(P50)& 
 
 #--- Multivariate SMA models ---
 
-#Estimate P50 from TLP and kstem
+#1)Estimate P50 from TLP and kstem
 ind=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks))
 mod_P50 <- sma_regress_multivar(data.frame(TLP[ind],Ks[ind],P50[ind]))
 P50_est <- mod_P50$intercept_R + mod_P50$slope_R.y1*TLP[ind] + mod_P50$slope_R.y2*Ks[ind]
@@ -167,10 +167,11 @@ plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
 points(TLP[ind],P50_est,col="red",pch=16)
 plot(mod_Ks_P50,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
 points(Ks[ind],P50_est,col="red",pch=16)
+#estimate P50 is good fror broadleaf
 
-#Estimate LMA from LS and TLP
-#note: My test is good frr the LS and consider to not use
-ind=which(!is.na(LS) & !is.na(TLP) & !is.na(LMA))
+#2)Estimate LMA from LS and TLP
+#note: LS is not good and consider to not use
+ind=which(!is.na(LMA) & !is.na(LS) & !is.na(TLP))
 mod_LMA <- sma_regress_multivar(data.frame(TLP[ind],LS[ind],LMA[ind]))
 LMA_est <- mod_LMA$intercept_R + mod_LMA$slope_R.y1*TLP[ind] + mod_LMA$slope_R.y2*LS[ind]
 #Cross-checks to make sure that result is sensible
@@ -178,22 +179,80 @@ plot(mod_LS_LMA,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
 points(LS[ind],LMA_est,col="red",pch=16)
 plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
 points(TLP[ind],LMA_est,col="red",pch=16)
+#here TLP is a goood predictor for LMA_est, but not LS.
 
-#Estimate WD from P50, TLP and LMA
-ind=which(!is.na(P50) & !is.na(TLP) & !is.na(LMA) & !is.na(WD))
-mod_WD <- sma_regress_multivar(data.frame(TLP[ind],P50[ind],LMA[ind],WD[ind]))
-WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*TLP[ind] + mod_WD$slope_R.y2*P50[ind] + mod_WD$slope_R.y3*LMA[ind]
+#3)Estimate WD from P50 and LMA
+ind=which(!is.na(WD) & !is.na(P50) & !is.na(LMA))
+mod_WD <- sma_regress_multivar(data.frame(P50[ind],LMA[ind],P50[ind]))
+WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*P50[ind] + mod_WD$slope_R.y2*LMA[ind]
 #Cross-checks to make sure that result is sensible
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(TLP[ind],WD_est,col="red",pch=16)
 plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
 points(P50[ind],WD_est,col="red",pch=16)
 plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
 points(WD_est,LMA[ind],col="red",pch=16)
+#why the regression for P50 and WD is so good? sel-correlated?
+#test P50 TLP LMA
+ind=which(!is.na(WD) & !is.na(P50) & !is.na(LMA) & !is.na(TLP))
+mod_WD <- sma_regress_multivar(data.frame(P50[ind],LMA[ind],TLP[ind],WD[ind]))
+WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*P50[ind] + mod_WD$slope_R.y2*LMA[ind]+ mod_WD$slope_R.y3*TLP[ind]
+#Cross-checks to make sure that result is sensible
+plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+points(P50[ind],WD_est,col="red",pch=16)
+plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
+points(WD_est,LMA[ind],col="red",pch=16)
+plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+points(WD_est,TLP[ind],col="red",pch=16)
+#test P50 TLP 
+ind=which(!is.na(WD) & !is.na(P50)  & !is.na(TLP))
+mod_WD <- sma_regress_multivar(data.frame(P50[ind],TLP[ind],P50[ind]))
+WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*P50[ind] + mod_WD$slope_R.y2*TLP[ind]
+#Cross-checks to make sure that result is sensible
+plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+points(P50[ind],WD_est,col="red",pch=16)
+plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+points(WD_est,TLP[ind],col="red",pch=16)
 
-#Estimate TLP from P50,LS,LMA and WD
+#test TLP LMA
+ind=which(!is.na(WD) & !is.na(LMA) & !is.na(TLP))
+mod_WD <- sma_regress_multivar(data.frame(LMA[ind],TLP[ind],WD[ind]))
+WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*LMA[ind]+ mod_WD$slope_R.y2*TLP[ind]
+#Cross-checks to make sure that result is sensible
+plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+points(TLP[ind],WD_est,col="red",pch=16)
+plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
+points(WD_est,LMA[ind],col="red",pch=16)
+
+library(smatr)
+#test LMA
+ind=which(!is.na(WD) & !is.na(LMA))
+mod_WD <- sma(data.frame(WD[ind],LMA[ind]),method=c("SMA"))
+summary(mod_WD)
+WD_est <- -0.7182037 + 0.2942892*LMA[ind]
+plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
+points(WD_est,LMA[ind],col="red",pch=16)
+#test TLP
+ind=which(!is.na(WD) & !is.na(TLP))
+mod_WD <- sma(data.frame(WD[ind],TLP[ind]),method=c("SMA"))
+summary(mod_WD)
+WD_est <- 0.2810941 + 0.5010815*TLP[ind]
+plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+points(TLP[ind],WD_est,col="red",pch=16)
+#P50
+ind=which(!is.na(WD) & !is.na(P50))
+mod_WD <- sma(data.frame(WD[ind],P50[ind]),method=c("SMA"))
+summary(mod_WD)
+WD_est <- 0.4031998 + 0.2291030*P50[ind]
+plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+points(P50[ind],WD_est,col="red",pch=16)
+
+#something weird so strong correlation
+
+
+
+
+#4)Estimate TLP from P50,LS,LMA and WD (223 sp)
 ind=which(!is.na(P50) & !is.na(TLP) & !is.na(LMA) & !is.na(LS)& !is.na(WD))
-mod_TLP <- sma_regress_multivar(data.frame(P50[ind],LS[ind],LMA[ind],TLP[ind],TLP[ind]))
+mod_TLP <- sma_regress_multivar(data.frame(P50[ind],LS[ind],LMA[ind],WD[ind],TLP[ind]))
 TLP_est <- mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50[ind] + mod_TLP$slope_R.y2*LS[ind] + mod_TLP$slope_R.y3*LMA[ind]+mod_TLP$slope_R.y4*WD[ind]
 #Cross-checks to make sure that result is sensible
 plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
@@ -204,9 +263,23 @@ plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
 points(TLP_est,LMA[ind],col="red",pch=16)
 plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
 points(TLP_est,WD[ind],col="red",pch=16)
-#why the regression forr TLP and WD is so good? sel-correlated?
 
-#Estimate slope from TLP, P50 and kstem
+##checcked total SP by no WD is 226, no LS is 352, no LMA is 279,noP50 is 264
+#4_1)Estimate TLP from P50,LS,LMA,WD 
+ind=which(!is.na(P50) & !is.na(TLP) & !is.na(LMA) & !is.na(WD))
+mod_TLP <- sma_regress_multivar(data.frame(P50[ind],LMA[ind],WD[ind],TLP[ind]))
+TLP_est <- mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50[ind] + mod_TLP$slope_R.y2*LMA[ind] + mod_TLP$slope_R.y3*WD[ind]
+#Cross-checks to make sure that result is sensible
+plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
+points(TLP_est,P50[ind],col="red",pch=16)
+plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
+points(TLP_est,LMA[ind],col="red",pch=16)
+plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+points(TLP_est,WD[ind],col="red",pch=16)
+#if do not incclud LS, the total sp is 352. So it has large number of SP. And the regrressionss are ok even though for WD and TLP iis not strong
+
+
+#5)Estimate slope from TLP, P50 and kstem
 ind=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks) & !is.na(slope))
 mod_slope <- sma_regress_multivar(data.frame(P50[ind],TLP[ind],Ks[ind],slope[ind]))
 slope_est <- mod_slope$intercept_R + mod_slope$slope_R.y1*P50[ind] + mod_slope$slope_R.y2*TLP[ind] + mod_slope$slope_R.y3*Ks[ind]
@@ -219,21 +292,21 @@ plot(mod_P50_slope,"SMA",pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
 points(P50[ind],slope_est,col="red",pch=16)
 
 
-#Estimate LS from LMA and kstem/Hmax.
-ind=which(!is.na(LMA) & !is.na(Ks_Hmax) & !is.na(LS))
-mod_LS <- sma_regress_multivar(data.frame(LMA[ind],Ks_Hmax[ind],LS[ind]))
-LS_est <- mod_LS$intercept_R + mod_LS$slope_R.y1*LMA[ind] + mod_LS$slope_R.y2*Ks_Hmax[ind]
+#6) Estimate Ks from LMA and LS/Hmax.
+ind=which(!is.na(P50) & !is.na(LS_Hmax)  & !is.na(Ks))
+mod_Ks <- sma_regress_multivar(data.frame(P50[ind],LS_Hmax[ind],Ks[ind]))
+Ks_est <- mod_Ks$intercept_R + mod_Ks$slope_R.y1*P50[ind] + mod_Ks$slope_R.y2*LS_Hmax[ind]
 #Cross-checks to make sure that result is sensible
-plot(mod_Ks_Hmax_LS,"SMA",pch=16,xlab="Ks_Hmax",ylab="LS",main="Ks_Hmax vs LS")
-points(Ks_Hmax[ind],LS_est,col="red",pch=16)
-plot(mod_LS_LMA,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
-points(LS_est,LMA[ind],col="red",pch=16)
+plot(mod_Ks_LS_Hmax,"SMA",pch=16,xlab="LS_Hmax",ylab="Ks",main="Ksvs LS_Hmax")
+points(LS_Hmax[ind],Ks_est,col="red",pch=16)
+plot(mod_Ks_P50,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
+points(P50[ind],Ks_est,col="red",pch=16)
 
 
 
 
 
-#--- Attempt to iteratively converge on the best fit values of LS, TLP, P50 and LMA given known Hmax and kstem ---
+#--- Attempt to iteratively converge on the best fit values of Ks, TLP, P50 and LMA given known Hmax and LS ---
 
 #Calculate minimum and maximum values
 maxP50=max(P50,na.rm=T)
