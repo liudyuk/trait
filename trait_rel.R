@@ -329,12 +329,12 @@ minslope=min(slope,na.rm=T)
 # Set the tolerance level for the iteration
 tol=0.00001
 
-#Go through all observed combinations of Hmax and kstem
+#Go through all observed combinations of Hmax and LS
 
 ind=which(!is.na(Hmax) & !is.na(Ks))
 
 Hmax_e=Hmax[ind]
-Ks_e=Ks[ind]
+LS_e=LS[ind]
 
 ndata=length(Ks_e)
 
@@ -347,24 +347,24 @@ slope_e <- matrix(NA, nrow = ndata)
 # Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
 limitdataranges=F
 
-# Outer loop over all the combinations of Hmax and Kstem
+# Outer loop over all the combinations of Hmax and LS
 # The new estimates of traits use the suffix "_e"
 for (dd in 1:ndata) {
 
-  #Calculate the value for Ks/Hmax, which comes direct from the two input traits
-  Ks_Hmax_e=log(exp(Ks_e[dd])/Hmax_e[dd],base=exp(1))
+  #Calculate the value for LS*Hmax, which comes direct from the two input traits
+  LS_Hmax_e=log(exp(LS_e[dd])*Hmax_e[dd],base=exp(1))
   
-  #Calculate the values of LS based only on the bivariate relationships with Ks/Hmax
-  LS_e[dd]= mod_Ks_Hmax_LS$regression.results$Slope[3]*Ks_Hmax_e +
-  mod_Ks_Hmax_LS$regression.results$Intercept[3]
+  #Calculate the values of Ks based only on the bivariate relationships with LS*Hmax
+  Ks_e[dd]= mod_Ks_LS_Hmax$regression.results$Slope[3]*LS_Hmax_e +
+    mod_Ks_LS_Hmax$regression.results$Intercept[3]
     
   if (limitdataranges) {
     #Do not go beyond observed limits of data
-    if (LS_e[dd]>maxLS) {LS_e[dd]=maxLS}
-    if (LS_e[dd]<minLS) {LS_e[dd]=minLS}
+    if (Ks_e[dd]>maxKs) {Ks_e[dd]=maxKs}
+    if (Ks_e[dd]<minKs) {Ks_e[dd]=minKs}
   }
 
-  #TLP, P50, LMA, WD (and possibly LS) need optimising (not understand)
+  #TLP, P50, LMA, WD need optimising
 
   #First set some initial based on simple bivariate relationship. This is just so that the iteration has somewhere to start from. Final result should not be sensitive to these.
   LMA_e_last = mod_LS_LMA$regression.results$Slope[3]*LS_e[dd] +
