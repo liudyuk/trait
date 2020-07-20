@@ -331,12 +331,12 @@ tol=0.00001
 
 #Go through all observed combinations of Hmax and LS
 
-ind=which(!is.na(Hmax) & !is.na(Ks))
+ind=which(!is.na(Hmax) & !is.na(LS))
 
 Hmax_e=Hmax[ind]
 LS_e=LS[ind]
 
-ndata=length(Ks_e)
+ndata=length(LS_e)
 
 P50_e <- matrix(NA, nrow = ndata)
 LMA_e <- matrix(NA, nrow = ndata)
