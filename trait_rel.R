@@ -227,21 +227,23 @@ library(smatr)
 ind=which(!is.na(WD) & !is.na(LMA))
 mod_WD <- sma(data.frame(WD[ind],LMA[ind]),method=c("SMA"))
 summary(mod_WD)
-WD_est <- -0.7182037 + 0.2942892*LMA[ind]
+WD_est <- mod_WD$coef[[1]][1,1] + mod_WD$coef[[1]][2,1]*LMA[ind]
 plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
 points(WD_est,LMA[ind],col="red",pch=16)
 #test TLP
 ind=which(!is.na(WD) & !is.na(TLP))
 mod_WD <- sma(data.frame(WD[ind],TLP[ind]),method=c("SMA"))
 summary(mod_WD)
-WD_est <- 0.2810941 + 0.5010815*TLP[ind]
+WD_est <- mod_WD$coef[[1]][1,1] + mod_WD$coef[[1]][2,1]*TLP[ind]
+
 plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
 points(TLP[ind],WD_est,col="red",pch=16)
 #P50
 ind=which(!is.na(WD) & !is.na(P50))
 mod_WD <- sma(data.frame(WD[ind],P50[ind]),method=c("SMA"))
 summary(mod_WD)
-WD_est <- 0.4031998 + 0.2291030*P50[ind]
+WD_est <- mod_WD$coef[[1]][1,1] + mod_WD$coef[[1]][2,1]*P50[ind]
+#WD_est <- 0.4031998 + 0.2291030*P50[ind]
 plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
 points(P50[ind],WD_est,col="red",pch=16)
 
@@ -368,7 +370,7 @@ for (dd in 1:ndata) {
     }
   }
 
-  #TLP, P50, LMA, WD (and possibly LS) need optimising
+  #TLP, P50, LMA, WD (and possibly LS) need optimising (not understand)
 
   #First set some initial based on simple bivariate relationship. This is just so that the iteration has somewhere to start from. Final result should not be sensitive to these.
   if (optLS) {
@@ -395,7 +397,7 @@ for (dd in 1:ndata) {
   # "diff_*_last" variables contain the differences from the last round of iteration
   # (these are compared to differences in the current round of iteration to see if changes are smaller than
   # "tol" and therefore the iteration can stop)
-  # Here we initialise the "diff_*_last" variables very high
+  # Here we initialise the "diff_*_last" variables very high (why set 100)
   if (optLS) {
     diff_LS_last=100
   }
@@ -424,11 +426,11 @@ for (dd in 1:ndata) {
     if (optLS) {
       LS_e[dd]=mod_LS$intercept_R + mod_LS$slope_R.y1*LMA_e_last + mod_LS$slope_R.y2*LS_Hmax_e
       LMA_e[dd]=mod_LMA$intercept_R + mod_LMA$slope_R.y1*TLP_e_last + mod_LMA$slope_R.y2*LS_e_last
-      TLP_e[dd]=mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50_e_last + mod_TLP$slope_R.y2*LS_e_last + mod_TLP$slope_R.y3*LMA_e_last+mod_TLP$slope_R.y4*WD_e_last
+      TLP_e[dd]=mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50_e_last + mod_TLP$slope_R.y2*LMA_e_last+mod_TLP$slope_R.y3*WD_e_last
     }
     else {
       LMA_e[dd]=mod_LMA$intercept_R + mod_LMA$slope_R.y1*TLP_e_last + mod_LMA$slope_R.y2*LS_e[dd]
-      TLP_e[dd]=mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50_e_last + mod_TLP$slope_R.y2*LS_e[dd] + mod_TLP$slope_R.y3*LMA_e_last+mod_TLP$slope_R.y4*WD_e_last
+      TLP_e[dd]=mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50_e_last +  mod_TLP$slope_R.y2*LMA_e_last+mod_TLP$slope_R.y3*WD_e_last
     }
     # Estimate P50 from TLP and kstem
     P50_e[dd]=mod_P50$intercept_R + mod_P50$slope_R.y1*TLP_e_last + mod_P50$slope_R.y2*Ks_e[dd]
