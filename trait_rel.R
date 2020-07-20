@@ -458,7 +458,7 @@ for (dd in 1:ndata) {
 
   # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
   #WD_e[dd]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e[dd] + mod_WD$slope_R.y2*P50_e[dd] + mod_WD$slope_R.y3*LMA_e[dd]
-  slope_e[dd]=mod_slope$intercept_R + mod_slope$slope_R.y1*P50_e[dd] + mod_slope$slope_R.y2*TLP_e[dd] + mod_slope$slope_R.y3*Ks[dd]
+  slope_e[dd]=mod_slope$intercept_R + mod_slope$slope_R.y1*P50_e[dd] + mod_slope$slope_R.y2*TLP_e[dd] + mod_slope$slope_R.y3*Ks_e[dd]
   
   if (limitdataranges) {
     #Do not go beyond observed limits of data
