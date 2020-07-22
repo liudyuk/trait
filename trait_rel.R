@@ -8,7 +8,8 @@
 
 #setwd('/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/Daijun_processed_data_240520')
 
-traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
+#traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
+traits=read.table("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0625.txt")
 
 #traitfile='woody_trait.0625.txt'
 source('sma_multivar_regress.R')
@@ -158,9 +159,11 @@ length(which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP) & !is.na(P50)& 
 
 #--- Multivariate SMA models ---
 
+nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
+
 #1)Estimate P50 from TLP and kstem
 ind_P50=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks))
-mod_P50 <- sma_regress_multivar(data.frame(TLP[ind_P50],Ks[ind_P50],P50[ind_P50]))
+mod_P50 <- sma_regress_multivar(data.frame(TLP[ind_P50],Ks[ind_P50],P50[ind_P50]),nbtstrp)
 P50_est <- mod_P50$intercept_R + mod_P50$slope_R.y1*TLP[ind_P50] + mod_P50$slope_R.y2*Ks[ind_P50]
 #Cross-checks to make sure that result is sensible
 plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
@@ -172,7 +175,7 @@ points(Ks[ind_P50],P50_est,col="red",pch=16)
 #2)Estimate LMA from LS and TLP
 #note: LS is not good and consider to not use
 ind_LMA=which(!is.na(LMA) & !is.na(LS) & !is.na(TLP))
-mod_LMA <- sma_regress_multivar(data.frame(TLP[ind_LMA],LS[ind_LMA],LMA[ind_LMA]))
+mod_LMA <- sma_regress_multivar(data.frame(TLP[ind_LMA],LS[ind_LMA],LMA[ind_LMA]),nbtstrp)
 LMA_est <- mod_LMA$intercept_R + mod_LMA$slope_R.y1*TLP[ind_LMA] + mod_LMA$slope_R.y2*LS[ind_LMA]
 #Cross-checks to make sure that result is sensible
 plot(mod_LS_LMA,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
@@ -183,7 +186,7 @@ points(TLP[ind_LMA],LMA_est,col="red",pch=16)
 
 #3)Estimate WD from P50 and LMA
 ind_WD=which(!is.na(WD) & !is.na(P50) & !is.na(LMA))
-mod_WD <- sma_regress_multivar(data.frame(P50[ind_WD],LMA[ind_WD],P50[ind_WD]))
+mod_WD <- sma_regress_multivar(data.frame(P50[ind_WD],LMA[ind_WD],P50[ind_WD]),nbtstrp)
 WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*P50[ind_WD] + mod_WD$slope_R.y2*LMA[ind_WD]
 #Cross-checks to make sure that result is sensible
 plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
@@ -193,7 +196,7 @@ points(WD_est,LMA[ind_WD],col="red",pch=16)
 #why the regression for P50 and WD is so good? sel-correlated?
 #test P50 TLP LMA
 ind_WD=which(!is.na(WD) & !is.na(P50) & !is.na(LMA) & !is.na(TLP))
-mod_WD <- sma_regress_multivar(data.frame(P50[ind_WD],LMA[ind_WD],TLP[ind_WD],WD[ind_WD]))
+mod_WD <- sma_regress_multivar(data.frame(P50[ind_WD],LMA[ind_WD],TLP[ind_WD],WD[ind_WD]),nbtstrp)
 WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*P50[ind_WD] + mod_WD$slope_R.y2*LMA[ind_WD]+ mod_WD$slope_R.y3*TLP[ind_WD]
 #Cross-checks to make sure that result is sensible
 plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
@@ -204,7 +207,7 @@ plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
 points(WD_est,TLP[ind_WD],col="red",pch=16)
 #test P50 TLP 
 ind_WD=which(!is.na(WD) & !is.na(P50)  & !is.na(TLP))
-mod_WD <- sma_regress_multivar(data.frame(P50[ind_WD],TLP[ind_WD],P50[ind_WD]))
+mod_WD <- sma_regress_multivar(data.frame(P50[ind_WD],TLP[ind_WD],P50[ind_WD]),nbtstrp)
 WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*P50[ind_WD] + mod_WD$slope_R.y2*TLP[ind_WD]
 #Cross-checks to make sure that result is sensible
 plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
@@ -214,7 +217,7 @@ points(WD_est,TLP[ind_WD],col="red",pch=16)
 
 #test TLP LMA
 ind_WD=which(!is.na(WD) & !is.na(LMA) & !is.na(TLP))
-mod_WD <- sma_regress_multivar(data.frame(LMA[ind_WD],TLP[ind_WD],WD[ind_WD]))
+mod_WD <- sma_regress_multivar(data.frame(LMA[ind_WD],TLP[ind_WD],WD[ind_WD]),nbtstrp)
 WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*LMA[ind_WD]+ mod_WD$slope_R.y2*TLP[ind_WD]
 #Cross-checks to make sure that result is sensible
 plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
@@ -222,7 +225,7 @@ points(TLP[ind_WD],WD_est,col="red",pch=16)
 plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
 points(WD_est,LMA[ind_WD],col="red",pch=16)
 
-library(smatr)
+library(smatr) #NOTE TO DAIJUN: I can't use this package (it's for an older version of R). Why not use the lmodel2 package as at the start of this script?
 #test LMA
 ind_WD=which(!is.na(WD) & !is.na(LMA))
 mod_WD <- sma(data.frame(WD[ind_WD],LMA[ind_WD]),method=c("SMA"))
@@ -254,7 +257,7 @@ points(P50[ind_WD],WD_est,col="red",pch=16)
 
 #4)Estimate TLP from P50,LS,LMA and WD (223 sp)
 ind_TLP=which(!is.na(P50) & !is.na(TLP) & !is.na(LMA) & !is.na(LS)& !is.na(WD))
-mod_TLP <- sma_regress_multivar(data.frame(P50[ind_TLP],LS[ind_TLP],LMA[ind_TLP],WD[ind_TLP],TLP[ind_TLP]))
+mod_TLP <- sma_regress_multivar(data.frame(P50[ind_TLP],LS[ind_TLP],LMA[ind_TLP],WD[ind_TLP],TLP[ind_TLP]),nbtstrp)
 TLP_est <- mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50[ind_TLP] + mod_TLP$slope_R.y2*LS[ind_TLP] + mod_TLP$slope_R.y3*LMA[ind_TLP]+mod_TLP$slope_R.y4*WD[ind_TLP]
 #Cross-checks to make sure that result is sensible
 plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
@@ -269,7 +272,7 @@ points(TLP_est,WD[ind_TLP],col="red",pch=16)
 ##checcked total SP by no WD is 226, no LS is 352, no LMA is 279,noP50 is 264
 #4_1)Estimate TLP from P50,LS,LMA,WD 
 ind_TLP=which(!is.na(P50) & !is.na(TLP) & !is.na(LMA) & !is.na(WD))
-mod_TLP <- sma_regress_multivar(data.frame(P50[ind_TLP],LMA[ind_TLP],WD[ind_TLP],TLP[ind_TLP]))
+mod_TLP <- sma_regress_multivar(data.frame(P50[ind_TLP],LMA[ind_TLP],WD[ind_TLP],TLP[ind_TLP]),nbtstrp)
 TLP_est <- mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50[ind_TLP] + mod_TLP$slope_R.y2*LMA[ind_TLP] + mod_TLP$slope_R.y3*WD[ind_TLP]
 #Cross-checks to make sure that result is sensible
 plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
@@ -283,7 +286,7 @@ points(TLP_est,WD[ind_TLP],col="red",pch=16)
 
 #5)Estimate slope from TLP, P50 and kstem
 ind_slope=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks) & !is.na(slope))
-mod_slope <- sma_regress_multivar(data.frame(P50[ind_slope],TLP[ind_slope],Ks[ind_slope],slope[ind_slope]))
+mod_slope <- sma_regress_multivar(data.frame(P50[ind_slope],TLP[ind_slope],Ks[ind_slope],slope[ind_slope]),nbtstrp)
 slope_est <- mod_slope$intercept_R + mod_slope$slope_R.y1*P50[ind_slope] + mod_slope$slope_R.y2*TLP[ind_slope] + mod_slope$slope_R.y3*Ks[ind_slope]
 #Cross-checks to make sure that result is sensible
 plot(mod_Ks_slope,"SMA",pch=16,xlab="kstem",ylab="slope",main="kstem vs slope")
@@ -296,29 +299,13 @@ points(P50[ind_slope],slope_est,col="red",pch=16)
 
 #6) Estimate Ks from LMA and LS/Hmax.
 ind_Ks=which(!is.na(P50) & !is.na(LS_Hmax)  & !is.na(Ks))
-mod_Ks <- sma_regress_multivar(data.frame(P50[ind_Ks],LS_Hmax[ind_Ks],Ks[ind_Ks]))
+mod_Ks <- sma_regress_multivar(data.frame(P50[ind_Ks],LS_Hmax[ind_Ks],Ks[ind_Ks]),nbtstrp)
 Ks_est <- mod_Ks$intercept_R + mod_Ks$slope_R.y1*P50[ind_Ks] + mod_Ks$slope_R.y2*LS_Hmax[ind_Ks]
 #Cross-checks to make sure that result is sensible
 plot(mod_Ks_LS_Hmax,"SMA",pch=16,xlab="LS_Hmax",ylab="Ks",main="Ksvs LS_Hmax")
 points(LS_Hmax[ind_Ks],Ks_est,col="red",pch=16)
 plot(mod_Ks_P50,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
 points(P50[ind_Ks],Ks_est,col="red",pch=16)
-
-#---
-# Estimate standard deviation on all slope coefficients based on the 95% confidence interval
-# Assume SD = (upper_limit - lower_limit)/3.92 (for 95% confidence intervals)
-#
-# Note that this assumes normality in the distribution of the coefficients!!
-# CHECK: ARE THEY NORMAL?
-
-mod_LMA$y1.SD <- ((mod_LMA$U95_R.y1-mod_LMA$L95_R.y1)/3.92)
-mod_LMA$y2.SD <- ((mod_LMA$U95_R.y2-mod_LMA$L95_R.y2)/3.92)
-mod_TLP$y1.SD <- ((mod_TLP$U95_R.y1-mod_TLP$L95_R.y1)/3.92)
-mod_TLP$y2.SD <- ((mod_TLP$U95_R.y2-mod_TLP$L95_R.y2)/3.92)
-mod_TLP$y3.SD <- ((mod_TLP$U95_R.y3-mod_TLP$L95_R.y3)/3.92)
-mod_P50$y1.SD <- ((mod_P50$U95_R.y1-mod_P50$L95_R.y1)/3.92)
-mod_P50$y2.SD <- ((mod_P50$U95_R.y2-mod_P50$L95_R.y2)/3.92)
-
 
 #--- Attempt to iteratively converge on the best fit values of Ks, TLP, P50 and LMA given known Hmax and LS ---
 
@@ -341,8 +328,6 @@ minslope=min(slope,na.rm=T)
 # Set the tolerance level for the iteration
 tol=0.00001
 
-n_uncer=100 # Number of times to randomly sample regression coefficients (should probably be very high given that the dimensions of our uncertainty space is the same as the number of coefficients. Maybe we should consider e.g. latin hypercube sampling, or some other similar approach)
-
 #Go through all observed combinations of Hmax and LS
 
 ind=which(!is.na(Hmax) & !is.na(LS))
@@ -362,15 +347,16 @@ slope_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
 limitdataranges=F
 
 # New outer loop which randomly samples regression coefficients from within their uncertainty bounds
-for (ss in 1:n_uncer) {
+# The random sampling comes from the bootstrap sampling done in the calculations of the SMA regressions themselves. This approach has the big advantages of (a) not having to make any assumptions about the distribution of the coefficient uncertainty and (b) ensuring that the individual slope coefficients within a regression are consistent with each other.
+for (ss in 1:nbtstrp) {
 # For now, make samples for the following:
-mod_LMA_slope_y1_sample <- rnorm(1,mod_LMA$slope_R.y1,mod_LMA$y1.SD)
-mod_LMA_slope_y2_sample <- rnorm(1,mod_LMA$slope_R.y2,mod_LMA$y2.SD)
-mod_TLP_slope_y1_sample <- rnorm(1,mod_TLP$slope_R.y1,mod_TLP$y1.SD)
-mod_TLP_slope_y2_sample <- rnorm(1,mod_TLP$slope_R.y2,mod_TLP$y2.SD)
-mod_TLP_slope_y3_sample <- rnorm(1,mod_TLP$slope_R.y3,mod_TLP$y3.SD)
-mod_P50_slope_y1_sample <- rnorm(1,mod_P50$slope_R.y1,mod_P50$y1.SD)
-mod_P50_slope_y2_sample <- rnorm(1,mod_P50$slope_R.y2,mod_P50$y2.SD)
+mod_LMA_slope_y1_sample <- mod_LMA$boot.y1[ss]
+mod_LMA_slope_y2_sample <- mod_LMA$boot.y2[ss]
+mod_TLP_slope_y1_sample <- mod_TLP$boot.y1[ss]
+mod_TLP_slope_y2_sample <- mod_TLP$boot.y2[ss]
+mod_TLP_slope_y3_sample <- mod_TLP$boot.y3[ss]
+mod_P50_slope_y1_sample <- mod_P50$boot.y1[ss]
+mod_P50_slope_y2_sample <- mod_P50$boot.y2[ss]
 # Not implemented for WD yet, as I'm not sure which regression equation to use
 # These regression coefficients will now be used in the optimisation calculations
 
@@ -440,27 +426,27 @@ for (dd in 1:ndata) {
     
     if (limitdataranges) {
       #Do not go beyond observed limits of data
-      if (P50_e[dd]>maxP50 | is.na(P50_e[dd])) {P50_e[dd]=NA; break}
-      if (P50_e[dd]<minP50 | is.na(P50_e[dd])) {P50_e[dd]=NA; break}
-      if (TLP_e[dd]>maxTLP | is.na(TLP_e[dd])) {TLP_e[dd]=NA; break}
-      if (TLP_e[dd]<minTLP | is.na(TLP_e[dd])) {TLP_e[dd]=NA; break}
-      if (LMA_e[dd]>maxLMA | is.na(LMA_e[dd])) {LMA_e[dd]=NA; break}
-      if (LMA_e[dd]<minLMA | is.na(LMA_e[dd])) {LMA_e[dd]=NA; break}
-      if (WD_e[dd]>maxWD | is.na(WD_e[dd])) {WD_e[dd]=NA; break}
-      if (WD_e[dd]<minWD | is.na(WD_e[dd])) {WD_e[dd]=NA; break}
+      if (P50_e[dd,ss]>maxP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+      if (P50_e[dd,ss]<minP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+      if (TLP_e[dd,ss]>maxTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+      if (TLP_e[dd,ss]<minTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+      if (LMA_e[dd,ss]>maxLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+      if (LMA_e[dd,ss]<minLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+      if (WD_e[dd,ss]>maxWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA; break}
+      if (WD_e[dd,ss]<minWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA; break}
     }
     
     # Save the values for this iteration to the output array (only for debugging, can be commented out)
-    P50_c[niter] <- P50_e[dd]
-    LMA_c[niter] <- LMA_e[dd]
-    TLP_c[niter] <- TLP_e[dd]
-    WD_c[niter] <- WD_e[dd]
+    P50_c[niter] <- P50_e[dd,ss]
+    LMA_c[niter] <- LMA_e[dd,ss]
+    TLP_c[niter] <- TLP_e[dd,ss]
+    WD_c[niter] <- WD_e[dd,ss]
 
     # Calculate the difference between the current estimate of a trait value "_e" and the previous estimate "_last"
-    diff_P50 = P50_e[dd]-P50_e_last
-    diff_LMA = LMA_e[dd]-LMA_e_last
-    diff_TLP = TLP_e[dd]-TLP_e_last
-    diff_WD = WD_e[dd]-WD_e_last
+    diff_P50 = P50_e[dd,ss]-P50_e_last
+    diff_LMA = LMA_e[dd,ss]-LMA_e_last
+    diff_TLP = TLP_e[dd,ss]-TLP_e_last
+    diff_WD = WD_e[dd,ss]-WD_e_last
 
     # Now we test if the difference between trait estimates on this iteration and between trait estimates on
     # the last iteration is less than "tol" for all traits. If it is we finish the iteration.
@@ -478,23 +464,25 @@ for (dd in 1:ndata) {
     diff_WD_last=diff_WD
 
     # Save the "_e" values ready for the next iteration
-    P50_e_last=P50_e[dd]
-    LMA_e_last=LMA_e[dd]
-    TLP_e_last=TLP_e[dd]
-    WD_e_last=WD_e[dd]
+    P50_e_last=P50_e[dd,ss]
+    LMA_e_last=LMA_e[dd,ss]
+    TLP_e_last=TLP_e[dd,ss]
+    WD_e_last=WD_e[dd,ss]
   }
 
   # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
   #WD_e[dd]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e[dd] + mod_WD$slope_R.y2*P50_e[dd] + mod_WD$slope_R.y3*LMA_e[dd]
-  slope_e[dd]=mod_slope$intercept_R + mod_slope$slope_R.y1*P50_e[dd] + mod_slope$slope_R.y2*TLP_e[dd] + mod_slope$slope_R.y3*Ks_e[dd]
+  slope_e[dd,ss]=mod_slope$intercept_R + mod_slope$slope_R.y1*P50_e[dd,ss] + mod_slope$slope_R.y2*TLP_e[dd,ss] + mod_slope$slope_R.y3*Ks_e[dd]
   
   if (limitdataranges) {
     #Do not go beyond observed limits of data
-    if (slope_e[dd]>maxslope | is.na(slope_e[dd])) {slope_e[dd]=NA}
-    if (slope_e[dd]<minslope | is.na(slope_e[dd])) {slope_e[dd]=NA}
+    if (slope_e[dd,ss]>maxslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
+    if (slope_e[dd,ss]<minslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
   }
 
 }
+
+} #Finish nbtstrp loop
 
 #Optionally limit to ranges of observed traits
 WD_e[WD_e>maxWD]=maxWD
