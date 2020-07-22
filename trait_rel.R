@@ -337,14 +337,15 @@ LS_e=LS[ind]
 
 ndata=length(LS_e)
 
-P50_e <- matrix(NA, nrow = ndata, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
-LMA_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
-TLP_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
-WD_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
-slope_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
+P50_e <- matrix(NA, nrow = ndata, ncol = nbtstrp) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
+LMA_e <- matrix(NA, nrow = ndata, ncol = nbtstrp)
+TLP_e <- matrix(NA, nrow = ndata, ncol = nbtstrp)
+WD_e <- matrix(NA, nrow = ndata, ncol = nbtstrp)
+slope_e <- matrix(NA, nrow = ndata, ncol = nbtstrp)
+Ks_e <- matrix(NA, nrow = ndata) #Currently no uncertainty dimension added to Ks_e. This should be added.
 
 # Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
-limitdataranges=F
+limitdataranges=T
 
 # New outer loop which randomly samples regression coefficients from within their uncertainty bounds
 # The random sampling comes from the bootstrap sampling done in the calculations of the SMA regressions themselves. This approach has the big advantages of (a) not having to make any assumptions about the distribution of the coefficient uncertainty and (b) ensuring that the individual slope coefficients within a regression are consistent with each other.
