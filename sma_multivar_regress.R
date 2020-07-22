@@ -1,4 +1,4 @@
-sma_regress_multivar <- function(yy,nbtstrp,bootout=F) {
+sma_regress_multivar <- function(yy,nbtstrp=10000,bootout=F) {
   # Function to calculate a multivariate SMA regression 
   # Based on Richter and Stavn (2014)
   # https://journals.ametsoc.org/jtech/article/31/7/1663/4627/Determining-Functional-Relations-in-Multivariate
@@ -12,7 +12,9 @@ sma_regress_multivar <- function(yy,nbtstrp,bootout=F) {
   # Can handle between 2 and 5 input variables.
   #
   # Input: yy - data.frame of input variables for regression
-  # Output: return_vals - array of intercept, slope and slope confidence intervals
+  # Input: nbtstrp - number of bootstrapped samples to take (10 000 is the default)
+  # Input: bootout - whether to write out the entire bootstrap sample arrays
+  # Output: return_vals - array of intercept, slope, slope confidence intervals and (optionally) bootstrapped samples
   #
   # T. Pugh
   # 01.07.20
