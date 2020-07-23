@@ -62,6 +62,19 @@ sma_LS_KsHmax <- bivariate_sma_plot_stats(LS,Ks_Hmax,"LS","Ks/Hmax",nbtstrp)
 
 sma_Ks_LMA <- bivariate_sma_plot_stats(Ks,LMA,"Ks","LMA",nbtstrp)
 
+# Make a data frame summarising the fits of the regressions
+all_label1 <- c("P50","TLP","P50","TLP","P50","TLP","LS","Ks","Ks","LS","WD","Ks","Ks","leafN","LS","Ks")
+all_label2 <- c("TLP","slope","slope","WD","WD","LMA","LMA","LS*Hmax","P50","TLP","LMA","slope","Hmax","LMA","Ks/Hmax","LMA")
+all_R2 <- c(sma_TLP_P50$R2,sma_TLP_slope$R2,sma_P50_slope$R2,sma_TLP_WD$R2,sma_P50_WD$R2,
+               sma_TLP_LMA$R2,sma_LS_LMA$R2,sma_Ks_LSHmax$R2,sma_Ks_P50$R2,sma_LS_TLP$R2,
+               sma_WD_LMA$R2,sma_Ks_slope$R2,sma_Ks_Hmax$R2,sma_leafN_LMA$R2,sma_LS_KsHmax$R2,
+               sma_Ks_LMA$R2)
+all_rmse <- c(sma_TLP_P50$rmse,sma_TLP_slope$rmse,sma_P50_slope$rmse,sma_TLP_WD$rmse,sma_P50_WD$rmse,
+            sma_TLP_LMA$rmse,sma_LS_LMA$rmse,sma_Ks_LSHmax$rmse,sma_Ks_P50$rmse,sma_LS_TLP$rmse,
+            sma_WD_LMA$rmse,sma_Ks_slope$rmse,sma_Ks_Hmax$rmse,sma_leafN_LMA$rmse,sma_LS_KsHmax$rmse,
+            sma_Ks_LMA$rmse)
+
+all_sma_bivar <- data.frame(all_label1,all_label2,all_R2,all_rmse)
 
 #Use up remaining unallocated plots and set back to single plot
 #plot.new()
