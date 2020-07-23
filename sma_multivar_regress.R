@@ -88,8 +88,8 @@ sma_regress_multivar <- function(yy,nbtstrp=10000,bootout=F) {
   }
 
   for(i in 1:nbtstrp) {
-    index = 1:n
-    bootindex = sample(index, n, replace=T) 
+    index = 1:nn
+    bootindex = sample(index, nn, replace=T) 
     bootsample = yy[bootindex,] 
     ybarb=unname(colMeans(bootsample))
     sdevb=unname(apply(bootsample, 2, sd)) #Calculate standard deviation for bootsample (a deviation from the code in Richter and Stavn)
@@ -177,7 +177,7 @@ sma_regress_multivar <- function(yy,nbtstrp=10000,bootout=F) {
     }
   }
 
-  if (c==2) {
+  if (cc==2) {
     if (bootout) {
       return_vals <- c(r1,b1)
     }
@@ -185,7 +185,7 @@ sma_regress_multivar <- function(yy,nbtstrp=10000,bootout=F) {
       return_vals <- r1
     }
   }
-  else if (c==3) {
+  else if (cc==3) {
     if (bootout) {
       return_vals <- c(r1,r2,b1)
     }
@@ -193,7 +193,7 @@ sma_regress_multivar <- function(yy,nbtstrp=10000,bootout=F) {
       return_vals <- c(r1,r2)
     }
   }
-  else if (c==4) {
+  else if (cc==4) {
     if (bootout) {
       return_vals <- c(r1,r2,r3,b1)
     }
@@ -201,7 +201,7 @@ sma_regress_multivar <- function(yy,nbtstrp=10000,bootout=F) {
       return_vals <- c(r1,r2,r3)
     }
   }
-  else if (c==5) {
+  else if (cc==5) {
     if (bootout) {
       return_vals <- c(r1,r2,r3,r4,b1)
     }
