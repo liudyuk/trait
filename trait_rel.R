@@ -6,13 +6,13 @@
 # T. Pugh
 # 15.06.20
 
-#setwd('/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/Daijun_processed_data_240520')
+nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
 #traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
 traits=read.table("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0625.txt")
 
-#traitfile='woody_trait.0625.txt'
 source('sma_multivar_regress.R')
+source('trait_functions.R')
 
 #--- Read in the trait data ---
 #traits=read.table(traitfile)
@@ -25,98 +25,42 @@ traitb<-droplevels(traitb)
 str(traitb)
 attach(traitb)
 
-
-#TOM CODE
-#--- Select a subset of the trait variables to work with ---
-#treesonly=T
-#groupsel='BE'
-#
-#group=traits$group
-#kstem=traits$Ks[group==groupsel]
-#Hmax=traits$Hmax[group==groupsel]
-#WD=traits$WD[group==groupsel]
-#LS=traits$LS[group==groupsel]
-#LMA=traits$LMA[group==groupsel]
-#P50=traits$P50[group==groupsel]
-#TLP=traits$TLP[group==groupsel]
-#slope=traits$slope[group==groupsel]
-
-#if (treesonly) {
-#  kstem[Hmax<5 | is.nan(Hmax)]=NA
-#  P50[Hmax<5 | is.nan(Hmax)]=NA
-#  TLP[Hmax<5 | is.nan(Hmax)]=NA
-#  slope[Hmax<5 | is.nan(Hmax)]=NA
-#  LS[Hmax<5 | is.nan(Hmax)]=NA
-#  Hmax[Hmax<5 | is.nan(Hmax)]=NA
-#  LMA[Hmax<5 | is.nan(Hmax)]=NA
-#  WD[Hmax<5 | is.nan(Hmax)]=NA
-#}
-#
-# Calculate transformed traits
-#P50log=log(-P50,base=exp(1))
-#P50log[-P50<0]=NA
-#TLPlog=log(-TLP,base=exp(1))
-#TLPlog[-TLP<0]=NA
-#
-#kstemHmax=log(exp(kstem)/Hmax,base=exp(1))
-#
-##Remove high LMA values (where are they coming from - need a good justification to remove but they are skewing the analysis)
-#LMA[LMA>log(600,base=exp(1))]=NA
-
 #--- Bivariate plots with SMA regression ---
-
-library(lmodel2)
 
 par(mfrow=c(4,4))
 par(mar=c(2,2,2,2))
 
-mod_TLP_P50 <- lmodel2(P50 ~ TLP)
-plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
+sma_TLP_P50 <- bivariate_sma_plot_stats(P50,TLP,"P50","TLP",nbtstrp)
 
-mod_TLP_slope <- lmodel2(slope ~ TLP)
-plot(mod_TLP_slope,"SMA",pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
+sma_TLP_slope <- bivariate_sma_plot_stats(TLP,slope,"TLP","slope",nbtstrp)
 
-mod_P50_slope <- lmodel2(slope ~ P50)
-plot(mod_P50_slope,"SMA",pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
+sma_P50_slope <- bivariate_sma_plot_stats(P50,slope,"P50","slope",nbtstrp)
 
-mod_TLP_WD <- lmodel2(WD ~ TLP)
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+sma_TLP_WD <- bivariate_sma_plot_stats(TLP,WD,"TLP","WD",nbtstrp)
 
-mod_P50_WD <- lmodel2(WD ~ P50)
-plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+sma_P50_WD <- bivariate_sma_plot_stats(P50,WD,"P50","WD",nbtstrp)
 
-mod_TLP_LMA <- lmodel2(LMA ~ TLP)
-plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
+sma_TLP_LMA <- bivariate_sma_plot_stats(TLP,LMA,"TLP","LMA",nbtstrp)
 
-mod_LS_LMA <- lmodel2(LMA ~ LS)
-plot(mod_LS_LMA,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
+sma_LS_LMA <- bivariate_sma_plot_stats(LS,LMA,"LS","LMA",nbtstrp)
 
-mod_Ks_LS_Hmax <- lmodel2(Ks ~ LS_Hmax)
-plot(mod_Ks_LS_Hmax,"SMA",pch=16,xlab="LS_Hmax",ylab="Ks",main="LS_Hmax vs Ks")
+sma_Ks_LSHmax <- bivariate_sma_plot_stats(Ks,LS_Hmax,"Ks","LS*Hmax",nbtstrp)
 
-mod_Ks_P50 <- lmodel2(P50 ~ Ks)
-plot(mod_Ks_P50,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
+sma_Ks_P50 <- bivariate_sma_plot_stats(Ks,P50,"Ks","P50",nbtstrp)
 
-mod_LS_TLP <- lmodel2(TLP ~ LS)
-plot(mod_LS_TLP,"SMA",pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
+sma_LS_TLP <- bivariate_sma_plot_stats(LS,TLP,"LS","TLP",nbtstrp)
 
-mod_WD_LMA <- lmodel2(LMA ~ WD)
-plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
+sma_WD_LMA <- bivariate_sma_plot_stats(WD,LMA,"WD","LMA",nbtstrp)
 
-mod_Ks_slope <- lmodel2(slope ~ Ks)
-plot(mod_Ks_slope,"SMA",pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
+sma_Ks_slope <- bivariate_sma_plot_stats(Ks,slope,"Ks","slope",nbtstrp)
 
-mod_Ks_Hmax <- lmodel2(Hmax ~ Ks)
-plot(mod_Ks_Hmax,"SMA",pch=16,xlab="Ks",ylab="Hmax",main="Ks vs Hmax")
+sma_Ks_Hmax <- bivariate_sma_plot_stats(Ks,Hmax,"Ks","Hmax",nbtstrp)
 
-mod_leafN_LMA <- lmodel2(LMA ~ leafN)
-plot(mod_leafN_LMA,"SMA",pch=16,xlab="leafN",ylab="LMA",main="leafN vs LMA")
+sma_leafN_LMA <- bivariate_sma_plot_stats(leafN,LMA,"leafN","LMA",nbtstrp)
 
-mod_Ks_Hmax_LS <- lmodel2(LS ~ Ks_Hmax)
-plot(mod_Ks_Hmax_LS,"SMA",pch=16,xlab="Ks_Hmax",ylab="LS",main="Ks_Hmax vs LS")
+sma_LS_KsHmax <- bivariate_sma_plot_stats(LS,Ks_Hmax,"LS","Ks/Hmax",nbtstrp)
 
-mod_Ks_LMA <- lmodel2(Ks ~ LMA)
-plot(mod_Ks_LMA,"SMA",pch=16,xlab="LMA",ylab="Ks",main="Ks vs LMA")
+sma_Ks_LMA <- bivariate_sma_plot_stats(Ks,LMA,"Ks","LMA",nbtstrp)
 
 
 #Use up remaining unallocated plots and set back to single plot
@@ -159,7 +103,7 @@ length(which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP) & !is.na(P50)& 
 
 #--- Multivariate SMA models ---
 
-nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
+
 
 #1)Estimate P50 from TLP and kstem
 ind_P50=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks))
