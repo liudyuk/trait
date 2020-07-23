@@ -30,37 +30,37 @@ attach(traitb)
 par(mfrow=c(4,4))
 par(mar=c(2,2,2,2))
 
-sma_TLP_P50 <- bivariate_sma_plot_stats(P50,TLP,"P50","TLP",nbtstrp)
+sma_TLP_P50 <- sma_plot_stats(data.frame(P50,TLP),c("P50","TLP"),nbtstrp,T)
 
-sma_TLP_slope <- bivariate_sma_plot_stats(TLP,slope,"TLP","slope",nbtstrp)
+sma_TLP_slope <- sma_plot_stats(data.frame(TLP,slope),c("TLP","slope"),nbtstrp,T)
 
-sma_P50_slope <- bivariate_sma_plot_stats(P50,slope,"P50","slope",nbtstrp)
+sma_P50_slope <- sma_plot_stats(data.frame(P50,slope),c("P50","slope"),nbtstrp,T)
 
-sma_TLP_WD <- bivariate_sma_plot_stats(TLP,WD,"TLP","WD",nbtstrp)
+sma_TLP_WD <- sma_plot_stats(data.frame(TLP,WD),c("TLP","WD"),nbtstrp,T)
 
-sma_P50_WD <- bivariate_sma_plot_stats(P50,WD,"P50","WD",nbtstrp)
+sma_P50_WD <- sma_plot_stats(data.frame(P50,WD),c("P50","WD"),nbtstrp,T)
 
-sma_TLP_LMA <- bivariate_sma_plot_stats(TLP,LMA,"TLP","LMA",nbtstrp)
+sma_TLP_LMA <- sma_plot_stats(data.frame(TLP,LMA),c("TLP","LMA"),nbtstrp,T)
 
-sma_LS_LMA <- bivariate_sma_plot_stats(LS,LMA,"LS","LMA",nbtstrp)
+sma_LS_LMA <- sma_plot_stats(data.frame(LS,LMA),c("LS","LMA"),nbtstrp,T)
 
-sma_Ks_LSHmax <- bivariate_sma_plot_stats(Ks,LS_Hmax,"Ks","LS*Hmax",nbtstrp)
+sma_Ks_LSHmax <- sma_plot_stats(data.frame(Ks,LS_Hmax),c("Ks","LS*Hmax"),nbtstrp,T)
 
-sma_Ks_P50 <- bivariate_sma_plot_stats(Ks,P50,"Ks","P50",nbtstrp)
+sma_Ks_P50 <- sma_plot_stats(data.frame(Ks,P50),c("Ks","P50"),nbtstrp,T)
 
-sma_LS_TLP <- bivariate_sma_plot_stats(LS,TLP,"LS","TLP",nbtstrp)
+sma_LS_TLP <- sma_plot_stats(data.frame(LS,TLP),c("LS","TLP"),nbtstrp,T)
 
-sma_WD_LMA <- bivariate_sma_plot_stats(WD,LMA,"WD","LMA",nbtstrp)
+sma_WD_LMA <- sma_plot_stats(data.frame(WD,LMA),c("WD","LMA"),nbtstrp,T)
 
-sma_Ks_slope <- bivariate_sma_plot_stats(Ks,slope,"Ks","slope",nbtstrp)
+sma_Ks_slope <- sma_plot_stats(data.frame(Ks,slope),c("Ks","slope"),nbtstrp,T)
 
-sma_Ks_Hmax <- bivariate_sma_plot_stats(Ks,Hmax,"Ks","Hmax",nbtstrp)
+sma_Ks_Hmax <- sma_plot_stats(data.frame(Ks,Hmax),c("Ks","Hmax"),nbtstrp,T)
 
-sma_leafN_LMA <- bivariate_sma_plot_stats(leafN,LMA,"leafN","LMA",nbtstrp)
+sma_leafN_LMA <- sma_plot_stats(data.frame(leafN,LMA),c("leafN","LMA"),nbtstrp,T)
 
-sma_LS_KsHmax <- bivariate_sma_plot_stats(LS,Ks_Hmax,"LS","Ks/Hmax",nbtstrp)
+sma_LS_KsHmax <- sma_plot_stats(data.frame(LS,Ks_Hmax),c("LS","Ks/Hmax"),nbtstrp,T)
 
-sma_Ks_LMA <- bivariate_sma_plot_stats(Ks,LMA,"Ks","LMA",nbtstrp)
+sma_Ks_LMA <- sma_plot_stats(data.frame(Ks,LMA),c("Ks","LMA"),nbtstrp,T)
 
 # Make a data frame summarising the fits of the regressions
 all_label1 <- c("P50","TLP","P50","TLP","P50","TLP","LS","Ks","Ks","LS","WD","Ks","Ks","leafN","LS","Ks")
@@ -69,12 +69,16 @@ all_R2 <- c(sma_TLP_P50$R2,sma_TLP_slope$R2,sma_P50_slope$R2,sma_TLP_WD$R2,sma_P
                sma_TLP_LMA$R2,sma_LS_LMA$R2,sma_Ks_LSHmax$R2,sma_Ks_P50$R2,sma_LS_TLP$R2,
                sma_WD_LMA$R2,sma_Ks_slope$R2,sma_Ks_Hmax$R2,sma_leafN_LMA$R2,sma_LS_KsHmax$R2,
                sma_Ks_LMA$R2)
+all_R2adj <- c(sma_TLP_P50$R2adj,sma_TLP_slope$R2adj,sma_P50_slope$R2adj,sma_TLP_WD$R2adj,sma_P50_WD$R2adj,
+            sma_TLP_LMA$R2adj,sma_LS_LMA$R2adj,sma_Ks_LSHmax$R2adj,sma_Ks_P50$R2adj,sma_LS_TLP$R2adj,
+            sma_WD_LMA$R2adj,sma_Ks_slope$R2adj,sma_Ks_Hmax$R2adj,sma_leafN_LMA$R2adj,sma_LS_KsHmax$R2adj,
+            sma_Ks_LMA$R2adj)
 all_rmse <- c(sma_TLP_P50$rmse,sma_TLP_slope$rmse,sma_P50_slope$rmse,sma_TLP_WD$rmse,sma_P50_WD$rmse,
             sma_TLP_LMA$rmse,sma_LS_LMA$rmse,sma_Ks_LSHmax$rmse,sma_Ks_P50$rmse,sma_LS_TLP$rmse,
             sma_WD_LMA$rmse,sma_Ks_slope$rmse,sma_Ks_Hmax$rmse,sma_leafN_LMA$rmse,sma_LS_KsHmax$rmse,
             sma_Ks_LMA$rmse)
 
-all_sma_bivar <- data.frame(all_label1,all_label2,all_R2,all_rmse)
+all_sma_bivar <- data.frame(all_label1,all_label2,all_R2,all_R2adj,all_rmse)
 
 #Use up remaining unallocated plots and set back to single plot
 #plot.new()
@@ -83,40 +87,9 @@ all_sma_bivar <- data.frame(all_label1,all_label2,all_R2,all_rmse)
 par(mfrow=c(1,1))
 par(mar=c(5.1,4.1,4.1,2.1))
 
-#--- Partial correlations for linked traits ---
+#--- Experiment with different plausible multivariate SMA models, based on our theory ---
 
-library(ppcor)
-
-#LMA, LS, WD, TLP
-ind=which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP))
-pcor_LMA <- pcor(data.frame(TLP[ind],LS[ind],WD[ind],LMA[ind]))
-
-#TLP, LS, WD, LMA, P50 (do not include slope due to lack of data)
-ind=which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP) & !is.na(P50))
-pcor_TLP <- pcor(data.frame(LMA[ind],LS[ind],WD[ind],P50[ind],TLP[ind]))
-
-#P50, TLP, kstem (do not include slope due to lack of data)
-ind=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks)) 
-pcor_P50 <- pcor(data.frame(P50[ind],TLP[ind],Ks[ind]))
-
-#slope, P50, TLP, kstem
-ind=which(!is.na(P50) & !is.na(TLP) & !is.na(slope) & !is.na(Ks)) 
-pcor_slope <- pcor(data.frame(P50[ind],TLP[ind],Ks[ind],slope[ind]))
-
-#WD, LMA, P50
-ind=which(!is.na(P50) & !is.na(LMA) & !is.na(TLP)& !is.na(WD)) 
-pcor_WD <- pcor(data.frame(P50[ind],LMA[ind],TLP[ind],WD[ind]))
-
-# How many species do we have all traits for?
-#Including slope
-length(which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP) & !is.na(P50)& !is.na(Ks)& !is.na(Hmax) & !is.na(slope)))
-#Excluding slope
-length(which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP) & !is.na(P50)& !is.na(Ks)& !is.na(Hmax)))
-
-
-#--- Multivariate SMA models ---
-
-
+#P50
 
 #1)Estimate P50 from TLP and kstem
 ind_P50=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks))
