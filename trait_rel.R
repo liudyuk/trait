@@ -30,41 +30,41 @@ attach(traitb)
 par(mfrow=c(4,4))
 par(mar=c(2,2,2,2))
 
-sma_TLP_P50 <- sma_plot_stats(data.frame(P50,TLP),c("P50","TLP"),nbtstrp,T)
+TLP_from_P50 <- sma_plot_stats(data.frame(P50,TLP),c("P50","TLP"),nbtstrp,T)
 
-sma_TLP_slope <- sma_plot_stats(data.frame(TLP,slope),c("TLP","slope"),nbtstrp,T)
+TLP_from_slope <- sma_plot_stats(data.frame(slope,TLP),c("slope","TLP"),nbtstrp,T)
 
-sma_P50_slope <- sma_plot_stats(data.frame(P50,slope),c("P50","slope"),nbtstrp,T)
+P50_from_slope <- sma_plot_stats(data.frame(slope,P50),c("slope","P50"),nbtstrp,T)
 
-sma_TLP_WD <- sma_plot_stats(data.frame(TLP,WD),c("TLP","WD"),nbtstrp,T)
+TLP_from_WD <- sma_plot_stats(data.frame(WD,TLP),c("WD","TLP"),nbtstrp,T)
 
-sma_P50_WD <- sma_plot_stats(data.frame(P50,WD),c("P50","WD"),nbtstrp,T)
+P50_from_WD <- sma_plot_stats(data.frame(WD,P50),c("WD","P50"),nbtstrp,T)
 
-sma_TLP_LMA <- sma_plot_stats(data.frame(TLP,LMA),c("TLP","LMA"),nbtstrp,T)
+TLP_from_LMA <- sma_plot_stats(data.frame(LMA,TLP),c("LMA","TLP"),nbtstrp,T)
 
-sma_LS_LMA <- sma_plot_stats(data.frame(LS,LMA),c("LS","LMA"),nbtstrp,T)
+LS_from_LMA <- sma_plot_stats(data.frame(LMA,LS),c("LMA","LS"),nbtstrp,T)
 
-sma_Ks_LSHmax <- sma_plot_stats(data.frame(Ks,LS_Hmax),c("Ks","LS*Hmax"),nbtstrp,T)
+Ks_from_LSHmax <- sma_plot_stats(data.frame(LS_Hmax,Ks),c("LS*Hmax","Ks"),nbtstrp,T)
 
-sma_Ks_P50 <- sma_plot_stats(data.frame(Ks,P50),c("Ks","P50"),nbtstrp,T)
+Ks_from_P50 <- sma_plot_stats(data.frame(P50,Ks),c("P50","Ks"),nbtstrp,T)
 
-sma_LS_TLP <- sma_plot_stats(data.frame(LS,TLP),c("LS","TLP"),nbtstrp,T)
+LS_from_TLP <- sma_plot_stats(data.frame(TLP,LS),c("TLP","LS"),nbtstrp,T)
 
-sma_WD_LMA <- sma_plot_stats(data.frame(WD,LMA),c("WD","LMA"),nbtstrp,T)
+WD_from_LMA <- sma_plot_stats(data.frame(LMA,WD),c("LMA","WD"),nbtstrp,T)
 
-sma_Ks_slope <- sma_plot_stats(data.frame(Ks,slope),c("Ks","slope"),nbtstrp,T)
+Ks_from_slope <- sma_plot_stats(data.frame(slope,Ks),c("slope","Ks"),nbtstrp,T)
 
-sma_Ks_Hmax <- sma_plot_stats(data.frame(Ks,Hmax),c("Ks","Hmax"),nbtstrp,T)
+Ks_from_Hmax <- sma_plot_stats(data.frame(Hmax,Ks),c("Hmax","Ks"),nbtstrp,T)
 
-sma_leafN_LMA <- sma_plot_stats(data.frame(leafN,LMA),c("leafN","LMA"),nbtstrp,T)
+leafN_from_LMA <- sma_plot_stats(data.frame(LMA,leafN),c("LMA","leafN"),nbtstrp,T)
 
-sma_LS_KsHmax <- sma_plot_stats(data.frame(LS,Ks_Hmax),c("LS","Ks/Hmax"),nbtstrp,T)
+LS_from_KsHmax <- sma_plot_stats(data.frame(Ks_Hmax,LS),c("Ks/Hmax","LS"),nbtstrp,T)
 
-sma_Ks_LMA <- sma_plot_stats(data.frame(Ks,LMA),c("Ks","LMA"),nbtstrp,T)
+Ks_from_LMA <- sma_plot_stats(data.frame(LMA,Ks),c("LMA","Ks"),nbtstrp,T)
 
 # Make a data frame summarising the fits of the regressions
-all_label1 <- c("P50","TLP","P50","TLP","P50","TLP","LS","Ks","Ks","LS","WD","Ks","Ks","leafN","LS","Ks")
-all_label2 <- c("TLP","slope","slope","WD","WD","LMA","LMA","LS*Hmax","P50","TLP","LMA","slope","Hmax","LMA","Ks/Hmax","LMA")
+all_label1 <- c("TLP","slope","slope","WD","WD","LMA","LMA","LS*Hmax","P50","TLP","LMA","slope","Hmax","LMA","Ks/Hmax","LMA")
+all_label2 <- c("P50","TLP","P50","TLP","P50","TLP","LS","Ks","Ks","LS","WD","Ks","Ks","leafN","LS","Ks")
 all_R2 <- c(sma_TLP_P50$R2,sma_TLP_slope$R2,sma_P50_slope$R2,sma_TLP_WD$R2,sma_P50_WD$R2,
                sma_TLP_LMA$R2,sma_LS_LMA$R2,sma_Ks_LSHmax$R2,sma_Ks_P50$R2,sma_LS_TLP$R2,
                sma_WD_LMA$R2,sma_Ks_slope$R2,sma_Ks_Hmax$R2,sma_leafN_LMA$R2,sma_LS_KsHmax$R2,
@@ -89,7 +89,37 @@ par(mar=c(5.1,4.1,4.1,2.1))
 
 #--- Experiment with different plausible multivariate SMA models, based on our theory ---
 
-#P50
+## P50 ##
+
+# P50 from TLP and Ks
+P50_from_TLP_Ks <- sma_plot_stats(data.frame(TLP,Ks,P50),c("TLP","Ks","P50"),nbtstrp)
+plot(P50[P50_from_TLP_Ks$dataused],P50_from_TLP_Ks$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+
+# P50 from TLP
+P50_from_TLP <- sma_plot_stats(data.frame(TLP,P50),c("TLP","P50"),nbtstrp)
+
+# P50 from Ks
+P50_from_Ks <- sma_plot_stats(data.frame(Ks,P50),c("Ks","P50"),nbtstrp)
+
+# P50 from TLP (same species as for TLP and Ks)
+P50_from_TLP_limitspec <- sma_plot_stats(data.frame(TLP,P50),c("TLP","P50"),nbtstrp,F,P50_from_TLP_Ks$dataused)
+
+# P50 from Ks (same species as for TLP and Ks)
+P50_from_Ks_limitspec <- sma_plot_stats(data.frame(Ks,P50),c("Ks","P50"),nbtstrp,F,P50_from_TLP_Ks$dataused)
+
+# Summarise statistics
+all_testnames_P50 <- c("P50_from_TLP_Ks","P50_from_TLP","P50_from_Ks","P50_from_TLP_limitspec","P50_from_Ks_limitspec")
+all_R2_P50 <- c(P50_from_TLP_Ks$R2,P50_from_TLP$R2,P50_from_Ks$R2,P50_from_TLP_limitspec$R2,P50_from_Ks_limitspec$R2)
+all_R2adj_P50 <- c(P50_from_TLP_Ks$R2adj,P50_from_TLP$R2adj,P50_from_Ks$R2adj,P50_from_TLP_limitspec$R2adj,P50_from_Ks_limitspec$R2adj)
+all_rmse_P50 <- c(P50_from_TLP_Ks$rmse,P50_from_TLP$rmse,P50_from_Ks$rmse,P50_from_TLP_limitspec$rmse,P50_from_Ks_limitspec$rmse)
+
+all_P50 <- data.frame(all_testnames_P50,all_R2_P50,all_R2adj_P50,all_rmse_P50)
+
+# BEST MODEL: P50_from_TLP_Ks
+
+## TLP ##
+
+
 
 #1)Estimate P50 from TLP and kstem
 ind_P50=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks))
