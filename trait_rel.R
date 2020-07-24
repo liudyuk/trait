@@ -283,7 +283,20 @@ plot(MAT[Ks_from_LSHmax_P50$dataused],MAP[Ks_from_LSHmax_P50$dataused])
 
 
 
-#--- Attempt to iteratively converge on the best fit values of Ks, TLP, P50 and LMA given known Hmax and LS ---
+# Optimisation ------------------------------------------------------------
+# Attempt to iteratively converge on the best fit values of Ks, TLP, P50 and LMA given known Hmax and LS
+
+# Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
+limitdataranges=F
+
+# Decide whether to run the uncertainty propagation (T) or not (F)
+propagate_uncer=F
+
+if (propagate_uncer) {
+  n_uncer=nbtstrp
+} else {
+  n_uncer=1
+}
 
 #Calculate minimum and maximum values
 maxP50=max(P50,na.rm=T)
@@ -310,154 +323,156 @@ ind=which(!is.na(Hmax) & !is.na(LS))
 
 Hmax_e=Hmax[ind]
 LS_e=LS[ind]
+LS_Hmax_e=LS_Hmax[ind]
 
 ndata=length(LS_e)
 
 P50_e <- matrix(NA, nrow = ndata, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
 LMA_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
 TLP_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
-WD_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
-slope_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
-
-# Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
-limitdataranges=F
+Ks_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
+#WD_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
+#slope_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
 
 # New outer loop which randomly samples regression coefficients from within their uncertainty bounds
 # The random sampling comes from the bootstrap sampling done in the calculations of the SMA regressions themselves. This approach has the big advantages of (a) not having to make any assumptions about the distribution of the coefficient uncertainty and (b) ensuring that the individual slope coefficients within a regression are consistent with each other.
-for (ss in 1:nbtstrp) {
-# For now, make samples for the following:
-mod_LMA_slope_y1_sample <- mod_LMA$boot.y1[ss]
-mod_LMA_slope_y2_sample <- mod_LMA$boot.y2[ss]
-mod_TLP_slope_y1_sample <- mod_TLP$boot.y1[ss]
-mod_TLP_slope_y2_sample <- mod_TLP$boot.y2[ss]
-mod_TLP_slope_y3_sample <- mod_TLP$boot.y3[ss]
-mod_P50_slope_y1_sample <- mod_P50$boot.y1[ss]
-mod_P50_slope_y2_sample <- mod_P50$boot.y2[ss]
-# Not implemented for WD yet, as I'm not sure which regression equation to use
-# These regression coefficients will now be used in the optimisation calculations
-
-
-# Outer loop over all the combinations of Hmax and LS
-# The new estimates of traits use the suffix "_e"
-for (dd in 1:ndata) {
-
-  #Calculate the value for LS*Hmax, which comes direct from the two input traits
-  LS_Hmax_e=log(exp(LS_e[dd])*Hmax_e[dd],base=exp(1))
-  
-  #Calculate the values of Ks based only on the bivariate relationships with LS*Hmax
-  Ks_e[dd]= mod_Ks_LS_Hmax$regression.results$Slope[3]*LS_Hmax_e +
-    mod_Ks_LS_Hmax$regression.results$Intercept[3]
-    
-  if (limitdataranges) {
-    #Do not go beyond observed limits of data
-    if (Ks_e[dd]>maxKs) {Ks_e[dd]=maxKs}
-    if (Ks_e[dd]<minKs) {Ks_e[dd]=minKs}
+for (ss in 1:n_uncer) {
+  # For now, make samples for the following:
+  # (ensure equation choices are consistent with decisions above)
+  if (ss==1) { #First pass always calculates the best estimate
+    mod_LMA_intercept_sample <- LMA_from_TLP$mod$intercept_R #LMA_from_TLP
+    mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$slope_R.y1
+    mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$intercept_R #TLP_from_LS_LMA_P50
+    mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y1
+    mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y2
+    mod_TLP_slope_y3_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y3
+    mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$intercept_R #P50_from_TLP_Ks
+    mod_P50_slope_y1_sample <- P50_from_TLP_Ks$mod$slope_R.y1
+    mod_P50_slope_y2_sample <- P50_from_TLP_Ks$mod$slope_R.y2
+    mod_Ks_intercept_sample <- Ks_from_LSHmax_P50$mod$intercept_R #Ks_from_LSHmax_P50
+    mod_Ks_slope_y1_sample <- Ks_from_LSHmax_P50$mod$slope_R.y1
+    mod_Ks_slope_y2_sample <- Ks_from_LSHmax_P50$mod$slope_R.y2
+  } else {
+    mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
+    mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
+    mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$boot.intercept[ss] #TLP_from_LS_LMA_P50
+    mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$boot.y1[ss]
+    mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$boot.y2[ss]
+    mod_TLP_slope_y3_sample <- TLP_from_LS_LMA_P50$mod$boot.y3[ss]
+    mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$boot.intercept[ss] #P50_from_TLP_Ks
+    mod_P50_slope_y1_sample <- P50_from_TLP_Ks$mod$boot.y1[ss]
+    mod_P50_slope_y2_sample <- P50_from_TLP_Ks$mod$boot.y2[ss]
+    mod_Ks_intercept_sample <- Ks_from_LSHmax_P50$mod$boot.intercept[ss] #Ks_from_LSHmax_P50
+    mod_Ks_slope_y1_sample <- Ks_from_LSHmax_P50$mod$boot.y1[ss]
+    mod_Ks_slope_y2_sample <- Ks_from_LSHmax_P50$mod$boot.y2[ss]
   }
-
-  #TLP, P50, LMA, WD need optimising
-
-  #First set some initial based on simple bivariate relationship. This is just so that the iteration has somewhere to start from. Final result should not be sensitive to these.
-  LMA_e_last = mod_LS_LMA$regression.results$Slope[3]*LS_e[dd] +
-    mod_LS_LMA$regression.results$Intercept[3]
-  TLP_e_last = mod_LS_TLP$regression.results$Slope[3]*LS_e[dd] +
-    mod_LS_TLP$regression.results$Intercept[3]
-  P50_e_last = mod_TLP_P50$regression.results$Slope[3]*TLP_e_last +
-    mod_TLP_P50$regression.results$Intercept[3]
-  WD_e_last = mod_TLP_WD$regression.results$Slope[3]*TLP_e_last +
-    mod_TLP_WD$regression.results$Intercept[3] #Not sure if TLP vs WD is the best choice, but as only for initialisation shouldn't be too important.
-
-  # "diff_" variables hold the difference between the current estimate of a trait value "_e" and the previous
-  # estimate "_last"
-  # "diff_*_last" variables contain the differences from the last round of iteration
-  # (these are compared to differences in the current round of iteration to see if changes are smaller than
-  # "tol" and therefore the iteration can stop)
-  # Here we initialise the "diff_*_last" variables very high (why set 100)
-  diff_P50_last=100
-  diff_LMA_last=100
-  diff_TLP_last=100
-  diff_WD_last=100
-
-  # These arrays are just for output, they store the values of every iteration for the current datapoint.
-  # Useful for debugging and to check that convergence is working.
-  # (only for debugging, can be commented out)
-  P50_c <- matrix(NA, nrow = 100)
-  LMA_c <- matrix(NA, nrow = 100)
-  TLP_c <- matrix(NA, nrow = 100)
-  WD_c <- matrix(NA, nrow = 100)
+  # These regression coefficients will now be used in the optimisation calculations
   
-  # Now we start the optimisation loop. Trait values are iterated until the difference between trait
-  # values on successive iterations is less than "tol".
-  niter=0;
-  while (T) {
-    niter=niter+1 # Number of iterations completed
-
-    # Make estimates of trait values based on the best SMA regressions (probably multivariate in most cases)
-    # The estimates of traits in each iteration are based on the estimates of their predictor traits from the previous iteration
-    LMA_e[dd,ss]=mod_LMA$intercept_R + mod_LMA_slope_y1_sample*TLP_e_last + mod_LMA_slope_y2_sample*LS_e[dd]
-    TLP_e[dd,ss]=mod_TLP$intercept_R + mod_TLP_slope_y1_sample*P50_e_last +  mod_TLP_slope_y2_sample*LMA_e_last+mod_TLP_slope_y3_sample*WD_e_last
-    P50_e[dd,ss]=mod_P50$intercept_R + mod_P50_slope_y1_sample*TLP_e_last + mod_P50_slope_y2_sample*Ks_e[dd]
-    #WD_e[dd,ss]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e_last + mod_WD$slope_R.y2*P50_e_last + mod_WD$slope_R.y3*LMA_e_last
-    # Test taking WD from a simple bivariate relationship (because not converging with the above multivariate one - need to sort out the multivariate fit!)
-    WD_e[dd,ss] = mod_TLP_WD$regression.results$Slope[3]*TLP_e_last + mod_TLP_WD$regression.results$Intercept[3]
+  # Outer loop over all the combinations of Hmax and LS
+  # The new estimates of traits use the suffix "_e"
+  for (dd in 1:ndata) {
     
-    if (limitdataranges) {
-      #Do not go beyond observed limits of data
-      if (P50_e[dd,ss]>maxP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
-      if (P50_e[dd,ss]<minP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
-      if (TLP_e[dd,ss]>maxTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
-      if (TLP_e[dd,ss]<minTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
-      if (LMA_e[dd,ss]>maxLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
-      if (LMA_e[dd,ss]<minLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
-      if (WD_e[dd,ss]>maxWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA; break}
-      if (WD_e[dd,ss]<minWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA; break}
+    #TLP, P50, LMA, Ks need optimising
+    
+    #First set some initial based on simple bivariate relationship. This is just so that the iteration has somewhere to start from. Final result should not be sensitive to these.
+    LMA_e_last = LMA_from_LS$mod$intercept_R + LMA_from_LS$mod$slope_R.y1*LS_e[dd]
+    Ks_e_last = Ks_from_LSHmax$mod$intercept_R + Ks_from_LSHmax$mod$slope_R.y1*LS_Hmax_e[dd]
+    P50_e_last = P50_from_Ks$mod$intercept_R + P50_from_Ks$mod$slope_R.y1*Ks_e_last
+    TLP_e_last = TLP_from_P50$mod$intercept_R + TLP_from_P50$mod$slope_R.y1*P50_e_last
+    
+    # "diff_" variables hold the difference between the current estimate of a trait value "_e" and the previous
+    # estimate "_last"
+    # "diff_*_last" variables contain the differences from the last round of iteration
+    # (these are compared to differences in the current round of iteration to see if changes are smaller than
+    # "tol" and therefore the iteration can stop)
+    # Here we initialise the "diff_*_last" variables very high
+    diff_P50_last=100
+    diff_LMA_last=100
+    diff_TLP_last=100
+    diff_Ks_last=100
+    
+    # These arrays are just for output, they store the values of every iteration for the current datapoint.
+    # Useful for debugging and to check that convergence is working.
+    # (only for debugging, can be commented out)
+    P50_c <- matrix(NA, nrow = 100)
+    LMA_c <- matrix(NA, nrow = 100)
+    TLP_c <- matrix(NA, nrow = 100)
+    Ks_c <- matrix(NA, nrow = 100)
+    
+    # Now we start the optimisation loop. Trait values are iterated until the difference between trait
+    # values on successive iterations is less than "tol".
+    niter=0;
+    while (T) {
+      niter=niter+1 # Number of iterations completed
+      
+      # Make estimates of trait values based on the best SMA regressions (probably multivariate in most cases)
+      # The estimates of traits in each iteration are based on the estimates of their predictor traits from the previous iteration
+      LMA_e[dd,ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last
+      TLP_e[dd,ss]=mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*LS_e[dd] + 
+        mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e_last
+      P50_e[dd,ss]=mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e_last + 
+        mod_P50_slope_y2_sample*Ks_e_last
+      Ks_e[dd,ss]=mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*LS_Hmax_e[dd] + 
+        mod_Ks_slope_y2_sample*P50_e_last
+      
+      if (limitdataranges) {
+        #Do not go beyond observed limits of data
+        if (P50_e[dd,ss]>maxP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+        if (P50_e[dd,ss]<minP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+        if (TLP_e[dd,ss]>maxTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+        if (TLP_e[dd,ss]<minTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+        if (LMA_e[dd,ss]>maxLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+        if (LMA_e[dd,ss]<minLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+        if (Ks_e[dd,ss]>maxKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
+        if (Ks_e[dd,ss]<minKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
+      }
+      
+      # Save the values for this iteration to the output array (only for debugging, can be commented out)
+      P50_c[niter] <- P50_e[dd,ss]
+      LMA_c[niter] <- LMA_e[dd,ss]
+      TLP_c[niter] <- TLP_e[dd,ss]
+      Ks_c[niter] <- Ks_e[dd,ss]
+      
+      # Calculate the difference between the current estimate of a trait value "_e" and the previous estimate "_last"
+      diff_P50 = P50_e[dd,ss]-P50_e_last
+      diff_LMA = LMA_e[dd,ss]-LMA_e_last
+      diff_TLP = TLP_e[dd,ss]-TLP_e_last
+      diff_Ks = Ks_e[dd,ss]-Ks_e_last
+      
+      # Now we test if the difference between trait estimates on this iteration and between trait estimates on
+      # the last iteration is less than "tol" for all traits. If it is we finish the iteration.
+      if (abs(diff_P50-diff_P50_last)<tol &&
+          abs(diff_LMA-diff_LMA_last)<tol &&
+          abs(diff_Ks-diff_Ks_last)<tol &&
+          abs(diff_TLP-diff_TLP_last)<tol) {
+        break
+      }
+      
+      # Save the "diff" values ready for the next iteration
+      diff_P50_last=diff_P50
+      diff_LMA_last=diff_LMA
+      diff_TLP_last=diff_TLP
+      diff_Ks_last=diff_Ks
+      
+      # Save the "_e" values ready for the next iteration
+      P50_e_last=P50_e[dd,ss]
+      LMA_e_last=LMA_e[dd,ss]
+      TLP_e_last=TLP_e[dd,ss]
+      Ks_e_last=Ks_e[dd,ss]
     }
     
-    # Save the values for this iteration to the output array (only for debugging, can be commented out)
-    P50_c[niter] <- P50_e[dd,ss]
-    LMA_c[niter] <- LMA_e[dd,ss]
-    TLP_c[niter] <- TLP_e[dd,ss]
-    WD_c[niter] <- WD_e[dd,ss]
-
-    # Calculate the difference between the current estimate of a trait value "_e" and the previous estimate "_last"
-    diff_P50 = P50_e[dd,ss]-P50_e_last
-    diff_LMA = LMA_e[dd,ss]-LMA_e_last
-    diff_TLP = TLP_e[dd,ss]-TLP_e_last
-    diff_WD = WD_e[dd,ss]-WD_e_last
-
-    # Now we test if the difference between trait estimates on this iteration and between trait estimates on
-    # the last iteration is less than "tol" for all traits. If it is we finish the iteration.
-    if (abs(diff_P50-diff_P50_last)<tol &&
-      abs(diff_LMA-diff_LMA_last)<tol &&
-      abs(diff_WD-diff_WD_last)<tol &&
-      abs(diff_TLP-diff_TLP_last)<tol) {
-      break
-    }
-
-    # Save the "diff" values ready for the next iteration
-    diff_P50_last=diff_P50
-    diff_LMA_last=diff_LMA
-    diff_TLP_last=diff_TLP
-    diff_WD_last=diff_WD
-
-    # Save the "_e" values ready for the next iteration
-    P50_e_last=P50_e[dd,ss]
-    LMA_e_last=LMA_e[dd,ss]
-    TLP_e_last=TLP_e[dd,ss]
-    WD_e_last=WD_e[dd,ss]
+    # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
+    #WD_e[dd]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e[dd] + mod_WD$slope_R.y2*P50_e[dd] + mod_WD$slope_R.y3*LMA_e[dd]
+    #slope_e[dd,ss]=mod_slope$intercept_R + mod_slope$slope_R.y1*P50_e[dd,ss] + mod_slope$slope_R.y2*TLP_e[dd,ss] + mod_slope$slope_R.y3*Ks_e[dd]
+    
+    #if (limitdataranges) {
+    #  #Do not go beyond observed limits of data
+    #  if (slope_e[dd,ss]>maxslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
+    #  if (slope_e[dd,ss]<minslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
+    #}
+    
   }
-
-  # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
-  #WD_e[dd]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e[dd] + mod_WD$slope_R.y2*P50_e[dd] + mod_WD$slope_R.y3*LMA_e[dd]
-  slope_e[dd,ss]=mod_slope$intercept_R + mod_slope$slope_R.y1*P50_e[dd,ss] + mod_slope$slope_R.y2*TLP_e[dd,ss] + mod_slope$slope_R.y3*Ks_e[dd]
   
-  if (limitdataranges) {
-    #Do not go beyond observed limits of data
-    if (slope_e[dd,ss]>maxslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
-    if (slope_e[dd,ss]<minslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
-  }
-
-}
-
 } #Finish nbtstrp loop
 
 #Optionally limit to ranges of observed traits
@@ -474,64 +489,55 @@ P50_e[P50_e<minP50]=minP50
 slope_e[slope_e>maxslope]=maxslope
 slope_e[slope_e<minslope]=minslope
 
-Hmax_e
-exp(Ks_e)
-WD_e
-exp(LMA_e)
-exp(LS_e)
-exp(slope_e)
--exp(P50_e)
--exp(TLP_e)
-
 #Make plots to compare with original data
 par(mfrow=c(4,4))
 par(mar=c(2,2,2,2))
 
-plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
+plot(TLP,P50,pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
 points(TLP_e,P50_e,col="red",pch=16)
 
-plot(mod_TLP_slope,"SMA",pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
-points(TLP_e,slope_e,col="red",pch=16)
+#plot(TLP,slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
+#points(TLP_e,slope_e,col="red",pch=16)
 
-plot(mod_P50_slope,"SMA",pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
-points(P50_e,slope_e,col="red",pch=16)
+#plot(P50,slope,pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
+#points(P50_e,slope_e,col="red",pch=16)
 
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(TLP_e,WD_e,col="red",pch=16)
+#plot(TLP,WD,pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+#points(TLP_e,WD_e,col="red",pch=16)
 
-plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
-points(P50_e,WD_e,col="red",pch=16)
+#plot(P50,WD,,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+#points(P50_e,WD_e,col="red",pch=16)
 
-plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
+plot(TLP,LMA,pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
 points(TLP_e,LMA_e,col="red",pch=16)
 
-plot(mod_LS_LMA,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
+plot(LS,LMA,pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
 points(LS_e,LMA_e,col="red",pch=16)
 
-plot(mod_Ks_LS_Hmax,"SMA",pch=16,xlab="LS_Hmax",ylab="LS",main="LS_Hmax vs Ks")
-points(log(exp(LS_e)*Hmax_e),LS_e,col="red",pch=16)
-#plot(log(exp(kstem_e)/Hmax_e),LS_e,col="red",pch=16)
+plot(Ks,LS_Hmax,pch=16,xlab="Ks",ylab="LS*Hmax",main="LS_Hmax vs Ks")
+points(Ks_e,log(exp(LS_e)*Hmax_e),col="red",pch=16)
 
-plot(mod_Ks_P50,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
+plot(Ks,P50,pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
 points(Ks_e,P50_e,col="red",pch=16)
 
-plot(mod_LS_TLP,"SMA",pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
+plot(LS,TLP,pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
 points(LS_e,TLP_e,col="red",pch=16)
 
-plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-points(WD_e,LMA_e,col="red",pch=16) 
+#plot(WD,LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
+#points(WD_e,LMA_e,col="red",pch=16) 
 
-plot(mod_Ks_slope,"SMA",pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
-points(Ks_e,slope_e,col="red",pch=16) 
-
-plot(mod_Ks_Hmax,"SMA",pch=16,xlab="Ks",ylab="Hmax",main="Ks vs Hmax")
-points(Ks_e,Hmax_e,col="red",pch=16) 
+#plot(Ks,slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
+#points(Ks_e,slope_e,col="red",pch=16) 
 
 #Use up remaining unallocated plots and set back to single plot
 par(mfrow=c(1,1))
 par(mar=c(5.1,4.1,4.1,2.1))
 
-#--- Calculate regressions that characterise the optimised relationship ---
+
+# Optional further simplification -----------------------------------------
+# Calculate regressions that characterise the optimised relationship
+
+library(lmodel2)
 
 par(mfrow=c(4,4))
 par(mar=c(2,2,2,2))
