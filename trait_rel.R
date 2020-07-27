@@ -626,21 +626,8 @@ for (ss in 1:n_uncer) {
   
 } #Finish nbtstrp loop
 
-#Optionally limit to ranges of observed traits
-#WD_e[WD_e>maxWD]=maxWD
-#WD_e[WD_e<minWD]=minWD
-#LMA_e[LMA_e>maxLMA]=maxLMA
-#LMA_e[LMA_e<minLMA]=minLMA
-#LS_e[LS_e>maxLS]=maxLS
-#LS_e[LS_e<minLS]=minLS
-#TLP_e[TLP_e>maxTLP]=maxTLP
-#TLP_e[TLP_e<minTLP]=minTLP
-#P50_e[P50_e>maxP50]=maxP50
-#P50_e[P50_e<minP50]=minP50
-#slope_e[slope_e>maxslope]=maxslope
-#slope_e[slope_e<minslope]=minslope
 
-#Stats for each point
+#Stats defining the uncertainty range for each point
 Ks_e_mean=unname(apply(Ks_e, 1, mean))
 Ks_e_median=unname(apply(Ks_e, 1, median))
 Ks_e_5perc=unname(apply(Ks_e, 1, quantile,0.05))
@@ -753,57 +740,44 @@ par(mfrow=c(1,1))
 par(mar=c(5.1,4.1,4.1,2.1))
 
 
-# Optional further simplification -----------------------------------------
-# Calculate regressions that characterise the optimised relationship
+# Calculate the RMSE
 
-library(lmodel2)
+#P50_res <- P50[ind]-P50_e_mean
+P50_res <- P50[ind]-P50_e[,1]
+P50_e_rmse <- sqrt(mean(P50_res^2,na.rm=T))
+P50_e_ndata <- length(which(is.na(P50_res)==F))
 
-par(mfrow=c(4,4))
-par(mar=c(2,2,2,2))
+#TLP_res <- TLP[ind]-TLP_e_mean
+TLP_res <- TLP[ind]-TLP_e[,1]
+TLP_e_rmse <- sqrt(mean(TLP_res^2,na.rm=T))
+TLP_e_ndata <- length(which(is.na(TLP_res)==F))
 
-mod_TLP_P50_opt <- lmodel2(P50_e ~ TLP_e, data.frame(TLP_e,P50_e))
-plot(mod_TLP_P50_opt,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
+#LMA_res <- LMA[ind]-LMA_e_mean
+LMA_res <- LMA[ind]-LMA_e[,1]
+LMA_e_rmse <- sqrt(mean(LMA_res^2,na.rm=T))
+LMA_e_ndata <- length(which(is.na(LMA_res)==F))
 
-mod_TLP_slope_opt <- lmodel2(slope_e ~ TLP_e, data.frame(TLP_e,slope_e))
-plot(mod_TLP_slope_opt,"SMA",pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
+#Ks_res <- Ks[ind]-Ks_e_mean
+Ks_res <- Ks[ind]-Ks_e[,1]
+Ks_e_rmse <- sqrt(mean(Ks_res^2,na.rm=T))
+Ks_e_ndata <- length(which(is.na(Ks_res)==F))
 
-mod_P50_slope_opt <- lmodel2(slope_e ~ P50_e, data.frame(P50_e,slope_e))
-plot(mod_P50_slope_opt,"SMA",pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
+#WD_res <- WD[ind]-WD_e_mean
+WD_res <- WD[ind]-WD_e[,1]
+WD_e_rmse <- sqrt(mean(WD_res^2,na.rm=T))
+WD_e_ndata <- length(which(is.na(WD_res)==F))
 
-mod_TLP_WD_opt <- lmodel2(WD_e ~ TLP_e, data.frame(TLP_e,WD_e))
-plot(mod_TLP_WD_opt,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+#slope_res <- slope[ind]-slope_e_mean
+slope_res <- slope[ind]-slope_e[,1]
+slope_e_rmse <- sqrt(mean(slope_res^2,na.rm=T))
+slope_e_ndata <- length(which(is.na(slope_res)==F))
 
-mod_P50_WD_opt <- lmodel2(WD_e ~ P50_e, data.frame(P50_e,WD_e))
-plot(mod_P50_WD_opt,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+# Compare to RMSE from best multivarirate regression
 
-mod_TLP_LMA_opt <- lmodel2(LMA_e ~ TLP_e, data.frame(TLP_e,LMA_e))
-plot(mod_TLP_LMA_opt,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
+all_e_rmse <- c(P50_e_rmse,TLP_e_rmse,LMA_e_rmse,Ks_e_rmse,WD_e_rmse,slope_e_rmse)
+all_e_ndata <- c(P50_e_ndata,TLP_e_ndata,LMA_e_ndata,Ks_e_ndata,WD_e_ndata,slope_e_ndata)
+all_multivar_rmse <- c(P50_from_TLP_Ks$rmse,TLP_from_LS_LMA_P50$rmse,LMA_from_TLP$rmse,Ks_from_LSHmax_P50$rmse,WD_from_slope_P50slope$rmse,slope_from_P50_TLP_Ks$rmse)
+all_multivar_ndata <- c(P50_from_TLP_Ks$ndata,TLP_from_LS_LMA_P50$ndata,LMA_from_TLP$ndata,Ks_from_LSHmax_P50$ndata,WD_from_slope_P50slope$ndata,slope_from_P50_TLP_Ks$ndata)
 
-mod_LS_LMA_opt <- lmodel2(LMA_e ~ LS_e, data.frame(LS_e,LMA_e))
-plot(mod_LS_LMA_opt,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
-
-#mod_kstemHmax_LS_opt <- lmodel2(LS_e ~ kstemHmax_e, data.frame(kstemHmax_e,LS_e))
-#plot(mod_kstemHmax_LS_opt,"SMA",pch=16,xlab="kstemHmax",ylab="LS",main="kstem/Hmax vs LS")
-
-mod_Ks_P50_opt <- lmodel2(P50_e ~ Ks_e, data.frame(Ks_e,P50_e))
-plot(mod_Ks_P50_opt,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
-
-mod_LS_TLP_opt <- lmodel2(TLP_e ~ LS_e, data.frame(LS_e,TLP_e))
-plot(mod_LS_TLP_opt,"SMA",pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
-
-mod_WD_LMA_opt <- lmodel2(LMA_e ~ WD_e, data.frame(WD_e,LMA_e))
-plot(mod_WD_LMA_opt,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-
-mod_Ks_slope_opt <- lmodel2(slope_e ~ Ks_e, data.frame(Ks_e,slope_e))
-
-plot(mod_Ks_slope_opt,"SMA",pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
-
-mod_Ks_Hmax <- lmodel2(Hmax ~ Ks, data.frame(Ks,Hmax))
-plot(mod_Ks_Hmax,"SMA",pch=16,xlab="Ks",ylab="Hmax",main="Ks vs Hmax")
-
-#Use up remaining unallocated plots and set back to single plot
-#plot.new()
-#plot.new()
-#plot.new()
-par(mfrow=c(1,1))
-par(mar=c(5.1,4.1,4.1,2.1))
+all_rmse_comp <- data.frame(all_e_rmse,all_e_ndata,all_multivar_rmse,all_multivar_ndata)
+View(all_rmse_comp)
