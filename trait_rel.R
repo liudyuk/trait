@@ -399,10 +399,6 @@ for (ss in 1:n_uncer) {
     diff_LMA_last=100
     diff_TLP_last=100
     diff_Ks_last=100
-    #diff_P50_last_last=100
-    #diff_LMA_last_last=100
-    #diff_TLP_last_last=100
-    #diff_Ks_last_last=100
     
     # These arrays are just for output, they store the values of every iteration for the current datapoint.
     # Useful for debugging and to check that convergence is working.
@@ -428,16 +424,6 @@ for (ss in 1:n_uncer) {
       Ks_e[dd,ss]=mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*LS_Hmax_e[dd] + 
         mod_Ks_slope_y2_sample*P50_e_last
       
-      # Some catches for values tending towards inf #THIS IS NOT EFFECTIVE AS WE END UP WITH A LOT OF LARGE VALUES LESS THAN 1000 REMAINING
-      #if (P50_e[dd,ss] > 1000 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
-      #if (P50_e[dd,ss] < -1000 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
-      #if (TLP_e[dd,ss] > 1000 | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
-      #if (TLP_e[dd,ss] < -1000 | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
-      #if (LMA_e[dd,ss] > 1000 | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
-      #if (LMA_e[dd,ss] < -1000 | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
-      #if (Ks_e[dd,ss] > 1000 | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
-      #if (Ks_e[dd,ss] < -1000 | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
-      
       if (limitdataranges) {
         #Do not go beyond observed limits of data - if so, discard.
         if (P50_e[dd,ss]>maxP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
@@ -448,15 +434,6 @@ for (ss in 1:n_uncer) {
         if (LMA_e[dd,ss]<minLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
         if (Ks_e[dd,ss]>maxKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
         if (Ks_e[dd,ss]<minKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
-        
-        #if (P50_e[dd,ss]>maxP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=maxP50;} #THIS APPROACH DOES NOT CONVERGE
-        #if (P50_e[dd,ss]<minP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=minP50;}
-        #if (TLP_e[dd,ss]>maxTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=maxTLP;}
-        #if (TLP_e[dd,ss]<minTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=minTLP;}
-        #if (LMA_e[dd,ss]>maxLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=maxLMA;}
-        #if (LMA_e[dd,ss]<minLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=minLMA;}
-        #if (Ks_e[dd,ss]>maxKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=maxKs;}
-        #if (Ks_e[dd,ss]<minKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=minKs;}
       }
       
       # Save the values for this iteration to the output array (only for debugging, can be commented out)
@@ -471,22 +448,6 @@ for (ss in 1:n_uncer) {
       diff_TLP = TLP_e[dd,ss]-TLP_e_last
       diff_Ks = Ks_e[dd,ss]-Ks_e_last
       
-      # Check for divergence #NEITHER OF THESE APPROACHES BELOW RELIABLY CATCH ALL THE DIVERGING VALUES IN THE OPTIMISATION. THEY ALSO SEEM TO MASSIVELY REDUCE THE DATASET BY REMOVING REASONABLE VALUES.
-      #if (abs(diff_P50>diff_P50_last) || abs(diff_P50>diff_P50_last_last) ||
-      #    abs(diff_LMA>diff_LMA_last) || abs(diff_LMA>diff_LMA_last_last) ||
-      #    abs(diff_Ks>diff_Ks_last) || abs(diff_Ks>diff_Ks_last_last) ||
-      #    abs(diff_TLP>diff_TLP_last) || abs(diff_TLP>diff_TLP_last_last)) {
-#      if (abs(diff_P50>diff_P50_last_last) ||
-#          abs(diff_LMA>diff_LMA_last_last) ||
-#          abs(diff_Ks>diff_Ks_last_last) ||
-#          abs(diff_TLP>diff_TLP_last_last)) {
-#        P50_e[dd,ss]=NA
-#        LMA_e[dd,ss]=NA
-#        Ks_e[dd,ss]=NA
-#        TLP_e[dd,ss]=NA
-#        break
-#      }
-      
       # Now we test if the difference between trait estimates on this iteration and between trait estimates on
       # the last iteration is less than "tol" for all traits. If it is we finish the iteration.
       if (abs(diff_P50-diff_P50_last)<tol &&
@@ -495,11 +456,6 @@ for (ss in 1:n_uncer) {
           abs(diff_TLP-diff_TLP_last)<tol) {
         break
       }
-      
-      #diff_P50_last_last=diff_P50_last
-      #diff_LMA_last_last=diff_LMA_last
-      #diff_TLP_last_last=diff_TLP_last
-      #diff_Ks_last_last=diff_Ks_last
       
       # Save the "diff" values ready for the next iteration
       diff_P50_last=diff_P50
