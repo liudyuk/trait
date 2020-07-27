@@ -665,39 +665,70 @@ par(mar=c(2,2,2,2))
 
 plot(TLP,P50,pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
 points(TLP_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(TLP_e_mean,P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(TLP_e_5perc,P50_e_5perc,col="green",pch=16)
-points(TLP_e_95perc,P50_e_95perc,col="green",pch=16)
+points(TLP_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e[,1],P50_e_5perc,col="green",pch=16)
+points(TLP_e[,1],P50_e_95perc,col="green",pch=16)
+
+plot(P50,TLP,pch=16,xlab="P50",ylab="TLP",main="P50 vs TLP")
+points(P50_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(P50_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(P50_e[,1],TLP_e_5perc,col="green",pch=16)
+points(P50_e[,1],TLP_e_95perc,col="green",pch=16)
 
 plot(TLP,slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
 points(TLP_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(TLP_e_mean,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(TLP_e_5perc,slope_e_5perc,col="green",pch=16)
-points(TLP_e_95perc,slope_e_95perc,col="green",pch=16)
+points(TLP_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e[,1],slope_e_5perc,col="green",pch=16)
+points(TLP_e[,1],slope_e_95perc,col="green",pch=16)
+
+plot(slope,TLP,pch=16,xlab="slope",ylab="TLP",main="slope vs TLP")
+points(slope_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(slope_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(slope_e[,1],TLP_e_5perc,col="green",pch=16)
+points(slope_e[,1],TLP_e_95perc,col="green",pch=16)
 
 plot(P50,slope,pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
 points(P50_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(P50_e_mean,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(P50_e_5perc,slope_e_5perc,col="green",pch=16)
-points(P50_e_95perc,slope_e_95perc,col="green",pch=16)
+points(P50_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(P50_e[,1],slope_e_5perc,col="green",pch=16)
+points(P50_e[,1],slope_e_95perc,col="green",pch=16)
+
+plot(slope,P50,pch=16,xlab="slope",ylab="P50",main="slope vs P50")
+points(slope_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(slope_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(slope_e[,1],P50_e_5perc,col="green",pch=16)
+points(slope_e[,1],P50_e_95perc,col="green",pch=16)
 
 plot(TLP,WD,pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
 points(TLP_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(TLP_e_mean,WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(TLP_e_5perc,WD_e_5perc,col="green",pch=16)
-points(TLP_e_95perc,WD_e_95perc,col="green",pch=16)
+points(TLP_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e[,1],WD_e_5perc,col="green",pch=16)
+points(TLP_e[,1],WD_e_95perc,col="green",pch=16)
+
+plot(WD,TLP,pch=16,xlab="WD",ylab="TLP",main="WD vs TLP")
+points(WD_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(WD_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(WD_e[,1],TLP_e_5perc,col="green",pch=16)
+points(WD_e[,1],TLP_e_95perc,col="green",pch=16)
 
 plot(P50,WD,,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
 points(P50_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(P50_e_mean,WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(P50_e_5perc,WD_e_5perc,col="green",pch=16)
-points(P50_e_95perc,WD_e_95perc,col="green",pch=16)
+points(P50_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(P50_e[,1],WD_e_5perc,col="green",pch=16)
+points(P50_e[,1],WD_e_95perc,col="green",pch=16)
 
+plot(WD,P50,,pch=16,xlab="WD",ylab="P50",main="WD vs P50")
+points(WD_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(WD_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(WD_e[,1],P50_e_5perc,col="green",pch=16)
+points(WD_e[,1],P50_e_95perc,col="green",pch=16)
+
+#NOTE: From here onwards I have not made the plots in both directions
 plot(TLP,LMA,pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
 points(TLP_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(TLP_e_mean,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(TLP_e_5perc,LMA_e_5perc,col="green",pch=16)
-points(TLP_e_95perc,LMA_e_95perc,col="green",pch=16)
+points(TLP_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e[,1],LMA_e_5perc,col="green",pch=16)
+points(TLP_e[,1],LMA_e_95perc,col="green",pch=16)
 
 plot(LS,LMA,pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
 points(LS_e,LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
@@ -705,17 +736,17 @@ points(LS_e,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estima
 points(LS_e,LMA_e_5perc,col="green",pch=16)
 points(LS_e,LMA_e_95perc,col="green",pch=16)
 
-plot(Ks,LS_Hmax,pch=16,xlab="Ks",ylab="LS*Hmax",main="LS_Hmax vs Ks")
-points(Ks_e[,1],log(exp(LS_e)*Hmax_e),col="blue",pch=16) # Using central estimate coefficients
-points(Ks_e_mean,log(exp(LS_e)*Hmax_e),col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(Ks_e_5perc,log(exp(LS_e)*Hmax_e),col="green",pch=16)
-points(Ks_e_95perc,log(exp(LS_e)*Hmax_e),col="green",pch=16)
+plot(LS_Hmax,Ks,pch=16,xlab="LS*Hmax",ylab="Ks",main="LS_Hmax vs Ks")
+points(log(exp(LS_e)*Hmax_e),Ks_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(log(exp(LS_e)*Hmax_e),Ks_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(log(exp(LS_e)*Hmax_e),Ks_e_5perc,col="green",pch=16)
+points(log(exp(LS_e)*Hmax_e),Ks_e_95perc,col="green",pch=16)
 
 plot(Ks,P50,pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
 points(Ks_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(Ks_e_mean,P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(Ks_e_5perc,P50_e_5perc,col="green",pch=16)
-points(Ks_e_95perc,P50_e_95perc,col="green",pch=16)
+points(Ks_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(Ks_e[,1],P50_e_5perc,col="green",pch=16)
+points(Ks_e[,1],P50_e_95perc,col="green",pch=16)
 
 plot(LS,TLP,pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
 points(LS_e,TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
@@ -725,9 +756,9 @@ points(LS_e,TLP_e_95perc,col="green",pch=16)
 
 plot(WD,LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
 points(WD_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(WD_e_mean,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(WD_e_5perc,LMA_e_5perc,col="green",pch=16)
-points(WD_e_95perc,LMA_e_95perc,col="green",pch=16)
+points(WD_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(WD_e[,1],LMA_e_5perc,col="green",pch=16)
+points(WD_e[,1],LMA_e_95perc,col="green",pch=16)
 
 #plot(Ks,slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
 #points(Ks_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
