@@ -463,8 +463,8 @@ P50_e <- matrix(NA, nrow = ndata, ncol = n_uncer) #Array now expanded to hold mu
 LMA_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
 TLP_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
 Ks_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
-#WD_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
-#slope_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
+WD_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
+slope_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
 
 # New outer loop which randomly samples regression coefficients from within their uncertainty bounds
 # The random sampling comes from the bootstrap sampling done in the calculations of the SMA regressions themselves. This approach has the big advantages of (a) not having to make any assumptions about the distribution of the coefficient uncertainty and (b) ensuring that the individual slope coefficients within a regression are consistent with each other.
@@ -485,6 +485,13 @@ for (ss in 1:n_uncer) {
     mod_Ks_intercept_sample <- Ks_from_LSHmax_P50$mod$intercept_R #Ks_from_LSHmax_P50
     mod_Ks_slope_y1_sample <- Ks_from_LSHmax_P50$mod$slope_R.y1
     mod_Ks_slope_y2_sample <- Ks_from_LSHmax_P50$mod$slope_R.y2
+    mod_slope_intercept_sample <- slope_from_P50_TLP_Ks$mod$intercept_R #slope_from_P50_TLP_Ks
+    mod_slope_slope_y1_sample <- slope_from_P50_TLP_Ks$mod$slope_R.y1
+    mod_slope_slope_y2_sample <- slope_from_P50_TLP_Ks$mod$slope_R.y2
+    mod_slope_slope_y3_sample <- slope_from_P50_TLP_Ks$mod$slope_R.y3
+    mod_WD_intercept_sample <- WD_from_slope_P50slope$mod$intercept_R #WD_from_slope_P50slope
+    mod_WD_slope_y1_sample <- WD_from_slope_P50slope$mod$slope_R.y1
+    mod_WD_slope_y2_sample <- WD_from_slope_P50slope$mod$slope_R.y2
   } else {
     mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
     mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
@@ -498,6 +505,13 @@ for (ss in 1:n_uncer) {
     mod_Ks_intercept_sample <- Ks_from_LSHmax_P50$mod$boot.intercept[ss] #Ks_from_LSHmax_P50
     mod_Ks_slope_y1_sample <- Ks_from_LSHmax_P50$mod$boot.y1[ss]
     mod_Ks_slope_y2_sample <- Ks_from_LSHmax_P50$mod$boot.y2[ss]
+    mod_slope_intercept_sample <- slope_from_P50_TLP_Ks$mod$boot.intercept[ss] #slope_from_P50_TLP_Ks
+    mod_slope_slope_y1_sample <- slope_from_P50_TLP_Ks$mod$boot.y1[ss]
+    mod_slope_slope_y2_sample <- slope_from_P50_TLP_Ks$mod$boot.y2[ss]
+    mod_slope_slope_y3_sample <- slope_from_P50_TLP_Ks$mod$boot.y3[ss]
+    mod_WD_intercept_sample <- WD_from_slope_P50slope$mod$boot.intercept[ss] #WD_from_slope_P50slope
+    mod_WD_slope_y1_sample <- WD_from_slope_P50slope$mod$boot.y1[ss]
+    mod_WD_slope_y2_sample <- WD_from_slope_P50slope$mod$boot.y2[ss]
   }
   # These regression coefficients will now be used in the optimisation calculations
   
@@ -595,13 +609,17 @@ for (ss in 1:n_uncer) {
     }
     
     # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
-    #WD_e[dd]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e[dd] + mod_WD$slope_R.y2*P50_e[dd] + mod_WD$slope_R.y3*LMA_e[dd]
-    #slope_e[dd,ss]=mod_slope$intercept_R + mod_slope$slope_R.y1*P50_e[dd,ss] + mod_slope$slope_R.y2*TLP_e[dd,ss] + mod_slope$slope_R.y3*Ks_e[dd]
+    slope_e[dd,ss]=mod_slope_intercept_sample + mod_slope_slope_y1_sample*P50_e[dd,ss] + 
+      mod_slope_slope_y2_sample*TLP_e[dd,ss] + mod_slope_slope_y3_sample*Ks_e[dd,ss]
+    WD_e[dd,ss]=mod_WD_intercept_sample + mod_WD_slope_y1_sample*slope_e[dd,ss] + 
+      mod_WD_slope_y2_sample*slope_e[dd,ss]*P50_e[dd,ss]
     
     #if (limitdataranges) {
     #  #Do not go beyond observed limits of data
     #  if (slope_e[dd,ss]>maxslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
     #  if (slope_e[dd,ss]<minslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
+    #  if (WD_e[dd,ss]>maxWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA}
+    #  if (WD_e[dd,ss]<minWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA}
     #}
     
   }
@@ -609,18 +627,18 @@ for (ss in 1:n_uncer) {
 } #Finish nbtstrp loop
 
 #Optionally limit to ranges of observed traits
-WD_e[WD_e>maxWD]=maxWD
-WD_e[WD_e<minWD]=minWD
-LMA_e[LMA_e>maxLMA]=maxLMA
-LMA_e[LMA_e<minLMA]=minLMA
-LS_e[LS_e>maxLS]=maxLS
-LS_e[LS_e<minLS]=minLS
-TLP_e[TLP_e>maxTLP]=maxTLP
-TLP_e[TLP_e<minTLP]=minTLP
-P50_e[P50_e>maxP50]=maxP50
-P50_e[P50_e<minP50]=minP50
-slope_e[slope_e>maxslope]=maxslope
-slope_e[slope_e<minslope]=minslope
+#WD_e[WD_e>maxWD]=maxWD
+#WD_e[WD_e<minWD]=minWD
+#LMA_e[LMA_e>maxLMA]=maxLMA
+#LMA_e[LMA_e<minLMA]=minLMA
+#LS_e[LS_e>maxLS]=maxLS
+#LS_e[LS_e<minLS]=minLS
+#TLP_e[TLP_e>maxTLP]=maxTLP
+#TLP_e[TLP_e<minTLP]=minTLP
+#P50_e[P50_e>maxP50]=maxP50
+#P50_e[P50_e<minP50]=minP50
+#slope_e[slope_e>maxslope]=maxslope
+#slope_e[slope_e<minslope]=minslope
 
 #Stats for each point
 Ks_e_mean=unname(apply(Ks_e, 1, mean))
@@ -643,6 +661,16 @@ LMA_e_median=unname(apply(LMA_e, 1, median,na.rm=T))
 LMA_e_5perc=unname(apply(LMA_e, 1, quantile,0.05,na.rm=T))
 LMA_e_95perc=unname(apply(LMA_e, 1, quantile,0.95,na.rm=T))
 
+WD_e_mean=unname(apply(WD_e, 1, mean,na.rm=T))
+WD_e_median=unname(apply(WD_e, 1, median,na.rm=T))
+WD_e_5perc=unname(apply(WD_e, 1, quantile,0.05,na.rm=T))
+WD_e_95perc=unname(apply(WD_e, 1, quantile,0.95,na.rm=T))
+
+slope_e_mean=unname(apply(slope_e, 1, mean,na.rm=T))
+slope_e_median=unname(apply(slope_e, 1, median,na.rm=T))
+slope_e_5perc=unname(apply(slope_e, 1, quantile,0.05,na.rm=T))
+slope_e_95perc=unname(apply(slope_e, 1, quantile,0.95,na.rm=T))
+
 
 #Make plots to compare with original data
 par(mfrow=c(4,4))
@@ -654,17 +682,29 @@ points(TLP_e_mean,P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped 
 points(TLP_e_5perc,P50_e_5perc,col="green",pch=16)
 points(TLP_e_95perc,P50_e_95perc,col="green",pch=16)
 
-#plot(TLP,slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
-#points(TLP_e,slope_e,col="red",pch=16)
+plot(TLP,slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
+points(TLP_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(TLP_e_mean,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e_5perc,slope_e_5perc,col="green",pch=16)
+points(TLP_e_95perc,slope_e_95perc,col="green",pch=16)
 
-#plot(P50,slope,pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
-#points(P50_e,slope_e,col="red",pch=16)
+plot(P50,slope,pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
+points(P50_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(P50_e_mean,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(P50_e_5perc,slope_e_5perc,col="green",pch=16)
+points(P50_e_95perc,slope_e_95perc,col="green",pch=16)
 
-#plot(TLP,WD,pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-#points(TLP_e,WD_e,col="red",pch=16)
+plot(TLP,WD,pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+points(TLP_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(TLP_e_mean,WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e_5perc,WD_e_5perc,col="green",pch=16)
+points(TLP_e_95perc,WD_e_95perc,col="green",pch=16)
 
-#plot(P50,WD,,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
-#points(P50_e,WD_e,col="red",pch=16)
+plot(P50,WD,,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+points(P50_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(P50_e_mean,WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(P50_e_5perc,WD_e_5perc,col="green",pch=16)
+points(P50_e_95perc,WD_e_95perc,col="green",pch=16)
 
 plot(TLP,LMA,pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
 points(TLP_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
@@ -696,11 +736,17 @@ points(LS_e,TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estima
 points(LS_e,TLP_e_5perc,col="green",pch=16)
 points(LS_e,TLP_e_95perc,col="green",pch=16)
 
-#plot(WD,LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-#points(WD_e,LMA_e,col="red",pch=16) 
+plot(WD,LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
+points(WD_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(WD_e_mean,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(WD_e_5perc,LMA_e_5perc,col="green",pch=16)
+points(WD_e_95perc,LMA_e_95perc,col="green",pch=16)
 
 #plot(Ks,slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
-#points(Ks_e,slope_e,col="red",pch=16) 
+#points(Ks_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
+#points(Ks_e_mean,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+#points(Ks_e_5perc,slope_e_5perc,col="green",pch=16)
+#points(Ks_e_95perc,slope_e_95perc,col="green",pch=16)
 
 #Use up remaining unallocated plots and set back to single plot
 par(mfrow=c(1,1))
