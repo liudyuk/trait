@@ -124,10 +124,10 @@ sma_regress_multivar <- function(yy,nbtstrp=10000,bootout=F) {
       slope_R.y2.boot[i]=-PCA_Rb$vectors[2,cc]*sdevb[cc]/PCA_Rb$vectors[cc,cc]/sdevb[2]
     }
     if (cc>3) {
-      slope_R.y3.boot=-PCA_Rb$vectors[3,cc]*sdevb[cc]/PCA_Rb$vectors[cc,cc]/sdevb[3]
+      slope_R.y3.boot[i]=-PCA_Rb$vectors[3,cc]*sdevb[cc]/PCA_Rb$vectors[cc,cc]/sdevb[3]
     }
     if (cc>4) {
-      slope_R.y4.boot=-PCA_Rb$vectors[4,cc]*sdevb[cc]/PCA_Rb$vectors[cc,cc]/sdevb[4]
+      slope_R.y4.boot[i]=-PCA_Rb$vectors[4,cc]*sdevb[cc]/PCA_Rb$vectors[cc,cc]/sdevb[4]
     }
   }
   
