@@ -286,9 +286,133 @@ plot(MAT[Ks_from_LSHmax_P50$dataused],MAP[Ks_from_LSHmax_P50$dataused])
 
 # WD fits -----------------------------------------------------------------
 
+# NOTE: Ignoring fits with TLP and LMA because they do not fit conceptually with the hypothesis framework
+
+# WD from P50 and slope
+WD_from_P50_slope <- sma_plot_stats(data.frame(P50,slope,WD),c("P50","slope","WD"),nbtstrp)
+plot(WD[WD_from_P50_slope$dataused],WD_from_P50_slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# WD from slope and P50*slope (interaction term) - NOTE: Testing the interactions because P50 and slope are so highly correlated with each other
+WD_from_slope_P50slope <- sma_plot_stats(data.frame(slope,P50*slope,WD),c("slope","P50*slope","WD"),nbtstrp)
+plot(WD[WD_from_slope_P50slope$dataused],WD_from_slope_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# WD from P50 and P50*slope (interaction term)
+WD_from_P50_P50slope <- sma_plot_stats(data.frame(P50,P50*slope,WD),c("P50","P50*slope","WD"),nbtstrp)
+plot(WD[WD_from_P50_P50slope$dataused],WD_from_P50_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# WD from P50 and slope
+WD_from_P50 <- sma_plot_stats(data.frame(P50,WD),c("P50","WD"),nbtstrp)
+plot(WD[WD_from_P50$dataused],WD_from_P50$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# WD from slope
+WD_from_slope <- sma_plot_stats(data.frame(slope,WD),c("slope","WD"),nbtstrp)
+plot(WD[WD_from_slope$dataused],WD_from_slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# Summarise statistics
+all_testnames_WD <- c("WD_from_P50_slope","WD_from_slope_P50slope","WD_from_P50_P50slope","WD_from_P50","WD_from_slope")
+all_R2_WD <- c(WD_from_P50_slope$R2,WD_from_slope_P50slope$R2,WD_from_P50_P50slope$R2,WD_from_P50$R2,WD_from_slope$R2)
+all_R2adj_WD <- c(WD_from_P50_slope$R2adj,WD_from_slope_P50slope$R2adj,WD_from_P50_P50slope$R2adj,WD_from_P50$R2adj,WD_from_slope$R2adj)
+all_rmse_WD <- c(WD_from_P50_slope$rmse,WD_from_slope_P50slope$rmse,WD_from_P50_P50slope$rmse,WD_from_P50$rmse,WD_from_slope$rmse)
+all_ndata_WD <- c(WD_from_P50_slope$ndata,WD_from_slope_P50slope$ndata,WD_from_P50_P50slope$ndata,WD_from_P50$ndata,WD_from_slope$ndata)
+
+all_WD <- data.frame(all_testnames_WD,all_R2_WD,all_R2adj_WD,all_rmse_WD,all_ndata_WD)
+View(all_WD)
+
+# CHOICE: WD_from_slope_P50slope has the best combination of R2adj and RMSE
+
+# Test MAT and PPT coverage of species for chosen model
+plot(MAT[WD_from_slope_P50slope$dataused],MAP[WD_from_slope_P50slope$dataused])
+# WIDE CLIMATE COVERAGE
+
+# DECISION: WD_from_slope_P50slope
 
 # slope fits --------------------------------------------------------------
 
+# slope from P50, TLP, WD and Ks
+slope_from_P50_TLP_WD_Ks <- sma_plot_stats(data.frame(P50,TLP,WD,Ks,slope),c("P50","TLP","WD","Ks","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLP_WD_Ks$dataused],slope_from_P50_TLP_WD_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, TLP and WD
+slope_from_P50_TLP_WD <- sma_plot_stats(data.frame(P50,TLP,WD,slope),c("P50","TLP","WD","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLP_WD$dataused],slope_from_P50_TLP_WD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, TLP and Ks
+slope_from_P50_TLP_Ks <- sma_plot_stats(data.frame(P50,TLP,Ks,slope),c("P50","TLP","Ks","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLP_Ks$dataused],slope_from_P50_TLP_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, WD and Ks
+slope_from_P50_WD_Ks <- sma_plot_stats(data.frame(P50,WD,Ks,slope),c("P50","WD","Ks","slope"),nbtstrp)
+plot(slope[slope_from_P50_WD_Ks$dataused],slope_from_P50_WD_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP, WD and Ks
+slope_from_TLP_WD_Ks <- sma_plot_stats(data.frame(TLP,WD,Ks,slope),c("TLP","WD","Ks","slope"),nbtstrp)
+plot(slope[slope_from_TLP_WD_Ks$dataused],slope_from_TLP_WD_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50 and TLP
+slope_from_P50_TLP <- sma_plot_stats(data.frame(P50,TLP,slope),c("P50","TLP","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLP$dataused],slope_from_P50_TLP$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50 and TLPP50 (interaction)
+slope_from_P50_TLPP50 <- sma_plot_stats(data.frame(P50,TLP*P50,slope),c("P50","TLP*P50","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLPP50$dataused],slope_from_P50_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP and TLPP50 (interaction)
+slope_from_TLP_TLPP50 <- sma_plot_stats(data.frame(TLP,TLP*P50,slope),c("TLP","TLP*P50","slope"),nbtstrp)
+plot(slope[slope_from_TLP_TLPP50$dataused],slope_from_TLP_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP and Ks
+slope_from_TLP_Ks <- sma_plot_stats(data.frame(TLP,Ks,slope),c("TLP","Ks","slope"),nbtstrp)
+plot(slope[slope_from_TLP_Ks$dataused],slope_from_TLP_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP and WD
+slope_from_TLP_WD <- sma_plot_stats(data.frame(TLP,WD,slope),c("TLP","WD","slope"),nbtstrp)
+plot(slope[slope_from_TLP_WD$dataused],slope_from_TLP_WD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP
+slope_from_TLP <- sma_plot_stats(data.frame(TLP,slope),c("TLP","slope"),nbtstrp)
+plot(slope[slope_from_TLP$dataused],slope_from_TLP$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50
+slope_from_P50 <- sma_plot_stats(data.frame(P50,slope),c("P50","slope"),nbtstrp)
+plot(slope[slope_from_P50$dataused],slope_from_P50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from WD
+slope_from_WD <- sma_plot_stats(data.frame(WD,slope),c("WD","slope"),nbtstrp)
+plot(slope[slope_from_WD$dataused],slope_from_WD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from Ks
+slope_from_Ks <- sma_plot_stats(data.frame(Ks,slope),c("Ks","slope"),nbtstrp)
+plot(slope[slope_from_Ks$dataused],slope_from_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, WD and Ks (same species as slope_from_P50_TLP_WD_Ks) (NOTE: testing because the fit for slope_from_P50_WD_Ks is only marginally worse than for slope_from_P50_TLP_Ks, but it has many more species)
+slope_from_P50_WD_Ks_limitspec <- sma_plot_stats(data.frame(P50,WD,Ks,slope),c("P50","WD","Ks","slope"),nbtstrp,F,slope_from_P50_TLP_WD_Ks$dataused)
+plot(slope[slope_from_P50_WD_Ks_limitspec$dataused],slope_from_P50_WD_Ks_limitspec$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, TLP and Ks (same species as slope_from_P50_TLP_WD_Ks) (NOTE: testing because the fit for slope_from_P50_WD_Ks is only marginally worse than for slope_from_P50_TLP_Ks, but it has many more species)
+slope_from_P50_TLP_Ks_limitspec <- sma_plot_stats(data.frame(P50,TLP,Ks,slope),c("P50","TLP","Ks","slope"),nbtstrp,F,slope_from_P50_TLP_WD_Ks$dataused)
+plot(slope[slope_from_P50_TLP_Ks_limitspec$dataused],slope_from_P50_TLP_Ks_limitspec$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50 (same species as slope_from_P50_TLP_WD_Ks)
+slope_from_P50_limitspec <- sma_plot_stats(data.frame(P50,slope),c("P50","slope"),nbtstrp,F,slope_from_P50_TLP_WD_Ks$dataused)
+plot(slope[slope_from_P50_limitspec$dataused],slope_from_P50_limitspec$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# Summarise statistics
+all_testnames_slope <- c("slope_from_P50_TLP_WD_Ks","slope_from_P50_TLP_WD","slope_from_P50_TLP_Ks","slope_from_P50_WD_Ks","slope_from_TLP_WD_Ks","slope_from_P50_TLP","slope_from_P50_TLPP50","slope_from_TLP_TLPP50","slope_from_TLP_Ks","slope_from_TLP_WD","slope_from_TLP","slope_from_P50","slope_from_WD","slope_from_Ks","slope_from_P50_WD_Ks_limitspec","slope_from_P50_TLP_Ks_limitspec","slope_from_P50_limitspec")
+all_R2_slope <- c(slope_from_P50_TLP_WD_Ks$R2,slope_from_P50_TLP_WD$R2,slope_from_P50_TLP_Ks$R2,slope_from_P50_WD_Ks$R2,slope_from_TLP_WD_Ks$R2,slope_from_P50_TLP$R2,slope_from_P50_TLPP50$R2,slope_from_TLP_TLPP50$R2,slope_from_TLP_Ks$R2,slope_from_TLP_WD$R2,slope_from_TLP$R2,slope_from_P50$R2,slope_from_WD$R2,slope_from_Ks$R2,slope_from_P50_WD_Ks_limitspec$R2,slope_from_P50_TLP_Ks_limitspec$R2,slope_from_P50_limitspec$R2)
+all_R2adj_slope <- c(slope_from_P50_TLP_WD_Ks$R2adj,slope_from_P50_TLP_WD$R2adj,slope_from_P50_TLP_Ks$R2adj,slope_from_P50_WD_Ks$R2adj,slope_from_TLP_WD_Ks$R2adj,slope_from_P50_TLP$R2adj,slope_from_P50_TLPP50$R2adj,slope_from_TLP_TLPP50$R2adj,slope_from_TLP_Ks$R2adj,slope_from_TLP_WD$R2adj,slope_from_TLP$R2adj,slope_from_P50$R2adj,slope_from_WD$R2adj,slope_from_Ks$R2adj,slope_from_P50_WD_Ks_limitspec$R2adj,slope_from_P50_TLP_Ks_limitspec$R2adj,slope_from_P50_limitspec$R2adj)
+all_rmse_slope <- c(slope_from_P50_TLP_WD_Ks$rmse,slope_from_P50_TLP_WD$rmse,slope_from_P50_TLP_Ks$rmse,slope_from_P50_WD_Ks$rmse,slope_from_TLP_WD_Ks$rmse,slope_from_P50_TLP$rmse,slope_from_P50_TLPP50$rmse,slope_from_TLP_TLPP50$rmse,slope_from_TLP_Ks$rmse,slope_from_TLP_WD$rmse,slope_from_TLP$rmse,slope_from_P50$rmse,slope_from_WD$rmse,slope_from_Ks$rmse,slope_from_P50_WD_Ks_limitspec$rmse,slope_from_P50_TLP_Ks_limitspec$rmse,slope_from_P50_limitspec$rmse)
+all_ndata_slope <- c(slope_from_P50_TLP_WD_Ks$ndata,slope_from_P50_TLP_WD$ndata,slope_from_P50_TLP_Ks$ndata,slope_from_P50_WD_Ks$ndata,slope_from_TLP_WD_Ks$ndata,slope_from_P50_TLP$ndata,slope_from_P50_TLPP50$ndata,slope_from_TLP_TLPP50$ndata,slope_from_TLP_Ks$ndata,slope_from_TLP_WD$ndata,slope_from_TLP$ndata,slope_from_P50$ndata,slope_from_WD$ndata,slope_from_Ks$ndata,slope_from_P50_WD_Ks_limitspec$ndata,slope_from_P50_TLP_Ks_limitspec$ndata,slope_from_P50_limitspec$ndata)
+
+all_slope <- data.frame(all_testnames_slope,all_R2_slope,all_R2adj_slope,all_rmse_slope,all_ndata_slope)
+View(all_slope)
+
+# CHOICE: slope_from_P50_TLP_Ks
+
+# Test MAT and PPT coverage of species for chosen model
+plot(MAT[slope_from_P50_TLP_Ks$dataused],MAP[slope_from_P50_TLP_Ks$dataused])
+# WIDE CLIMATE COVERAGE
+
+# DECISION: slope_from_P50_TLP_Ks
 
 
 # Optimisation ------------------------------------------------------------
