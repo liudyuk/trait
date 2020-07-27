@@ -286,11 +286,14 @@ plot(MAT[Ks_from_LSHmax_P50$dataused],MAP[Ks_from_LSHmax_P50$dataused])
 # Optimisation ------------------------------------------------------------
 # Attempt to iteratively converge on the best fit values of Ks, TLP, P50 and LMA given known Hmax and LS
 
+# ADD IN A CATCH TO SET A RESULT TO NA WHEN IT STARTS TO TURN INF
+# SEE HOW MANY SUCH INFS COME UP
+
 # Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
 limitdataranges=F
 
 # Decide whether to run the uncertainty propagation (T) or not (F)
-propagate_uncer=F
+propagate_uncer=T
 
 if (propagate_uncer) {
   n_uncer=nbtstrp
@@ -414,6 +417,16 @@ for (ss in 1:n_uncer) {
         mod_P50_slope_y2_sample*Ks_e_last
       Ks_e[dd,ss]=mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*LS_Hmax_e[dd] + 
         mod_Ks_slope_y2_sample*P50_e_last
+      
+      # Some catches for values tending towards inf
+      if (P50_e[dd,ss]>maxP50*10 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+      if (P50_e[dd,ss]<minP50/10 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+      if (TLP_e[dd,ss]>maxTLP*10 | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+      if (TLP_e[dd,ss]<minTLP/10 | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+      if (LMA_e[dd,ss]>maxLMA*10 | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+      if (LMA_e[dd,ss]<minLMA/10 | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+      if (Ks_e[dd,ss]>maxKs*10 | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
+      if (Ks_e[dd,ss]<minKs/10 | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
       
       if (limitdataranges) {
         #Do not go beyond observed limits of data
