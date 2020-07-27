@@ -21,35 +21,50 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL) {
   nregress=nvars-1 #Number of independent regressors
   if (is.null(indin)) {
     ind=complete.cases(vars)
-  }
-  else {
+  } else {
     ind=indin
   }
   ndata=length(ind[ind])
   
   mod <- sma_regress_multivar(vars[ind,],nbtstrp,T)
+  
+  var_est_boot <- matrix(NA, nrow = ndata, ncol = nbtstrp)
   if (nvars==2) {
     var_est <- mod$intercept_R + mod$slope_R.y1*vars[ind,1]
-  }
-  else if (nvars==3) {
+    for (nn in 1:nbtstrp) {
+      var_est_boot[,nn] <- mod$boot.intercept[nn] + mod$boot.y1[nn]*vars[ind,1]
+    }
+  } else if (nvars==3) {
     var_est <- mod$intercept_R + mod$slope_R.y1*vars[ind,1] + mod$slope_R.y2*vars[ind,2]
-  }
-  else if (nvars==4) {
+    for (nn in 1:nbtstrp) {
+      var_est_boot[,nn] <- mod$boot.intercept[nn] + mod$boot.y1[nn]*vars[ind,1] + mod$boot.y2[nn]*vars[ind,2]
+    }
+  } else if (nvars==4) {
     var_est <- mod$intercept_R + mod$slope_R.y1*vars[ind,1] + mod$slope_R.y2*vars[ind,2] +
       mod$slope_R.y3*vars[ind,3]
-  }
-  else if (nvars==5) {
+    for (nn in 1:nbtstrp) {
+      var_est_boot[,nn] <- mod$boot.intercept[nn] + mod$boot.y1[nn]*vars[ind,1] + mod$boot.y2[nn]*vars[ind,2] +
+        mod$boot.y3[nn]*vars[ind,3]
+    }
+  } else if (nvars==5) {
     var_est <- mod$intercept_R + mod$slope_R.y1*vars[ind,1] + mod$slope_R.y2*vars[ind,2] +
       mod$slope_R.y3*vars[ind,3] + mod$slope_R.y4*vars[ind,4]
-  }
-  else {
+    for (nn in 1:nbtstrp) {
+      var_est_boot[,nn] <- mod$boot.intercept[nn] + mod$boot.y1[nn]*vars[ind,1] + mod$boot.y2[nn]*vars[ind,2] +
+        mod$boot.y3[nn]*vars[ind,3] + mod$boot.y4[nn]*vars[ind,4]
+    }
+  } else {
     stop('sma_plot_stats can only handle a maximum of 5 variables')
   }
+  var_est_L95=unname(apply(var_est_boot, 1, quantile,0.05))
+  var_est_U95=unname(apply(var_est_boot, 1, quantile,0.95))
   
   #Make plot against the first variable
   if (makeplot) {
     plot(vars[ind,nvars],vars[ind,1],pch=16,xlab=labels[nvars],ylab=labels[1],main=paste(labels[nvars]," vs ",labels[1]))
     points(var_est,vars[ind,1],col="red",pch=16)
+    points(var_est_L95,vars[ind,1],col="green",pch=5)
+    points(var_est_U95,vars[ind,1],col="green",pch=5)
   }
   
   #Calculate RMSE
@@ -61,7 +76,8 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL) {
   R2 <- R^2
   R2adj <- 1 - ( ((1-R2)*(ndata-1))/(ndata-nregress-1) )
   
-  return_vals <- list("mod"=mod,"rmse"=rmse,"R"=R,"R2"=R2,"R2adj"=R2adj,"var_est"=var_est,"ndata"=ndata,"dataused"=ind)
+  return_vals <- list("mod"=mod,"rmse"=rmse,"R"=R,"R2"=R2,"R2adj"=R2adj,"var_est"=var_est,
+                      "var_est_L95"=var_est_L95,"var_est_U95"=var_est_U95,"ndata"=ndata,"dataused"=ind)
   
   return(return_vals)
 }
