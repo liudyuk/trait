@@ -129,6 +129,14 @@ plot(MAT[P50_from_TLP_Ks$dataused],MAP[P50_from_TLP_Ks$dataused])
 # WIDE CLIMATE COVERAGE
 
 # DECISION: P50_from_TLP_Ks
+coeffnames_P50_from_TLP_Ks <- c("Coefficient","L95","U95")
+intercept_P50_from_TLP_Ks <- c(P50_from_TLP_Ks$mod$intercept_R,P50_from_TLP_Ks$mod$L95_R.intercept,P50_from_TLP_Ks$mod$U95_R.intercept)
+y1_P50_from_TLP_Ks <- c(P50_from_TLP_Ks$mod$slope_R.y1,P50_from_TLP_Ks$mod$L95_R.y1,P50_from_TLP_Ks$mod$U95_R.y1)
+y2_P50_from_TLP_Ks <- c(P50_from_TLP_Ks$mod$slope_R.y2,P50_from_TLP_Ks$mod$L95_R.y2,P50_from_TLP_Ks$mod$U95_R.y2)
+
+coeff_P50_from_TLP_Ks <- data.frame(coeffnames_P50_from_TLP_Ks,intercept_P50_from_TLP_Ks,y1_P50_from_TLP_Ks,y2_P50_from_TLP_Ks)
+View(coeff_P50_from_TLP_Ks)
+# NOTE: These coefficients are all over the place, almost certainly because we have high multicolinearity in the predictors, BUT, this is not a problem as we are not interpreting the coefficients, just using them for the prediction.
 
 
 # TLP fits ----------------------------------------------------------------
@@ -286,11 +294,8 @@ plot(MAT[Ks_from_LSHmax_P50$dataused],MAP[Ks_from_LSHmax_P50$dataused])
 # Optimisation ------------------------------------------------------------
 # Attempt to iteratively converge on the best fit values of Ks, TLP, P50 and LMA given known Hmax and LS
 
-# ADD IN A CATCH TO SET A RESULT TO NA WHEN IT STARTS TO TURN INF
-# SEE HOW MANY SUCH INFS COME UP
-
 # Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
-limitdataranges=F
+limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
 
 # Decide whether to run the uncertainty propagation (T) or not (F)
 propagate_uncer=T
@@ -340,6 +345,7 @@ Ks_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
 # New outer loop which randomly samples regression coefficients from within their uncertainty bounds
 # The random sampling comes from the bootstrap sampling done in the calculations of the SMA regressions themselves. This approach has the big advantages of (a) not having to make any assumptions about the distribution of the coefficient uncertainty and (b) ensuring that the individual slope coefficients within a regression are consistent with each other.
 for (ss in 1:n_uncer) {
+  print(ss)
   # For now, make samples for the following:
   # (ensure equation choices are consistent with decisions above)
   if (ss==1) { #First pass always calculates the best estimate
@@ -393,6 +399,10 @@ for (ss in 1:n_uncer) {
     diff_LMA_last=100
     diff_TLP_last=100
     diff_Ks_last=100
+    #diff_P50_last_last=100
+    #diff_LMA_last_last=100
+    #diff_TLP_last_last=100
+    #diff_Ks_last_last=100
     
     # These arrays are just for output, they store the values of every iteration for the current datapoint.
     # Useful for debugging and to check that convergence is working.
@@ -418,18 +428,18 @@ for (ss in 1:n_uncer) {
       Ks_e[dd,ss]=mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*LS_Hmax_e[dd] + 
         mod_Ks_slope_y2_sample*P50_e_last
       
-      # Some catches for values tending towards inf
-      if (P50_e[dd,ss]>maxP50*10 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
-      if (P50_e[dd,ss]<minP50/10 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
-      if (TLP_e[dd,ss]>maxTLP*10 | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
-      if (TLP_e[dd,ss]<minTLP/10 | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
-      if (LMA_e[dd,ss]>maxLMA*10 | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
-      if (LMA_e[dd,ss]<minLMA/10 | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
-      if (Ks_e[dd,ss]>maxKs*10 | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
-      if (Ks_e[dd,ss]<minKs/10 | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
+      # Some catches for values tending towards inf #THIS IS NOT EFFECTIVE AS WE END UP WITH A LOT OF LARGE VALUES LESS THAN 1000 REMAINING
+      #if (P50_e[dd,ss] > 1000 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+      #if (P50_e[dd,ss] < -1000 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+      #if (TLP_e[dd,ss] > 1000 | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+      #if (TLP_e[dd,ss] < -1000 | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+      #if (LMA_e[dd,ss] > 1000 | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+      #if (LMA_e[dd,ss] < -1000 | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+      #if (Ks_e[dd,ss] > 1000 | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
+      #if (Ks_e[dd,ss] < -1000 | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
       
       if (limitdataranges) {
-        #Do not go beyond observed limits of data
+        #Do not go beyond observed limits of data - if so, discard.
         if (P50_e[dd,ss]>maxP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
         if (P50_e[dd,ss]<minP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
         if (TLP_e[dd,ss]>maxTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
@@ -438,6 +448,15 @@ for (ss in 1:n_uncer) {
         if (LMA_e[dd,ss]<minLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
         if (Ks_e[dd,ss]>maxKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
         if (Ks_e[dd,ss]<minKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
+        
+        #if (P50_e[dd,ss]>maxP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=maxP50;} #THIS APPROACH DOES NOT CONVERGE
+        #if (P50_e[dd,ss]<minP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=minP50;}
+        #if (TLP_e[dd,ss]>maxTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=maxTLP;}
+        #if (TLP_e[dd,ss]<minTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=minTLP;}
+        #if (LMA_e[dd,ss]>maxLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=maxLMA;}
+        #if (LMA_e[dd,ss]<minLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=minLMA;}
+        #if (Ks_e[dd,ss]>maxKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=maxKs;}
+        #if (Ks_e[dd,ss]<minKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=minKs;}
       }
       
       # Save the values for this iteration to the output array (only for debugging, can be commented out)
@@ -452,6 +471,22 @@ for (ss in 1:n_uncer) {
       diff_TLP = TLP_e[dd,ss]-TLP_e_last
       diff_Ks = Ks_e[dd,ss]-Ks_e_last
       
+      # Check for divergence #NEITHER OF THESE APPROACHES BELOW RELIABLY CATCH ALL THE DIVERGING VALUES IN THE OPTIMISATION. THEY ALSO SEEM TO MASSIVELY REDUCE THE DATASET BY REMOVING REASONABLE VALUES.
+      #if (abs(diff_P50>diff_P50_last) || abs(diff_P50>diff_P50_last_last) ||
+      #    abs(diff_LMA>diff_LMA_last) || abs(diff_LMA>diff_LMA_last_last) ||
+      #    abs(diff_Ks>diff_Ks_last) || abs(diff_Ks>diff_Ks_last_last) ||
+      #    abs(diff_TLP>diff_TLP_last) || abs(diff_TLP>diff_TLP_last_last)) {
+#      if (abs(diff_P50>diff_P50_last_last) ||
+#          abs(diff_LMA>diff_LMA_last_last) ||
+#          abs(diff_Ks>diff_Ks_last_last) ||
+#          abs(diff_TLP>diff_TLP_last_last)) {
+#        P50_e[dd,ss]=NA
+#        LMA_e[dd,ss]=NA
+#        Ks_e[dd,ss]=NA
+#        TLP_e[dd,ss]=NA
+#        break
+#      }
+      
       # Now we test if the difference between trait estimates on this iteration and between trait estimates on
       # the last iteration is less than "tol" for all traits. If it is we finish the iteration.
       if (abs(diff_P50-diff_P50_last)<tol &&
@@ -460,6 +495,11 @@ for (ss in 1:n_uncer) {
           abs(diff_TLP-diff_TLP_last)<tol) {
         break
       }
+      
+      #diff_P50_last_last=diff_P50_last
+      #diff_LMA_last_last=diff_LMA_last
+      #diff_TLP_last_last=diff_TLP_last
+      #diff_Ks_last_last=diff_Ks_last
       
       # Save the "diff" values ready for the next iteration
       diff_P50_last=diff_P50
@@ -502,12 +542,37 @@ P50_e[P50_e<minP50]=minP50
 slope_e[slope_e>maxslope]=maxslope
 slope_e[slope_e<minslope]=minslope
 
+#Stats for each point
+Ks_e_mean=unname(apply(Ks_e, 1, mean))
+Ks_e_median=unname(apply(Ks_e, 1, median))
+Ks_e_5perc=unname(apply(Ks_e, 1, quantile,0.05))
+Ks_e_95perc=unname(apply(Ks_e, 1, quantile,0.95))
+
+TLP_e_mean=unname(apply(TLP_e, 1, mean,na.rm=T))
+TLP_e_median=unname(apply(TLP_e, 1, median,na.rm=T))
+TLP_e_5perc=unname(apply(TLP_e, 1, quantile,0.05,na.rm=T))
+TLP_e_95perc=unname(apply(TLP_e, 1, quantile,0.95,na.rm=T))
+
+P50_e_mean=unname(apply(P50_e, 1, mean,na.rm=T))
+P50_e_median=unname(apply(P50_e, 1, median,na.rm=T))
+P50_e_5perc=unname(apply(P50_e, 1, quantile,0.05,na.rm=T))
+P50_e_95perc=unname(apply(P50_e, 1, quantile,0.95,na.rm=T))
+
+LMA_e_mean=unname(apply(LMA_e, 1, mean,na.rm=T))
+LMA_e_median=unname(apply(LMA_e, 1, median,na.rm=T))
+LMA_e_5perc=unname(apply(LMA_e, 1, quantile,0.05,na.rm=T))
+LMA_e_95perc=unname(apply(LMA_e, 1, quantile,0.95,na.rm=T))
+
+
 #Make plots to compare with original data
 par(mfrow=c(4,4))
 par(mar=c(2,2,2,2))
 
 plot(TLP,P50,pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
-points(TLP_e,P50_e,col="red",pch=16)
+points(TLP_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(TLP_e_mean,P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e_5perc,P50_e_5perc,col="green",pch=16)
+points(TLP_e_95perc,P50_e_95perc,col="green",pch=16)
 
 #plot(TLP,slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
 #points(TLP_e,slope_e,col="red",pch=16)
@@ -522,19 +587,34 @@ points(TLP_e,P50_e,col="red",pch=16)
 #points(P50_e,WD_e,col="red",pch=16)
 
 plot(TLP,LMA,pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
-points(TLP_e,LMA_e,col="red",pch=16)
+points(TLP_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(TLP_e_mean,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e_5perc,LMA_e_5perc,col="green",pch=16)
+points(TLP_e_95perc,LMA_e_95perc,col="green",pch=16)
 
 plot(LS,LMA,pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
-points(LS_e,LMA_e,col="red",pch=16)
+points(LS_e,LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(LS_e,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(LS_e,LMA_e_5perc,col="green",pch=16)
+points(LS_e,LMA_e_95perc,col="green",pch=16)
 
 plot(Ks,LS_Hmax,pch=16,xlab="Ks",ylab="LS*Hmax",main="LS_Hmax vs Ks")
-points(Ks_e,log(exp(LS_e)*Hmax_e),col="red",pch=16)
+points(Ks_e[,1],log(exp(LS_e)*Hmax_e),col="blue",pch=16) # Using central estimate coefficients
+points(Ks_e_mean,log(exp(LS_e)*Hmax_e),col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(Ks_e_5perc,log(exp(LS_e)*Hmax_e),col="green",pch=16)
+points(Ks_e_95perc,log(exp(LS_e)*Hmax_e),col="green",pch=16)
 
 plot(Ks,P50,pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
-points(Ks_e,P50_e,col="red",pch=16)
+points(Ks_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(Ks_e_mean,P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(Ks_e_5perc,P50_e_5perc,col="green",pch=16)
+points(Ks_e_95perc,P50_e_95perc,col="green",pch=16)
 
 plot(LS,TLP,pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
-points(LS_e,TLP_e,col="red",pch=16)
+points(LS_e,TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(LS_e,TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(LS_e,TLP_e_5perc,col="green",pch=16)
+points(LS_e,TLP_e_95perc,col="green",pch=16)
 
 #plot(WD,LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
 #points(WD_e,LMA_e,col="red",pch=16) 
