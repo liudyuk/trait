@@ -1,4 +1,3 @@
-
 sma_regress_multivar <- function(yy,nbtstrp=10000,bootout=F) {
   # Function to calculate a multivariate SMA regression 
   # Based on Richter and Stavn (2014)
