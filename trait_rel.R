@@ -720,7 +720,12 @@ traits_e_out <- data.frame(LS_e,Hmax_e,LS_Hmax_e,
 write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_040820.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
 
 
+# Convert to the values needed in LPJ-GUESS and write out -----------------
 
+source('lpjg_traits_conv.R')
+
+traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
+                                LS_e,WD_e_mean,Ks_e_mean)
 
   
 
