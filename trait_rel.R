@@ -539,10 +539,10 @@ for (dd in 1:ndata) {
 }
   
 #Stats defining the uncertainty range for each point
-Ks_e_mean=unname(apply(Ks_e, 1, mean))
-Ks_e_median=unname(apply(Ks_e, 1, median))
-Ks_e_5perc=unname(apply(Ks_e, 1, quantile,0.05))
-Ks_e_95perc=unname(apply(Ks_e, 1, quantile,0.95))
+Ks_e_mean=unname(apply(Ks_e, 1, mean,na.rm=T))
+Ks_e_median=unname(apply(Ks_e, 1, median,na.rm=T))
+Ks_e_5perc=unname(apply(Ks_e, 1, quantile,0.05,na.rm=T))
+Ks_e_95perc=unname(apply(Ks_e, 1, quantile,0.95,na.rm=T))
 
 TLP_e_mean=unname(apply(TLP_e, 1, mean,na.rm=T))
 TLP_e_median=unname(apply(TLP_e, 1, median,na.rm=T))

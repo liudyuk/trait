@@ -38,6 +38,12 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   DeltaPsiWW_LPJG <- -0.5571 + (2.9748*WD_e_mean) # Based on https://docs.google.com/spreadsheets/d/1KvB97vt6OVdy3GPUdOdlxd8c9TdjEk9z4qIl2mcfPHk/edit#gid=51069844
   Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged)
   
+  #Limit ranges
+  lambda_LPJG[lambda_LPJG<-0.5]=0.5
+  lambda_LPJG[lambda_LPJG>1.0]=1.0
+  DeltaPsiWW_LPJG[DeltaPsiWW_LPJG<0.0]=0.0
+  DeltaPsiWW_LPJG[DeltaPsiWW_LPJG>10.0]=10.0
+  
   # No transformation needed
   Ks_LPJG <- Ks_e_mean_unlogged
   P50_LPJG <- P50_e_mean_unlogged
