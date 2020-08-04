@@ -426,9 +426,12 @@ limitdataranges=T # Currently does not converge in uncertainty propagation if no
 propagate_uncer=T
 
 # Decide whether to run all trait combinations in the database for LS and Hmax (F), or just a selection (T)
-trait_sel=F
+trait_sel=T
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified
 n_trait_sel=-1
+
+# Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
+spec_group_sel=4
 
 # ---
 if (propagate_uncer) {
@@ -437,7 +440,20 @@ if (propagate_uncer) {
   n_uncer=1
 }
 
-# Identify all combinations of Hmax and LS
+# Get index for selected species group
+if (spec_group_sel==1) {
+  ind_spec_group=1:length(traits$group) # Take everything (assumes that conifers were scopes out at the top of the file)
+} else if (spec_group_sel==2) {
+  ind_spec_group=which(traits$group=='BT' | traits$group=='BD')
+} else if (spec_group_sel==3) {
+  ind_spec_group=which(traits$group=='BE')
+} else if (spec_group_sel==4) {
+  ind_spec_group=which(traits$group=='BT')
+} else if (spec_group_sel==5) {
+  ind_spec_group=which(traits$group=='BD')
+}
+
+# Identify all combinations of Hmax and LS (do this across full range of broadleaf species)
 ind=which(!is.na(Hmax) & !is.na(LS))
 
 LS_comb <- LS[ind]
@@ -471,23 +487,23 @@ if (trait_sel) {
     sampHmax=8
     sampLS=8
     
-    maxLS=max(LS,na.rm=T)
-    minLS=min(LS,na.rm=T)
-    maxHmax=max(Hmax,na.rm=T)
-    minHmax=min(Hmax,na.rm=T)
+    maxLS=max(LS_comb,na.rm=T)
+    minLS=min(LS_comb,na.rm=T)
+    maxHmax=max(Hmax_comb,na.rm=T)
+    minHmax=min(Hmax_comb,na.rm=T)
     intLS=(maxLS-minLS)/sampLS
     intHmax=(maxHmax-minHmax)/sampHmax
     
     LS_seq <- seq(minLS+intLS,maxLS-intLS,by=intLS)
     Hmax_seq <- seq(minHmax+intHmax,maxHmax-intHmax,by=intHmax)
-    Hmax_rescale_seq <- Hmax_seq/sd(Hmax[ind])
+    Hmax_rescale_seq <- Hmax_seq/sd(Hmax_comb)
     LS_Hmax_seq <- expand.grid(LS_seq,Hmax_rescale_seq)
     
     # Test those points for inclusion in the hypervolume
     in_hv <- hypervolume_inclusion_test(hv,LS_Hmax_seq,fast.or.accurate = "accurate")
     
     LS_e <- LS_Hmax_seq$Var1[in_hv]
-    Hmax_e <- LS_Hmax_seq$Var2[in_hv] * sd(Hmax[ind])
+    Hmax_e <- LS_Hmax_seq$Var2[in_hv] * sd(Hmax_comb)
     LS_Hmax_e <- log(exp(LS_e) * Hmax_e)
   }
 } else {
@@ -512,7 +528,7 @@ for (dd in 1:ndata) {
   print(dd)
   
   # Carry out the optimisation
-  opt_vals <- trait_opt(P50,TLP,Ks,LS,LMA,WD,slope,LMA_from_TLP,TLP_from_LS_LMA_P50,P50_from_TLP_Ks,Ks_from_LSHmax_P50,slope_from_P50_TLP_Ks,WD_from_slope_P50slope,Hmax_e[dd],LS_e[dd],LS_Hmax_e[dd],n_uncer)
+  opt_vals <- trait_opt(P50[ind_spec_group],TLP[ind_spec_group],Ks[ind_spec_group],LS[ind_spec_group],LMA[ind_spec_group],WD[ind_spec_group],slope[ind_spec_group],LMA_from_TLP,TLP_from_LS_LMA_P50,P50_from_TLP_Ks,Ks_from_LSHmax_P50,slope_from_P50_TLP_Ks,WD_from_slope_P50slope,Hmax_e[dd],LS_e[dd],LS_Hmax_e[dd],n_uncer)
   
   P50_e[dd,] <- opt_vals$P50_e
   TLP_e[dd,] <- opt_vals$TLP_e
@@ -728,13 +744,24 @@ traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                                 LS_e,WD_e_mean,Ks_e_mean)
 
 # Select which base PFT to use: TeBE (1), TeBS (2) or IBS (3)
-basePFT=1
+basePFT=2
+
+# Set the name for the output file
+if (basePFT==1) {
+  LPJG_outfile <- "LPJG_PFT_insfile_TeBE.ins"
+} else if (basePFT==2) {
+  LPJG_outfile <- "LPJG_PFT_insfile_TeBS.ins"
+} else if (basePFT==3) {
+  LPJG_outfile <- "LPJG_PFT_insfile_IBS.ins"
+} else {
+  stop("basePFT must be equal to 1, 2 or 3")
+}
 
 # Write out to LPJ-GUESS instruction file
-PFTfile <- file("LPJG_PFT_insfile.txt")
+PFTfile <- file(LPJG_outfile)
 for (nn in 1:length(traits_LPJG$Ks)) {
   if (nn>1) {
-    PFTfile <- file("LPJG_PFT_insfile.txt",open="append")
+    PFTfile <- file(LPJG_outfile,open="append")
   }
   
   Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
@@ -744,8 +771,6 @@ for (nn in 1:length(traits_LPJG$Ks)) {
     Line2 <- TeBS_header
   } else if (basePFT==3) {
     Line2 <- IBS_header
-  } else {
-    stop("basePFT must be equal to 1, 2 or 3")
   }
   Line3 <- "\t !Hydraulics"
   Line4 <- paste("\t isohydricity ",round(traits_LPJG$lambda[nn],digits=4),sep="")
