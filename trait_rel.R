@@ -606,13 +606,13 @@ points(WD_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped es
 points(WD_e[,1],TLP_e_5perc,col="green",pch=16)
 points(WD_e[,1],TLP_e_95perc,col="green",pch=16)
 
-plot(P50,WD,,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+plot(P50,WD,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
 points(P50_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(P50_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(P50_e[,1],WD_e_5perc,col="green",pch=16)
 points(P50_e[,1],WD_e_95perc,col="green",pch=16)
 
-plot(WD,P50,,pch=16,xlab="WD",ylab="P50",main="WD vs P50")
+plot(WD,P50,pch=16,xlab="WD",ylab="P50",main="WD vs P50")
 points(WD_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(WD_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(WD_e[,1],P50_e_5perc,col="green",pch=16)
