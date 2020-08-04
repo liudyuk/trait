@@ -46,3 +46,50 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   return(traits_LPJG)
 }
 
+
+# LPJ-GUESS instruction file information ----------------------------------
+
+TeBE_header <- c("\t ! Temperate broadleaved evergreen tree",
+                 "",
+                 "\t include 1",
+                 "\t tree",
+                 "\t broadleaved",
+                 "\t shade_tolerant",
+                 "\t evergreen",
+                 "\t temperate",
+                 "\t !leaflong 3",
+                 "\t turnover_leaf 0.33",
+                 "\t tcmin_surv -1",
+                 "\t tcmin_est 0",
+                 "\t tcmax_est 18.8",
+                 "\t twmin_est 5",
+                 "\t gdd5min_est 2000",
+                 "\t longevity 300 !from TH 2010-04-07 was 350 AA",
+                 "\t fireresist 0.3",
+                 "\t eps_iso 24.0",
+                 "\t seas_iso 0",
+                 "\t eps_mon 1.6",
+                 "\t storfrac_mon 0.",
+                 "")
+
+TeBS_header <- c(  "\t ! Shade-tolerant temperate broadleaved summergreen tree",
+                   "",
+                   "\t include 1",
+                   "\t tree",
+                   "\t broadleaved",
+                   "\t shade_tolerant",
+                   "\t summergreen",
+                   "\t temperate",
+                   "\t tcmin_surv -14",
+                   "\t tcmin_est -13",
+                   "\t tcmax_est 6",
+                   "\t twmin_est 5",
+                   "\t gdd5min_est 1100",
+                   "\t longevity 400",
+                   "\t fireresist 0.1",
+                   "\t eps_iso 45.0",
+                   "\t seas_iso 1",
+                   "\t eps_mon 1.6",
+                   "\t storfrac_mon 0.",
+                   "")
+

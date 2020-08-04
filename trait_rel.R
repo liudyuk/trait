@@ -727,8 +727,44 @@ source('lpjg_traits_conv.R')
 traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                                 LS_e,WD_e_mean,Ks_e_mean)
 
+# Select which base PFT to use: TeBE (1), TeBS (2) or IBS (3)
+basePFT=1
+
+# Write out to LPJ-GUESS instruction file
+PFTfile <- file("LPJG_PFT_insfile.txt")
+for (nn in 1:length(traits_LPJG$Ks)) {
+  if (nn>1) {
+    PFTfile <- file("LPJG_PFT_insfile.txt",open="append")
+  }
   
-
-
+  Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
+  if (basePFT==1) {
+    Line2 <- TeBE_header
+  } else if (basePFT==2) {
+    Line2 <- TeBS_header
+  } else if (basePFT==3) {
+    Line2 <- IBS_header
+  } else {
+    stop("basePFT must be equal to 1, 2 or 3")
+  }
+  Line3 <- "\t !Hydraulics"
+  Line4 <- paste("\t isohydricity ",round(traits_LPJG$lambda[nn],digits=4),sep="")
+  Line5 <- paste("\t delta_psi_max ",round(traits_LPJG$DeltaPsiWW[nn],digits=4),sep="")
+  Line6 <- paste("\t cav_slope ",round(traits_LPJG$polyslope[nn],digits=4),sep="")
+  Line7 <- paste("\t psi50_xylem ",round(traits_LPJG$P50[nn],digits=4),sep="")
+  Line8 <- paste("\t ks_max ",round(traits_LPJG$Ks[nn],digits=4),sep="")
+  Line9 <- paste("\t kr_max ",11.2e-4,sep="") # LPJ-GUESS default from Hickler et al. (2006)
+  Line10 <- paste("\t kL_max ",round(traits_LPJG$Kleaf[nn],digits=4),sep="")
+  Line11 <- paste("\t wooddens ",round(traits_LPJG$WD[nn],digits=4),sep="")
+  Line12 <- paste("\t k_latosa ",round(traits_LPJG$LS[nn],digits=4),sep="")
+  if (basePFT==1) {
+    Line13 <- paste("\t leaflong ",round(traits_LPJG$leaflong[nn],digits=4),sep="")
+  } else {
+    Line13 <- NULL
+  } 
+  
+  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,"",")",""),PFTfile)
+  close(PFTfile)
+}
   
   
