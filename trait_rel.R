@@ -431,7 +431,7 @@ trait_sel=T
 n_trait_sel=-1
 
 # Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=4
+spec_group_sel=1
 
 # ---
 if (propagate_uncer) {
@@ -743,8 +743,8 @@ source('lpjg_traits_conv.R')
 traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                                 LS_e,WD_e_mean,Ks_e_mean)
 
-# Select which base PFT to use: TeBE (1), TeBS (2) or IBS (3)
-basePFT=2
+# Select which base PFT to use: TeBE (1), TeBS (2), IBS (3) or TrBE (4)
+basePFT=4
 
 # Set the name for the output file
 if (basePFT==1) {
@@ -753,6 +753,8 @@ if (basePFT==1) {
   LPJG_outfile <- "LPJG_PFT_insfile_TeBS.ins"
 } else if (basePFT==3) {
   LPJG_outfile <- "LPJG_PFT_insfile_IBS.ins"
+} else if (basePFT==4) {
+  LPJG_outfile <- "LPJG_PFT_insfile_TrBE.ins"
 } else {
   stop("basePFT must be equal to 1, 2 or 3")
 }
@@ -771,6 +773,8 @@ for (nn in 1:length(traits_LPJG$Ks)) {
     Line2 <- TeBS_header
   } else if (basePFT==3) {
     Line2 <- IBS_header
+  } else if (basePFT==3) {
+    Line2 <- TrBE_header
   }
   Line3 <- "\t !Hydraulics"
   Line4 <- paste("\t isohydricity ",round(traits_LPJG$lambda[nn],digits=4),sep="")
@@ -782,7 +786,7 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line10 <- paste("\t kL_max ",round(traits_LPJG$Kleaf[nn],digits=4),sep="")
   Line11 <- paste("\t wooddens ",round(traits_LPJG$WD[nn],digits=4),sep="")
   Line12 <- paste("\t k_latosa ",round(traits_LPJG$LS[nn],digits=4),sep="")
-  if (basePFT==1) {
+  if (basePFT==1 | basePFT==4) {
     Line13 <- paste("\t leaflong ",round(traits_LPJG$leaflong[nn],digits=4),sep="")
   } else {
     Line13 <- NULL
