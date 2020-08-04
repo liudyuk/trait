@@ -9,7 +9,7 @@
 nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
 #traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
-traits=read.table("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0625.txt")
+traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
 
 source('sma_multivar_regress.R')
 source('trait_functions.R')
@@ -65,20 +65,21 @@ Ks_from_LMA <- sma_plot_stats(data.frame(LMA,Ks),c("LMA","Ks"),nbtstrp,T)
 # Make a data frame summarising the fits of the regressions
 all_label1 <- c("TLP","slope","slope","WD","WD","LMA","LMA","LS*Hmax","P50","TLP","LMA","slope","Hmax","LMA","Ks/Hmax","LMA")
 all_label2 <- c("P50","TLP","P50","TLP","P50","TLP","LS","Ks","Ks","LS","WD","Ks","Ks","leafN","LS","Ks")
-all_R2 <- c(sma_TLP_P50$R2,sma_TLP_slope$R2,sma_P50_slope$R2,sma_TLP_WD$R2,sma_P50_WD$R2,
-               sma_TLP_LMA$R2,sma_LS_LMA$R2,sma_Ks_LSHmax$R2,sma_Ks_P50$R2,sma_LS_TLP$R2,
-               sma_WD_LMA$R2,sma_Ks_slope$R2,sma_Ks_Hmax$R2,sma_leafN_LMA$R2,sma_LS_KsHmax$R2,
-               sma_Ks_LMA$R2)
-all_R2adj <- c(sma_TLP_P50$R2adj,sma_TLP_slope$R2adj,sma_P50_slope$R2adj,sma_TLP_WD$R2adj,sma_P50_WD$R2adj,
-            sma_TLP_LMA$R2adj,sma_LS_LMA$R2adj,sma_Ks_LSHmax$R2adj,sma_Ks_P50$R2adj,sma_LS_TLP$R2adj,
-            sma_WD_LMA$R2adj,sma_Ks_slope$R2adj,sma_Ks_Hmax$R2adj,sma_leafN_LMA$R2adj,sma_LS_KsHmax$R2adj,
-            sma_Ks_LMA$R2adj)
-all_rmse <- c(sma_TLP_P50$rmse,sma_TLP_slope$rmse,sma_P50_slope$rmse,sma_TLP_WD$rmse,sma_P50_WD$rmse,
-            sma_TLP_LMA$rmse,sma_LS_LMA$rmse,sma_Ks_LSHmax$rmse,sma_Ks_P50$rmse,sma_LS_TLP$rmse,
-            sma_WD_LMA$rmse,sma_Ks_slope$rmse,sma_Ks_Hmax$rmse,sma_leafN_LMA$rmse,sma_LS_KsHmax$rmse,
-            sma_Ks_LMA$rmse)
+all_R2 <- c(TLP_from_P50$R2,TLP_from_slope$R2,P50_from_slope$R2,TLP_from_WD$R2,P50_from_WD$R2,
+               TLP_from_LMA$R2,LS_from_LMA$R2,Ks_from_LSHmax$R2,Ks_from_P50$R2,LS_from_TLP$R2,
+               WD_from_LMA$R2,Ks_from_slope$R2,Ks_from_Hmax$R2,leafN_from_LMA$R2,LS_from_KsHmax$R2,
+               Ks_from_LMA$R2)
+all_R2adj <- c(TLP_from_P50$R2adj,TLP_from_slope$R2adj,P50_from_slope$R2adj,TLP_from_WD$R2adj,P50_from_WD$R2adj,
+               TLP_from_LMA$R2adj,LS_from_LMA$R2adj,Ks_from_LSHmax$R2adj,Ks_from_P50$R2adj,LS_from_TLP$R2adj,
+               WD_from_LMA$R2adj,Ks_from_slope$R2adj,Ks_from_Hmax$R2adj,leafN_from_LMA$R2adj,LS_from_KsHmax$R2adj,
+               Ks_from_LMA$R2adj)
+all_rmse <- c(TLP_from_P50$rmse,TLP_from_slope$rmse,P50_from_slope$rmse,TLP_from_WD$rmse,P50_from_WD$rmse,
+              TLP_from_LMA$rmse,LS_from_LMA$rmse,Ks_from_LSHmax$rmse,Ks_from_P50$rmse,LS_from_TLP$rmse,
+              WD_from_LMA$rmse,Ks_from_slope$rmse,Ks_from_Hmax$rmse,leafN_from_LMA$rmse,LS_from_KsHmax$rmse,
+              Ks_from_LMA$rmse)
 
 all_sma_bivar <- data.frame(all_label1,all_label2,all_R2,all_R2adj,all_rmse)
+View(all_sma_bivar)
 
 #Use up remaining unallocated plots and set back to single plot
 #plot.new()
@@ -425,9 +426,9 @@ limitdataranges=T # Currently does not converge in uncertainty propagation if no
 propagate_uncer=T
 
 # Decide whether to run all trait combinations in the database for LS and Hmax (F), or just a selection (T)
-trait_sel=T
-# Number of combinations to select if trait_sel=T
-n_trait_sel=20
+trait_sel=F
+# Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified
+n_trait_sel=-1
 
 # ---
 if (propagate_uncer) {
@@ -444,16 +445,51 @@ Hmax_comb <- Hmax[ind]
 LS_Hmax_comb <- LS_Hmax[ind]
 
 if (trait_sel) {
-  # Random selection of LS and Hmax values to be tested
-  set.seed(1234)
-  index = 1:length(ind)
-  trait_samp = sample(index, n_trait_sel, replace=F) 
-  LS_e = LS_comb[trait_samp] 
-  Hmax_e = Hmax_comb[trait_samp] 
-  LS_Hmax_e = LS_Hmax_comb[trait_samp] 
-  # Plot sample against all data as a check for sampling density
-  plot(LS_comb,Hmax_comb)
-  points(LS_e,Hmax_e,col="red")
+  if (n_trait_sel>0) {
+    # Random selection of LS and Hmax values to be tested
+    set.seed(1234)
+    index = 1:length(ind)
+    trait_samp = sample(index, n_trait_sel, replace=F) 
+    LS_e = LS_comb[trait_samp] 
+    Hmax_e = Hmax_comb[trait_samp] 
+    LS_Hmax_e = LS_Hmax_comb[trait_samp] 
+    # Plot sample against all data as a check for sampling density
+    plot(LS_comb,Hmax_comb)
+    points(LS_e,Hmax_e,col="red")
+    
+  } else {
+    # Systematic sample
+    
+    library(hypervolume)
+    
+    # Fit a hypervolume (KDE at 99%)
+    Hmax_rescale = Hmax_comb/sd(Hmax_comb)
+    hv = hypervolume(data.frame(LS_comb,Hmax_rescale),method="gaussian",quantile.requested=0.99)
+    plot(hv)
+    
+    # Set the number of points distributed systematically across LS and Hmax space to test for inclusion in the hypervolume
+    sampHmax=8
+    sampLS=8
+    
+    maxLS=max(LS,na.rm=T)
+    minLS=min(LS,na.rm=T)
+    maxHmax=max(Hmax,na.rm=T)
+    minHmax=min(Hmax,na.rm=T)
+    intLS=(maxLS-minLS)/sampLS
+    intHmax=(maxHmax-minHmax)/sampHmax
+    
+    LS_seq <- seq(minLS+intLS,maxLS-intLS,by=intLS)
+    Hmax_seq <- seq(minHmax+intHmax,maxHmax-intHmax,by=intHmax)
+    Hmax_rescale_seq <- Hmax_seq/sd(Hmax[ind])
+    LS_Hmax_seq <- expand.grid(LS_seq,Hmax_rescale_seq)
+    
+    # Test those points for inclusion in the hypervolume
+    in_hv <- hypervolume_inclusion_test(hv,LS_Hmax_seq,fast.or.accurate = "accurate")
+    
+    LS_e <- LS_Hmax_seq$Var1[in_hv]
+    Hmax_e <- LS_Hmax_seq$Var2[in_hv] * sd(Hmax[ind])
+    LS_Hmax_e <- log(exp(LS_e) * Hmax_e)
+  }
 } else {
   # Go through all observed combinations of Hmax and LS
   Hmax_e=Hmax_comb
@@ -662,7 +698,7 @@ slope_res <- slope[ind]-slope_e[,1]
 slope_e_rmse <- sqrt(mean(slope_res^2,na.rm=T))
 slope_e_ndata <- length(which(is.na(slope_res)==F))
 
-# Compare to RMSE from best multivarirate regression
+# Compare to RMSE from best multivariate regression
 
 all_e_rmse <- c(P50_e_rmse,TLP_e_rmse,LMA_e_rmse,Ks_e_rmse,WD_e_rmse,slope_e_rmse)
 all_e_ndata <- c(P50_e_ndata,TLP_e_ndata,LMA_e_ndata,Ks_e_ndata,WD_e_ndata,slope_e_ndata)
@@ -671,3 +707,23 @@ all_multivar_ndata <- c(P50_from_TLP_Ks$ndata,TLP_from_LS_LMA_P50$ndata,LMA_from
 
 all_rmse_comp <- data.frame(all_e_rmse,all_e_ndata,all_multivar_rmse,all_multivar_ndata)
 View(all_rmse_comp)
+
+
+# Write the optimised trait values out to a file
+traits_e_out <- data.frame(LS_e,Hmax_e,LS_Hmax_e,
+                           P50_e_mean,P50_e_5perc,P50_e_95perc,
+                           TLP_e_mean,TLP_e_5perc,TLP_e_95perc,
+                           LMA_e_mean,LMA_e_5perc,LMA_e_95perc,
+                           Ks_e_mean,Ks_e_5perc,Ks_e_95perc,
+                           WD_e_mean,WD_e_5perc,WD_e_95perc,
+                           slope_e_mean,slope_e_5perc,slope_e_95perc)
+write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_040820.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
+
+
+
+
+  
+
+
+  
+  
