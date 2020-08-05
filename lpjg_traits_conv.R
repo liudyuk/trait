@@ -12,6 +12,7 @@ SLA_to_leaflong <- function(SLA_LPJG) {
   for (nn in 1:length(leaflong_raw)) {
     leaflong[nn] <- max(min(leaflong_raw[nn],10),0.5)
   }
+  leaflong <- t(leaflong) # Rotate array for consistency with other arrays
   return(leaflong)
 }
 
@@ -48,7 +49,7 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   Ks_LPJG <- Ks_e_mean_unlogged
   P50_LPJG <- P50_e_mean_unlogged
   
-  traits_LPJG <- list("WD"=WD_LPJG,"SLA"=SLA_LPJG,"P50"=P50_LPJG,"P88"=P88_LPJG,"polyslope"=polyslope_LPJG,"LS"=LS_LPJG,"leaflong"=leaflong_LPJG,"lambda"=lambda_LPJG,"DeltaPsiWW"=DeltaPsiWW_LPJG,"Ks"=Ks_LPJG,"Kleaf"=Kleaf_LPJG)
+  traits_LPJG <- list("WD"=round(WD_LPJG,digits=4),"SLA"=round(SLA_LPJG,digits=4),"P50"=round(P50_LPJG,digits=4),"P88"=round(P88_LPJG,digits=4),"polyslope"=round(polyslope_LPJG,digits=4),"LS"=round(LS_LPJG,digits=4),"leaflong"=round(leaflong_LPJG,digits=4),"lambda"=round(lambda_LPJG,digits=4),"DeltaPsiWW"=round(DeltaPsiWW_LPJG,digits=4),"Ks"=round(Ks_LPJG,digits=4),"Kleaf"=round(Kleaf_LPJG,digits=4))
   return(traits_LPJG)
 }
 
@@ -63,7 +64,7 @@ TeBE_header <- c("\t ! Temperate broadleaved evergreen tree",
                  "\t shade_tolerant",
                  "\t evergreen",
                  "\t temperate",
-                 "\t !leaflong 3",
+                 "\t leaflong 3",
                  "\t turnover_leaf 0.33",
                  "\t tcmin_surv -1",
                  "\t tcmin_est 0",
@@ -101,40 +102,40 @@ TeBS_header <- c(  "\t ! Shade-tolerant temperate broadleaved summergreen tree",
 
 IBS_header <- c(  "\t ! Shade-intolerant broadleaved summergreen tree",
                   "",
-                  "include 1",
-                  "tree",
-                  "broadleaved",
-                  "shade_intolerant",
-                  "summergreen",
-                  "boreal",
-                  "tcmin_surv -30",
+                  "\t include 1",
+                  "\t tree",
+                  "\t broadleaved",
+                  "\t shade_intolerant",
+                  "\t summergreen",
+                  "\t boreal",
+                  "\t tcmin_surv -30",
                   "tcmin_est -30",
-                  "tcmax_est 7",
-                  "twmin_est -1000  !no limit",
-                  "gdd5min_est 350 !from TH 2010-03-10 AA",
-                  "longevity 300 !from TH 2010-04-07 was 300 AA",
-                  "fireresist 0.1",
-                  "eps_iso 45.0",
-                  "seas_iso 1",
-                  "eps_mon 1.6",
-                  "storfrac_mon 0.",
+                  "\t tcmax_est 7",
+                  "\t twmin_est -1000  !no limit",
+                  "\t gdd5min_est 350 !from TH 2010-03-10 AA",
+                  "\t longevity 300 !from TH 2010-04-07 was 300 AA",
+                  "\t fireresist 0.1",
+                  "\t eps_iso 45.0",
+                  "\t seas_iso 1",
+                  "\t eps_mon 1.6",
+                  "\t storfrac_mon 0.",
                   "")
 
 TrBE_header <- c(  "\t ! Tropical broadleaved evergreen tree",
                    "",
-                   "include 1",
-                   "tree",
-                   "broadleaved",
-                   "shade_tolerant",
-                   "evergreen",
-                   "tropical",
-                   "!leaflong 2",
-                   "turnover_leaf 0.5",
-                   "longevity 500   !from Thomas H 2010-03-30 new 500 instead of 600 2010-04-07",
-                   "fireresist 0.1",
-                   "eps_iso 24.0",
-                   "seas_iso 0",
-                   "eps_mon 0.8",
-                   "storfrac_mon 0.",
+                   "\t include 1",
+                   "\t tree",
+                   "\t broadleaved",
+                   "\t shade_tolerant",
+                   "\t evergreen",
+                   "\t tropical",
+                   "\t leaflong 2",
+                   "\t turnover_leaf 0.5",
+                   "\t longevity 500   !from Thomas H 2010-03-30 new 500 instead of 600 2010-04-07",
+                   "\t fireresist 0.1",
+                   "\t eps_iso 24.0",
+                   "\t seas_iso 0",
+                   "\t eps_mon 0.8",
+                   "\t storfrac_mon 0.",
                    "")
 

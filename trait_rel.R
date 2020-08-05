@@ -431,7 +431,7 @@ trait_sel=T
 n_trait_sel=-1
 
 # Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=1
+spec_group_sel=4
 
 # ---
 if (propagate_uncer) {
@@ -744,17 +744,21 @@ traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                                 LS_e,WD_e_mean,Ks_e_mean)
 
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3) or TrBE (4)
-basePFT=4
+basePFT=2
 
 # Set the name for the output file
 if (basePFT==1) {
   LPJG_outfile <- "LPJG_PFT_insfile_TeBE.ins"
+  LPJG_summaryfile <- "LPJG_PFT_summary_TeBE.csv"
 } else if (basePFT==2) {
   LPJG_outfile <- "LPJG_PFT_insfile_TeBS.ins"
+  LPJG_summaryfile <- "LPJG_PFT_summary_TeBS.csv"
 } else if (basePFT==3) {
   LPJG_outfile <- "LPJG_PFT_insfile_IBS.ins"
+  LPJG_summaryfile <- "LPJG_PFT_summary_IBS.csv"
 } else if (basePFT==4) {
   LPJG_outfile <- "LPJG_PFT_insfile_TrBE.ins"
+  LPJG_summaryfile <- "LPJG_PFT_summary_TrBE.csv"
 } else {
   stop("basePFT must be equal to 1, 2 or 3")
 }
@@ -773,21 +777,21 @@ for (nn in 1:length(traits_LPJG$Ks)) {
     Line2 <- TeBS_header
   } else if (basePFT==3) {
     Line2 <- IBS_header
-  } else if (basePFT==3) {
+  } else if (basePFT==4) {
     Line2 <- TrBE_header
   }
   Line3 <- "\t !Hydraulics"
-  Line4 <- paste("\t isohydricity ",round(traits_LPJG$lambda[nn],digits=4),sep="")
-  Line5 <- paste("\t delta_psi_max ",round(traits_LPJG$DeltaPsiWW[nn],digits=4),sep="")
-  Line6 <- paste("\t cav_slope ",round(traits_LPJG$polyslope[nn],digits=4),sep="")
-  Line7 <- paste("\t psi50_xylem ",round(traits_LPJG$P50[nn],digits=4),sep="")
-  Line8 <- paste("\t ks_max ",round(traits_LPJG$Ks[nn],digits=4),sep="")
+  Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
+  Line5 <- paste("\t delta_psi_max ",traits_LPJG$DeltaPsiWW[nn],sep="")
+  Line6 <- paste("\t cav_slope ",traits_LPJG$polyslope[nn],sep="")
+  Line7 <- paste("\t psi50_xylem ",traits_LPJG$P50[nn],sep="")
+  Line8 <- paste("\t ks_max ",traits_LPJG$Ks[nn],sep="")
   Line9 <- paste("\t kr_max ",11.2e-4,sep="") # LPJ-GUESS default from Hickler et al. (2006)
-  Line10 <- paste("\t kL_max ",round(traits_LPJG$Kleaf[nn],digits=4),sep="")
-  Line11 <- paste("\t wooddens ",round(traits_LPJG$WD[nn],digits=4),sep="")
-  Line12 <- paste("\t k_latosa ",round(traits_LPJG$LS[nn],digits=4),sep="")
+  Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
+  Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
+  Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
   if (basePFT==1 | basePFT==4) {
-    Line13 <- paste("\t leaflong ",round(traits_LPJG$leaflong[nn],digits=4),sep="")
+    Line13 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
   } else {
     Line13 <- NULL
   } 
@@ -795,5 +799,9 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,"",")",""),PFTfile)
   close(PFTfile)
 }
-  
+
+# Write out a trait values table by PFT to be used for post-processing of LPJ-GUESS output
+write.table(traits_LPJG,file=LPJG_summaryfile,sep=",",row.names = F)
+
+
   
