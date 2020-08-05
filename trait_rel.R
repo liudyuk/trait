@@ -6,12 +6,13 @@
 # T. Pugh
 # 15.06.20
 
-#setwd('/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/Daijun_processed_data_240520')
+nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
-traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
+#traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
+traits=read.table("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0625.txt")
 
-#traitfile='woody_trait.0625.txt'
 source('sma_multivar_regress.R')
+source('trait_functions.R')
 
 #--- Read in the trait data ---
 #traits=read.table(traitfile)
@@ -24,99 +25,60 @@ traitb<-droplevels(traitb)
 str(traitb)
 attach(traitb)
 
-
-#TOM CODE
-#--- Select a subset of the trait variables to work with ---
-#treesonly=T
-#groupsel='BE'
-#
-#group=traits$group
-#kstem=traits$Ks[group==groupsel]
-#Hmax=traits$Hmax[group==groupsel]
-#WD=traits$WD[group==groupsel]
-#LS=traits$LS[group==groupsel]
-#LMA=traits$LMA[group==groupsel]
-#P50=traits$P50[group==groupsel]
-#TLP=traits$TLP[group==groupsel]
-#slope=traits$slope[group==groupsel]
-
-#if (treesonly) {
-#  kstem[Hmax<5 | is.nan(Hmax)]=NA
-#  P50[Hmax<5 | is.nan(Hmax)]=NA
-#  TLP[Hmax<5 | is.nan(Hmax)]=NA
-#  slope[Hmax<5 | is.nan(Hmax)]=NA
-#  LS[Hmax<5 | is.nan(Hmax)]=NA
-#  Hmax[Hmax<5 | is.nan(Hmax)]=NA
-#  LMA[Hmax<5 | is.nan(Hmax)]=NA
-#  WD[Hmax<5 | is.nan(Hmax)]=NA
-#}
-#
-# Calculate transformed traits
-#P50log=log(-P50,base=exp(1))
-#P50log[-P50<0]=NA
-#TLPlog=log(-TLP,base=exp(1))
-#TLPlog[-TLP<0]=NA
-#
-#kstemHmax=log(exp(kstem)/Hmax,base=exp(1))
-#
-##Remove high LMA values (where are they coming from - need a good justification to remove but they are skewing the analysis)
-#LMA[LMA>log(600,base=exp(1))]=NA
-
 #--- Bivariate plots with SMA regression ---
-
-library(lmodel2)
 
 par(mfrow=c(4,4))
 par(mar=c(2,2,2,2))
 
-mod_TLP_P50 <- lmodel2(P50 ~ TLP)
-plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
+TLP_from_P50 <- sma_plot_stats(data.frame(P50,TLP),c("P50","TLP"),nbtstrp,T)
 
-mod_TLP_slope <- lmodel2(slope ~ TLP)
-plot(mod_TLP_slope,"SMA",pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
+TLP_from_slope <- sma_plot_stats(data.frame(slope,TLP),c("slope","TLP"),nbtstrp,T)
 
-mod_P50_slope <- lmodel2(slope ~ P50)
-plot(mod_P50_slope,"SMA",pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
+P50_from_slope <- sma_plot_stats(data.frame(slope,P50),c("slope","P50"),nbtstrp,T)
 
-mod_TLP_WD <- lmodel2(WD ~ TLP)
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+TLP_from_WD <- sma_plot_stats(data.frame(WD,TLP),c("WD","TLP"),nbtstrp,T)
 
-mod_P50_WD <- lmodel2(WD ~ P50)
-plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+P50_from_WD <- sma_plot_stats(data.frame(WD,P50),c("WD","P50"),nbtstrp,T)
 
-mod_TLP_LMA <- lmodel2(LMA ~ TLP)
-plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
+TLP_from_LMA <- sma_plot_stats(data.frame(LMA,TLP),c("LMA","TLP"),nbtstrp,T)
 
-mod_LS_LMA <- lmodel2(LMA ~ LS)
-plot(mod_LS_LMA,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
+LS_from_LMA <- sma_plot_stats(data.frame(LMA,LS),c("LMA","LS"),nbtstrp,T)
 
-mod_Ks_LS_Hmax <- lmodel2(Ks ~ LS_Hmax)
-plot(mod_Ks_LS_Hmax,"SMA",pch=16,xlab="LS_Hmax",ylab="Ks",main="LS_Hmax vs Ks")
+Ks_from_LSHmax <- sma_plot_stats(data.frame(LS_Hmax,Ks),c("LS*Hmax","Ks"),nbtstrp,T)
 
-mod_Ks_P50 <- lmodel2(P50 ~ Ks)
-plot(mod_Ks_P50,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
+Ks_from_P50 <- sma_plot_stats(data.frame(P50,Ks),c("P50","Ks"),nbtstrp,T)
 
-mod_LS_TLP <- lmodel2(TLP ~ LS)
-plot(mod_LS_TLP,"SMA",pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
+LS_from_TLP <- sma_plot_stats(data.frame(TLP,LS),c("TLP","LS"),nbtstrp,T)
 
-mod_WD_LMA <- lmodel2(LMA ~ WD)
-plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
+WD_from_LMA <- sma_plot_stats(data.frame(LMA,WD),c("LMA","WD"),nbtstrp,T)
 
-mod_Ks_slope <- lmodel2(slope ~ Ks)
-plot(mod_Ks_slope,"SMA",pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
+Ks_from_slope <- sma_plot_stats(data.frame(slope,Ks),c("slope","Ks"),nbtstrp,T)
 
-mod_Ks_Hmax <- lmodel2(Hmax ~ Ks)
-plot(mod_Ks_Hmax,"SMA",pch=16,xlab="Ks",ylab="Hmax",main="Ks vs Hmax")
+Ks_from_Hmax <- sma_plot_stats(data.frame(Hmax,Ks),c("Hmax","Ks"),nbtstrp,T)
 
-mod_leafN_LMA <- lmodel2(LMA ~ leafN)
-plot(mod_leafN_LMA,"SMA",pch=16,xlab="leafN",ylab="LMA",main="leafN vs LMA")
+leafN_from_LMA <- sma_plot_stats(data.frame(LMA,leafN),c("LMA","leafN"),nbtstrp,T)
 
-mod_Ks_Hmax_LS <- lmodel2(LS ~ Ks_Hmax)
-plot(mod_Ks_Hmax_LS,"SMA",pch=16,xlab="Ks_Hmax",ylab="LS",main="Ks_Hmax vs LS")
+LS_from_KsHmax <- sma_plot_stats(data.frame(Ks_Hmax,LS),c("Ks/Hmax","LS"),nbtstrp,T)
 
-mod_Ks_LMA <- lmodel2(Ks ~ LMA)
-plot(mod_Ks_LMA,"SMA",pch=16,xlab="LMA",ylab="Ks",main="Ks vs LMA")
+Ks_from_LMA <- sma_plot_stats(data.frame(LMA,Ks),c("LMA","Ks"),nbtstrp,T)
 
+# Make a data frame summarising the fits of the regressions
+all_label1 <- c("TLP","slope","slope","WD","WD","LMA","LMA","LS*Hmax","P50","TLP","LMA","slope","Hmax","LMA","Ks/Hmax","LMA")
+all_label2 <- c("P50","TLP","P50","TLP","P50","TLP","LS","Ks","Ks","LS","WD","Ks","Ks","leafN","LS","Ks")
+all_R2 <- c(sma_TLP_P50$R2,sma_TLP_slope$R2,sma_P50_slope$R2,sma_TLP_WD$R2,sma_P50_WD$R2,
+               sma_TLP_LMA$R2,sma_LS_LMA$R2,sma_Ks_LSHmax$R2,sma_Ks_P50$R2,sma_LS_TLP$R2,
+               sma_WD_LMA$R2,sma_Ks_slope$R2,sma_Ks_Hmax$R2,sma_leafN_LMA$R2,sma_LS_KsHmax$R2,
+               sma_Ks_LMA$R2)
+all_R2adj <- c(sma_TLP_P50$R2adj,sma_TLP_slope$R2adj,sma_P50_slope$R2adj,sma_TLP_WD$R2adj,sma_P50_WD$R2adj,
+            sma_TLP_LMA$R2adj,sma_LS_LMA$R2adj,sma_Ks_LSHmax$R2adj,sma_Ks_P50$R2adj,sma_LS_TLP$R2adj,
+            sma_WD_LMA$R2adj,sma_Ks_slope$R2adj,sma_Ks_Hmax$R2adj,sma_leafN_LMA$R2adj,sma_LS_KsHmax$R2adj,
+            sma_Ks_LMA$R2adj)
+all_rmse <- c(sma_TLP_P50$rmse,sma_TLP_slope$rmse,sma_P50_slope$rmse,sma_TLP_WD$rmse,sma_P50_WD$rmse,
+            sma_TLP_LMA$rmse,sma_LS_LMA$rmse,sma_Ks_LSHmax$rmse,sma_Ks_P50$rmse,sma_LS_TLP$rmse,
+            sma_WD_LMA$rmse,sma_Ks_slope$rmse,sma_Ks_Hmax$rmse,sma_leafN_LMA$rmse,sma_LS_KsHmax$rmse,
+            sma_Ks_LMA$rmse)
+
+all_sma_bivar <- data.frame(all_label1,all_label2,all_R2,all_R2adj,all_rmse)
 
 #Use up remaining unallocated plots and set back to single plot
 #plot.new()
@@ -125,190 +87,348 @@ plot(mod_Ks_LMA,"SMA",pch=16,xlab="LMA",ylab="Ks",main="Ks vs LMA")
 par(mfrow=c(1,1))
 par(mar=c(5.1,4.1,4.1,2.1))
 
-#--- Partial correlations for linked traits ---
-
-library(ppcor)
-
-#LMA, LS, WD, TLP
-ind=which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP))
-pcor_LMA <- pcor(data.frame(TLP[ind],LS[ind],WD[ind],LMA[ind]))
-
-#TLP, LS, WD, LMA, P50 (do not include slope due to lack of data)
-ind=which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP) & !is.na(P50))
-pcor_TLP <- pcor(data.frame(LMA[ind],LS[ind],WD[ind],P50[ind],TLP[ind]))
-
-#P50, TLP, kstem (do not include slope due to lack of data)
-ind=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks)) 
-pcor_P50 <- pcor(data.frame(P50[ind],TLP[ind],Ks[ind]))
-
-#slope, P50, TLP, kstem
-ind=which(!is.na(P50) & !is.na(TLP) & !is.na(slope) & !is.na(Ks)) 
-pcor_slope <- pcor(data.frame(P50[ind],TLP[ind],Ks[ind],slope[ind]))
-
-#WD, LMA, P50
-ind=which(!is.na(P50) & !is.na(LMA) & !is.na(TLP)& !is.na(WD)) 
-pcor_WD <- pcor(data.frame(P50[ind],LMA[ind],TLP[ind],WD[ind]))
-
-# How many species do we have all traits for?
-#Including slope
-length(which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP) & !is.na(P50)& !is.na(Ks)& !is.na(Hmax) & !is.na(slope)))
-#Excluding slope
-length(which(!is.na(LMA) & !is.na(LS) & !is.na(WD) & !is.na(TLP) & !is.na(P50)& !is.na(Ks)& !is.na(Hmax)))
+#--- Experiment with different plausible multivariate SMA models, based on our theory ---
 
 
-#--- Multivariate SMA models ---
+# P50 fits ----------------------------------------------------------------
 
-#1)Estimate P50 from TLP and kstem
-ind=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks))
-mod_P50 <- sma_regress_multivar(data.frame(TLP[ind],Ks[ind],P50[ind]))
-P50_est <- mod_P50$intercept_R + mod_P50$slope_R.y1*TLP[ind] + mod_P50$slope_R.y2*Ks[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
-points(TLP[ind],P50_est,col="red",pch=16)
-plot(mod_Ks_P50,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
-points(Ks[ind],P50_est,col="red",pch=16)
-#estimate P50 is good fror broadleaf
+# P50 from TLP, Ks and WD
+P50_from_TLP_Ks_WD <- sma_plot_stats(data.frame(TLP,Ks,WD,P50),c("TLP","Ks","WD","P50"),nbtstrp)
+plot(P50[P50_from_TLP_Ks_WD$dataused],P50_from_TLP_Ks_WD$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+#NOTE: This actually reduces R2 compared to the next model which has one variable less. That is strange behaviour (and cannot be attributed to the reduction in species number, as testing that does not explain the difference)
 
-#2)Estimate LMA from LS and TLP
-#note: LS is not good and consider to not use
-ind=which(!is.na(LMA) & !is.na(LS) & !is.na(TLP))
-mod_LMA <- sma_regress_multivar(data.frame(TLP[ind],LS[ind],LMA[ind]))
-LMA_est <- mod_LMA$intercept_R + mod_LMA$slope_R.y1*TLP[ind] + mod_LMA$slope_R.y2*LS[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_LS_LMA,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
-points(LS[ind],LMA_est,col="red",pch=16)
-plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
-points(TLP[ind],LMA_est,col="red",pch=16)
-#here TLP is a goood predictor for LMA_est, but not LS.
+# P50 from TLP and Ks
+P50_from_TLP_Ks <- sma_plot_stats(data.frame(TLP,Ks,P50),c("TLP","Ks","P50"),nbtstrp)
+plot(P50[P50_from_TLP_Ks$dataused],P50_from_TLP_Ks$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
 
-#3)Estimate WD from P50 and LMA
-ind=which(!is.na(WD) & !is.na(P50) & !is.na(LMA))
-mod_WD <- sma_regress_multivar(data.frame(P50[ind],LMA[ind],P50[ind]))
-WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*P50[ind] + mod_WD$slope_R.y2*LMA[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
-points(P50[ind],WD_est,col="red",pch=16)
-plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-points(WD_est,LMA[ind],col="red",pch=16)
-#why the regression for P50 and WD is so good? sel-correlated?
-#test P50 TLP LMA
-ind=which(!is.na(WD) & !is.na(P50) & !is.na(LMA) & !is.na(TLP))
-mod_WD <- sma_regress_multivar(data.frame(P50[ind],LMA[ind],TLP[ind],WD[ind]))
-WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*P50[ind] + mod_WD$slope_R.y2*LMA[ind]+ mod_WD$slope_R.y3*TLP[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
-points(P50[ind],WD_est,col="red",pch=16)
-plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-points(WD_est,LMA[ind],col="red",pch=16)
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(WD_est,TLP[ind],col="red",pch=16)
-#test P50 TLP 
-ind=which(!is.na(WD) & !is.na(P50)  & !is.na(TLP))
-mod_WD <- sma_regress_multivar(data.frame(P50[ind],TLP[ind],P50[ind]))
-WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*P50[ind] + mod_WD$slope_R.y2*TLP[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
-points(P50[ind],WD_est,col="red",pch=16)
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(WD_est,TLP[ind],col="red",pch=16)
+# P50 from TLP
+P50_from_TLP <- sma_plot_stats(data.frame(TLP,P50),c("TLP","P50"),nbtstrp)
 
-#test TLP LMA
-ind=which(!is.na(WD) & !is.na(LMA) & !is.na(TLP))
-mod_WD <- sma_regress_multivar(data.frame(LMA[ind],TLP[ind],WD[ind]))
-WD_est <- mod_WD$intercept_R + mod_WD$slope_R.y1*LMA[ind]+ mod_WD$slope_R.y2*TLP[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(TLP[ind],WD_est,col="red",pch=16)
-plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-points(WD_est,LMA[ind],col="red",pch=16)
+# P50 from Ks
+P50_from_Ks <- sma_plot_stats(data.frame(Ks,P50),c("Ks","P50"),nbtstrp)
 
-library(smatr)
-#test LMA
-ind=which(!is.na(WD) & !is.na(LMA))
-mod_WD <- sma(data.frame(WD[ind],LMA[ind]),method=c("SMA"))
-summary(mod_WD)
-WD_est <- mod_WD$coef[[1]][1,1] + mod_WD$coef[[1]][2,1]*LMA[ind]
-plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-points(WD_est,LMA[ind],col="red",pch=16)
-#test TLP
-ind=which(!is.na(WD) & !is.na(TLP))
-mod_WD <- sma(data.frame(WD[ind],TLP[ind]),method=c("SMA"))
-summary(mod_WD)
-WD_est <- mod_WD$coef[[1]][1,1] + mod_WD$coef[[1]][2,1]*TLP[ind]
+# P50 from TLP (same species as for TLP and Ks)
+P50_from_TLP_limitspec <- sma_plot_stats(data.frame(TLP,P50),c("TLP","P50"),nbtstrp,F,P50_from_TLP_Ks$dataused)
 
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(TLP[ind],WD_est,col="red",pch=16)
-#P50
-ind=which(!is.na(WD) & !is.na(P50))
-mod_WD <- sma(data.frame(WD[ind],P50[ind]),method=c("SMA"))
-summary(mod_WD)
-WD_est <- mod_WD$coef[[1]][1,1] + mod_WD$coef[[1]][2,1]*P50[ind]
-#WD_est <- 0.4031998 + 0.2291030*P50[ind]
-plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
-points(P50[ind],WD_est,col="red",pch=16)
+# P50 from Ks (same species as for TLP and Ks)
+P50_from_Ks_limitspec <- sma_plot_stats(data.frame(Ks,P50),c("Ks","P50"),nbtstrp,F,P50_from_TLP_Ks$dataused)
 
-#something weird so strong correlation
+# Summarise statistics
+all_testnames_P50 <- c("P50_from_TLP_Ks_WD","P50_from_TLP_Ks","P50_from_TLP","P50_from_Ks","P50_from_TLP_limitspec","P50_from_Ks_limitspec")
+all_R2_P50 <- c(P50_from_TLP_Ks_WD$R2,P50_from_TLP_Ks$R2,P50_from_TLP$R2,P50_from_Ks$R2,P50_from_TLP_limitspec$R2,P50_from_Ks_limitspec$R2)
+all_R2adj_P50 <- c(P50_from_TLP_Ks_WD$R2adj,P50_from_TLP_Ks$R2adj,P50_from_TLP$R2adj,P50_from_Ks$R2adj,P50_from_TLP_limitspec$R2adj,P50_from_Ks_limitspec$R2adj)
+all_rmse_P50 <- c(P50_from_TLP_Ks_WD$rmse,P50_from_TLP_Ks$rmse,P50_from_TLP$rmse,P50_from_Ks$rmse,P50_from_TLP_limitspec$rmse,P50_from_Ks_limitspec$rmse)
+all_ndata_P50 <- c(P50_from_TLP_Ks_WD$ndata,P50_from_TLP_Ks$ndata,P50_from_TLP$ndata,P50_from_Ks$ndata,P50_from_TLP_limitspec$ndata,P50_from_Ks_limitspec$ndata)
+
+all_P50 <- data.frame(all_testnames_P50,all_R2_P50,all_R2adj_P50,all_rmse_P50,all_ndata_P50)
+View(all_P50)
+
+# BEST MODEL: P50_from_TLP_Ks
+# Test MAT and PPT coverage of species for best model
+plot(MAT[P50_from_TLP_Ks$dataused],MAP[P50_from_TLP_Ks$dataused])
+# WIDE CLIMATE COVERAGE
+
+# DECISION: P50_from_TLP_Ks
+coeffnames_P50_from_TLP_Ks <- c("Coefficient","L95","U95")
+intercept_P50_from_TLP_Ks <- c(P50_from_TLP_Ks$mod$intercept_R,P50_from_TLP_Ks$mod$L95_R.intercept,P50_from_TLP_Ks$mod$U95_R.intercept)
+y1_P50_from_TLP_Ks <- c(P50_from_TLP_Ks$mod$slope_R.y1,P50_from_TLP_Ks$mod$L95_R.y1,P50_from_TLP_Ks$mod$U95_R.y1)
+y2_P50_from_TLP_Ks <- c(P50_from_TLP_Ks$mod$slope_R.y2,P50_from_TLP_Ks$mod$L95_R.y2,P50_from_TLP_Ks$mod$U95_R.y2)
+
+coeff_P50_from_TLP_Ks <- data.frame(coeffnames_P50_from_TLP_Ks,intercept_P50_from_TLP_Ks,y1_P50_from_TLP_Ks,y2_P50_from_TLP_Ks)
+View(coeff_P50_from_TLP_Ks)
+# NOTE: These coefficients are all over the place, almost certainly because we have high multicolinearity in the predictors, BUT, this is not a problem as we are not interpreting the coefficients, just using them for the prediction.
 
 
+# TLP fits ----------------------------------------------------------------
+
+# TLP from LS, LMA, P50 and WD
+TLP_from_LS_LMA_P50_WD <- sma_plot_stats(data.frame(LS,LMA,P50,WD,TLP),c("LS","LMA","P50","WD","TLP"),nbtstrp)
+plot(TLP[TLP_from_LS_LMA_P50_WD$dataused],TLP_from_LS_LMA_P50_WD$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
+
+# TLP from LS, LMA, P50 and slope
+TLP_from_LS_LMA_P50_slope <- sma_plot_stats(data.frame(LS,LMA,P50,slope,TLP),c("LS","LMA","P50","slope","TLP"),nbtstrp)
+plot(TLP[TLP_from_LS_LMA_P50_slope$dataused],TLP_from_LS_LMA_P50_slope$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
+
+# TLP from LS, LMA and P50
+TLP_from_LS_LMA_P50 <- sma_plot_stats(data.frame(LS,LMA,P50,TLP),c("LS","LMA","P50","TLP"),nbtstrp)
+plot(TLP[TLP_from_LS_LMA_P50$dataused],TLP_from_LS_LMA_P50$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
+
+# TLP from LS and LMA
+TLP_from_LS_LMA <- sma_plot_stats(data.frame(LS,LMA,TLP),c("LS","LMA","TLP"),nbtstrp)
+plot(TLP[TLP_from_LS_LMA$dataused],TLP_from_LS_LMA$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
+
+# TLP from P50 and LMA
+TLP_from_P50_LMA <- sma_plot_stats(data.frame(P50,LMA,TLP),c("P50","LMA","TLP"),nbtstrp)
+plot(TLP[TLP_from_P50_LMA$dataused],TLP_from_P50_LMA$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
+
+# TLP from P50 and LMA (same species as for LS, LMA and P50)
+TLP_from_P50_LMA_limitspec <- sma_plot_stats(data.frame(P50,LMA,TLP),c("P50","LMA","TLP"),nbtstrp,F,TLP_from_LS_LMA_P50$dataused)
+
+# TLP from P50 and LS
+TLP_from_P50_LS <- sma_plot_stats(data.frame(P50,LS,TLP),c("P50","LS","TLP"),nbtstrp)
+plot(TLP[TLP_from_P50_LS$dataused],TLP_from_P50_LS$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
+
+# TLP from LS
+TLP_from_LS <- sma_plot_stats(data.frame(LS,TLP),c("LS","TLP"),nbtstrp)
+
+# TLP from P50 (same species as for LS, LMA and P50)
+TLP_from_P50_limitspec <- sma_plot_stats(data.frame(P50,TLP),c("P50","TLP"),nbtstrp,F,TLP_from_LS_LMA_P50$dataused)
+
+# Summarise statistics
+all_testnames_TLP <- c("TLP_from_LS_LMA_P50_WD","TLP_from_LS_LMA_P50_slope","TLP_from_LS_LMA_P50","TLP_from_LS_LMA","TLP_from_P50_LMA","TLP_from_P50_LMA_limitspec","TLP_from_P50_LS","TLP_from_LS","TLP_from_P50","TLP_from_LMA","TLP_from_P50_limitspec")
+all_R2_TLP <- c(TLP_from_LS_LMA_P50_WD$R2,TLP_from_LS_LMA_P50_slope$R2,TLP_from_LS_LMA_P50$R2,TLP_from_LS_LMA$R2,TLP_from_P50_LMA$R2,TLP_from_P50_LMA_limitspec$R2,TLP_from_P50_LS$R2,TLP_from_LS$R2,TLP_from_P50$R2,TLP_from_LMA$R2,TLP_from_P50_limitspec$R2)
+all_R2adj_TLP <- c(TLP_from_LS_LMA_P50_WD$R2adj,TLP_from_LS_LMA_P50_slope$R2adj,TLP_from_LS_LMA_P50$R2adj,TLP_from_LS_LMA$R2adj,TLP_from_P50_LMA$R2adj,TLP_from_P50_LMA_limitspec$R2adj,TLP_from_P50_LS$R2adj,TLP_from_LS$R2adj,TLP_from_P50$R2adj,TLP_from_LMA$R2adj,TLP_from_P50_limitspec$R2adj)
+all_rmse_TLP <- c(TLP_from_LS_LMA_P50_WD$rmse,TLP_from_LS_LMA_P50_slope$rmse,TLP_from_LS_LMA_P50$rmse,TLP_from_LS_LMA$rmse,TLP_from_P50_LMA$rmse,TLP_from_P50_LMA_limitspec$rmse,TLP_from_P50_LS$rmse,TLP_from_LS$rmse,TLP_from_P50$rmse,TLP_from_LMA$rmse,TLP_from_P50_limitspec$rmse)
+all_ndata_TLP <- c(TLP_from_LS_LMA_P50_WD$ndata,TLP_from_LS_LMA_P50_slope$ndata,TLP_from_LS_LMA_P50$ndata,TLP_from_LS_LMA$ndata,TLP_from_P50_LMA$ndata,TLP_from_P50_LMA_limitspec$ndata,TLP_from_P50_LS$ndata,TLP_from_LS$ndata,TLP_from_P50$ndata,TLP_from_LMA$ndata,TLP_from_P50_limitspec$ndata)
+
+all_TLP <- data.frame(all_testnames_TLP,all_R2_TLP,all_R2adj_TLP,all_rmse_TLP,all_ndata_TLP)
+View(all_TLP)
+
+# CHOICE: Although WD improves the fit, do not use it as our hypothesis framework does not posit a direct link between TLP and WD (only indirect via P50 and slope)
+
+# BEST MODEL: TLP_from_LS_LMA_P50
+# NO EVIDENCE that the smaller selection of species for 3 variables is the reason behind the fit
+# Test MAT and PPT coverage of species for best model
+plot(MAT[TLP_from_LS_LMA_P50$dataused],MAP[TLP_from_LS_LMA_P50$dataused])
+# Test MAT and PPT coverage of species from TLP_from_P50_LMA
+plot(MAT[TLP_from_P50_LMA$dataused],MAP[TLP_from_P50_LMA$dataused])
+# Test MAT and PPT coverage of species from TLP_from_LMA
+plot(MAT[TLP_from_LMA$dataused],MAP[TLP_from_LMA$dataused])
+# WIDE CLIMATE COVERAGE for TLP_from_LS_LMA_P50 EXCEPT temperate rainforest (which is captured by TLP_from_P50_LMA)
+
+# Test if relationships are consistent in character despite regardless of climate zone differences
+plot(TLP[TLP_from_LS_LMA_P50$dataused],TLP_from_LS_LMA_P50$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
+points(TLP[TLP_from_P50_LMA$dataused],TLP_from_P50_LMA$var_est,pch=16,col="red")
+
+# DECISION: TLP_from_LS_LMA_P50
 
 
-#4)Estimate TLP from P50,LS,LMA and WD (223 sp)
-ind=which(!is.na(P50) & !is.na(TLP) & !is.na(LMA) & !is.na(LS)& !is.na(WD))
-mod_TLP <- sma_regress_multivar(data.frame(P50[ind],LS[ind],LMA[ind],WD[ind],TLP[ind]))
-TLP_est <- mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50[ind] + mod_TLP$slope_R.y2*LS[ind] + mod_TLP$slope_R.y3*LMA[ind]+mod_TLP$slope_R.y4*WD[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
-points(TLP_est,P50[ind],col="red",pch=16)
-plot(mod_LS_TLP,"SMA",pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
-points(LS[ind],TLP_est,col="red",pch=16)
-plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
-points(TLP_est,LMA[ind],col="red",pch=16)
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(TLP_est,WD[ind],col="red",pch=16)
+# LMA fits -----------------------------------------------------------------
 
-##checcked total SP by no WD is 226, no LS is 352, no LMA is 279,noP50 is 264
-#4_1)Estimate TLP from P50,LS,LMA,WD 
-ind=which(!is.na(P50) & !is.na(TLP) & !is.na(LMA) & !is.na(WD))
-mod_TLP <- sma_regress_multivar(data.frame(P50[ind],LMA[ind],WD[ind],TLP[ind]))
-TLP_est <- mod_TLP$intercept_R + mod_TLP$slope_R.y1*P50[ind] + mod_TLP$slope_R.y2*LMA[ind] + mod_TLP$slope_R.y3*WD[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
-points(TLP_est,P50[ind],col="red",pch=16)
-plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
-points(TLP_est,LMA[ind],col="red",pch=16)
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(TLP_est,WD[ind],col="red",pch=16)
-#if do not incclud LS, the total sp is 352. So it has large number of SP. And the regrressionss are ok even though for WD and TLP iis not strong
+# LMA from TLP, LS and WD
+LMA_from_TLP_LS_WD <- sma_plot_stats(data.frame(TLP,LS,WD,LMA),c("TLP","LS","WD","LMA"),nbtstrp)
+plot(LMA[LMA_from_TLP_LS_WD$dataused],LMA_from_TLP_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
 
+# LMA from TLP and LS
+LMA_from_TLP_LS <- sma_plot_stats(data.frame(TLP,LS,LMA),c("TLP","LS","LMA"),nbtstrp)
+plot(LMA[LMA_from_TLP_LS$dataused],LMA_from_TLP_LS$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
 
-#5)Estimate slope from TLP, P50 and kstem
-ind=which(!is.na(P50) & !is.na(TLP) & !is.na(Ks) & !is.na(slope))
-mod_slope <- sma_regress_multivar(data.frame(P50[ind],TLP[ind],Ks[ind],slope[ind]))
-slope_est <- mod_slope$intercept_R + mod_slope$slope_R.y1*P50[ind] + mod_slope$slope_R.y2*TLP[ind] + mod_slope$slope_R.y3*Ks[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_Ks_slope,"SMA",pch=16,xlab="kstem",ylab="slope",main="kstem vs slope")
-points(Ks[ind],slope_est,col="red",pch=16)
-plot(mod_TLP_slope,"SMA",pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
-points(TLP[ind],slope_est,col="red",pch=16)
-plot(mod_P50_slope,"SMA",pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
-points(P50[ind],slope_est,col="red",pch=16)
+# LMA from TLP and WD
+LMA_from_TLP_WD <- sma_plot_stats(data.frame(TLP,WD,LMA),c("TLP","WD","LMA"),nbtstrp)
+plot(LMA[LMA_from_TLP_WD$dataused],LMA_from_TLP_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
 
+# LMA from LS and WD
+LMA_from_LS_WD <- sma_plot_stats(data.frame(LS,WD,LMA),c("LS","WD","LMA"),nbtstrp)
+plot(LMA[LMA_from_LS_WD$dataused],LMA_from_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
 
-#6) Estimate Ks from LMA and LS/Hmax.
-ind=which(!is.na(P50) & !is.na(LS_Hmax)  & !is.na(Ks))
-mod_Ks <- sma_regress_multivar(data.frame(P50[ind],LS_Hmax[ind],Ks[ind]))
-Ks_est <- mod_Ks$intercept_R + mod_Ks$slope_R.y1*P50[ind] + mod_Ks$slope_R.y2*LS_Hmax[ind]
-#Cross-checks to make sure that result is sensible
-plot(mod_Ks_LS_Hmax,"SMA",pch=16,xlab="LS_Hmax",ylab="Ks",main="Ksvs LS_Hmax")
-points(LS_Hmax[ind],Ks_est,col="red",pch=16)
-plot(mod_Ks_P50,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
-points(P50[ind],Ks_est,col="red",pch=16)
+# LMA from TLP
+LMA_from_TLP <- sma_plot_stats(data.frame(TLP,LMA),c("TLP","LMA"),nbtstrp)
+plot(LMA[LMA_from_TLP$dataused],LMA_from_TLP$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+
+# LMA from LS
+LMA_from_LS <- sma_plot_stats(data.frame(LS,LMA),c("LS","LMA"),nbtstrp)
+
+# LMA from WD
+LMA_from_WD <- sma_plot_stats(data.frame(WD,LMA),c("WD","LMA"),nbtstrp)
+
+# Summarise statistics
+all_testnames_LMA <- c("LMA_from_TLP_LS_WD","LMA_from_TLP_LS","LMA_from_TLP_WD","LMA_from_LS_WD","LMA_from_TLP","LMA_from_LS","LMA_from_WD")
+all_R2_LMA <- c(LMA_from_TLP_LS_WD$R2,LMA_from_TLP_LS$R2,LMA_from_TLP_WD$R2,LMA_from_LS_WD$R2,LMA_from_TLP$R2,LMA_from_LS$R2,LMA_from_WD$R2)
+all_R2adj_LMA <- c(LMA_from_TLP_LS_WD$R2adj,LMA_from_TLP_LS$R2adj,LMA_from_TLP_WD$R2adj,LMA_from_LS_WD$R2adj,LMA_from_TLP$R2adj,LMA_from_LS$R2adj,LMA_from_WD$R2adj)
+all_rmse_LMA <- c(LMA_from_TLP_LS_WD$rmse,LMA_from_TLP_LS$rmse,LMA_from_TLP_WD$rmse,LMA_from_LS_WD$rmse,LMA_from_TLP$rmse,LMA_from_LS$rmse,LMA_from_WD$rmse)
+all_ndata_LMA <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata)
+
+all_LMA <- data.frame(all_testnames_LMA,all_R2_LMA,all_R2adj_LMA,all_rmse_LMA,all_ndata_LMA)
+View(all_LMA)
+
+# CHOICE: best model in R2 terms is LMA_from_LS_WD, but in RMSE is (marginally) LMA_from_TLP
+# Prefer to go with LMA_from_TLP on the basis that it better fits our hypothesis framework, there is also a clearer conceptual link between TLP and LMA than LS and LMA (and WD link is only expected for evergreen species)
+
+# Test MAT and PPT coverage of species for chosen model
+plot(MAT[LMA_from_TLP$dataused],MAP[LMA_from_TLP$dataused])
+# WIDE CLIMATE COVERAGE
+
+# DECISION: LMA_from_TLP
 
 
+# Ks fits -----------------------------------------------------------------
+
+# Ks from LS_Hmax, P50 and slope
+Ks_from_LSHmax_P50_slope <- sma_plot_stats(data.frame(LS_Hmax,P50,slope,Ks),c("LS*Hmax","P50","slope","Ks"),nbtstrp)
+plot(Ks[Ks_from_LSHmax_P50_slope$dataused],Ks_from_LSHmax_P50_slope$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
+
+# Ks from LS_Hmax and P50
+Ks_from_LSHmax_P50 <- sma_plot_stats(data.frame(LS_Hmax,P50,Ks),c("LS*Hmax","P50","Ks"),nbtstrp)
+plot(Ks[Ks_from_LSHmax_P50$dataused],Ks_from_LSHmax_P50$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
+
+# Ks from LS_Hmax and slope
+Ks_from_LSHmax_slope <- sma_plot_stats(data.frame(LS_Hmax,slope,Ks),c("LS*Hmax","slope","Ks"),nbtstrp)
+plot(Ks[Ks_from_LSHmax_slope$dataused],Ks_from_LSHmax_slope$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
+
+# Summarise statistics
+all_testnames_Ks <- c("Ks_from_LSHmax_P50_slope","Ks_from_LSHmax_P50","Ks_from_LSHmax_slope","Ks_from_LSHmax","Ks_from_P50","Ks_from_slope")
+all_R2_Ks <- c(Ks_from_LSHmax_P50_slope$R2,Ks_from_LSHmax_P50$R2,Ks_from_LSHmax_slope$R2,Ks_from_LSHmax$R2,Ks_from_P50$R2,Ks_from_slope$R2)
+all_R2adj_Ks <- c(Ks_from_LSHmax_P50_slope$R2adj,Ks_from_LSHmax_P50$R2adj,Ks_from_LSHmax_slope$R2adj,Ks_from_LSHmax$R2adj,Ks_from_P50$R2adj,Ks_from_slope$R2adj)
+all_rmse_Ks <- c(Ks_from_LSHmax_P50_slope$rmse,Ks_from_LSHmax_P50$rmse,Ks_from_LSHmax_slope$rmse,Ks_from_LSHmax$rmse,Ks_from_P50$rmse,Ks_from_slope$rmse)
+all_ndata_Ks <- c(Ks_from_LSHmax_P50_slope$ndata,Ks_from_LSHmax_P50$ndata,Ks_from_LSHmax_slope$ndata,Ks_from_LSHmax$ndata,Ks_from_P50$ndata,Ks_from_slope$ndata)
+
+all_Ks <- data.frame(all_testnames_Ks,all_R2_Ks,all_R2adj_Ks,all_rmse_Ks,all_ndata_Ks)
+View(all_Ks)
+
+# CHOICE: Ks_from_LSHmax_P50 has the best combination of R2adj and RMSE
+
+# Test MAT and PPT coverage of species for chosen model
+plot(MAT[Ks_from_LSHmax_P50$dataused],MAP[Ks_from_LSHmax_P50$dataused])
+# WIDE CLIMATE COVERAGE
+
+# DECISION: Ks_from_LSHmax_P50
 
 
+# WD fits -----------------------------------------------------------------
 
-#--- Attempt to iteratively converge on the best fit values of Ks, TLP, P50 and LMA given known Hmax and LS ---
+# NOTE: Ignoring fits with TLP and LMA because they do not fit conceptually with the hypothesis framework
+
+# WD from P50 and slope
+WD_from_P50_slope <- sma_plot_stats(data.frame(P50,slope,WD),c("P50","slope","WD"),nbtstrp)
+plot(WD[WD_from_P50_slope$dataused],WD_from_P50_slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# WD from slope and P50*slope (interaction term) - NOTE: Testing the interactions because P50 and slope are so highly correlated with each other
+WD_from_slope_P50slope <- sma_plot_stats(data.frame(slope,P50*slope,WD),c("slope","P50*slope","WD"),nbtstrp)
+plot(WD[WD_from_slope_P50slope$dataused],WD_from_slope_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# WD from P50 and P50*slope (interaction term)
+WD_from_P50_P50slope <- sma_plot_stats(data.frame(P50,P50*slope,WD),c("P50","P50*slope","WD"),nbtstrp)
+plot(WD[WD_from_P50_P50slope$dataused],WD_from_P50_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# WD from P50 and slope
+WD_from_P50 <- sma_plot_stats(data.frame(P50,WD),c("P50","WD"),nbtstrp)
+plot(WD[WD_from_P50$dataused],WD_from_P50$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# WD from slope
+WD_from_slope <- sma_plot_stats(data.frame(slope,WD),c("slope","WD"),nbtstrp)
+plot(WD[WD_from_slope$dataused],WD_from_slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+
+# Summarise statistics
+all_testnames_WD <- c("WD_from_P50_slope","WD_from_slope_P50slope","WD_from_P50_P50slope","WD_from_P50","WD_from_slope")
+all_R2_WD <- c(WD_from_P50_slope$R2,WD_from_slope_P50slope$R2,WD_from_P50_P50slope$R2,WD_from_P50$R2,WD_from_slope$R2)
+all_R2adj_WD <- c(WD_from_P50_slope$R2adj,WD_from_slope_P50slope$R2adj,WD_from_P50_P50slope$R2adj,WD_from_P50$R2adj,WD_from_slope$R2adj)
+all_rmse_WD <- c(WD_from_P50_slope$rmse,WD_from_slope_P50slope$rmse,WD_from_P50_P50slope$rmse,WD_from_P50$rmse,WD_from_slope$rmse)
+all_ndata_WD <- c(WD_from_P50_slope$ndata,WD_from_slope_P50slope$ndata,WD_from_P50_P50slope$ndata,WD_from_P50$ndata,WD_from_slope$ndata)
+
+all_WD <- data.frame(all_testnames_WD,all_R2_WD,all_R2adj_WD,all_rmse_WD,all_ndata_WD)
+View(all_WD)
+
+# CHOICE: WD_from_slope_P50slope has the best combination of R2adj and RMSE
+
+# Test MAT and PPT coverage of species for chosen model
+plot(MAT[WD_from_slope_P50slope$dataused],MAP[WD_from_slope_P50slope$dataused])
+# WIDE CLIMATE COVERAGE
+
+# DECISION: WD_from_slope_P50slope
+
+# slope fits --------------------------------------------------------------
+
+# slope from P50, TLP, WD and Ks
+slope_from_P50_TLP_WD_Ks <- sma_plot_stats(data.frame(P50,TLP,WD,Ks,slope),c("P50","TLP","WD","Ks","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLP_WD_Ks$dataused],slope_from_P50_TLP_WD_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, TLP and WD
+slope_from_P50_TLP_WD <- sma_plot_stats(data.frame(P50,TLP,WD,slope),c("P50","TLP","WD","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLP_WD$dataused],slope_from_P50_TLP_WD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, TLP and Ks
+slope_from_P50_TLP_Ks <- sma_plot_stats(data.frame(P50,TLP,Ks,slope),c("P50","TLP","Ks","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLP_Ks$dataused],slope_from_P50_TLP_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, WD and Ks
+slope_from_P50_WD_Ks <- sma_plot_stats(data.frame(P50,WD,Ks,slope),c("P50","WD","Ks","slope"),nbtstrp)
+plot(slope[slope_from_P50_WD_Ks$dataused],slope_from_P50_WD_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP, WD and Ks
+slope_from_TLP_WD_Ks <- sma_plot_stats(data.frame(TLP,WD,Ks,slope),c("TLP","WD","Ks","slope"),nbtstrp)
+plot(slope[slope_from_TLP_WD_Ks$dataused],slope_from_TLP_WD_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50 and TLP
+slope_from_P50_TLP <- sma_plot_stats(data.frame(P50,TLP,slope),c("P50","TLP","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLP$dataused],slope_from_P50_TLP$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50 and TLPP50 (interaction)
+slope_from_P50_TLPP50 <- sma_plot_stats(data.frame(P50,TLP*P50,slope),c("P50","TLP*P50","slope"),nbtstrp)
+plot(slope[slope_from_P50_TLPP50$dataused],slope_from_P50_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP and TLPP50 (interaction)
+slope_from_TLP_TLPP50 <- sma_plot_stats(data.frame(TLP,TLP*P50,slope),c("TLP","TLP*P50","slope"),nbtstrp)
+plot(slope[slope_from_TLP_TLPP50$dataused],slope_from_TLP_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP and Ks
+slope_from_TLP_Ks <- sma_plot_stats(data.frame(TLP,Ks,slope),c("TLP","Ks","slope"),nbtstrp)
+plot(slope[slope_from_TLP_Ks$dataused],slope_from_TLP_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP and WD
+slope_from_TLP_WD <- sma_plot_stats(data.frame(TLP,WD,slope),c("TLP","WD","slope"),nbtstrp)
+plot(slope[slope_from_TLP_WD$dataused],slope_from_TLP_WD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from TLP
+slope_from_TLP <- sma_plot_stats(data.frame(TLP,slope),c("TLP","slope"),nbtstrp)
+plot(slope[slope_from_TLP$dataused],slope_from_TLP$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50
+slope_from_P50 <- sma_plot_stats(data.frame(P50,slope),c("P50","slope"),nbtstrp)
+plot(slope[slope_from_P50$dataused],slope_from_P50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from WD
+slope_from_WD <- sma_plot_stats(data.frame(WD,slope),c("WD","slope"),nbtstrp)
+plot(slope[slope_from_WD$dataused],slope_from_WD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from Ks
+slope_from_Ks <- sma_plot_stats(data.frame(Ks,slope),c("Ks","slope"),nbtstrp)
+plot(slope[slope_from_Ks$dataused],slope_from_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, WD and Ks (same species as slope_from_P50_TLP_WD_Ks) (NOTE: testing because the fit for slope_from_P50_WD_Ks is only marginally worse than for slope_from_P50_TLP_Ks, but it has many more species)
+slope_from_P50_WD_Ks_limitspec <- sma_plot_stats(data.frame(P50,WD,Ks,slope),c("P50","WD","Ks","slope"),nbtstrp,F,slope_from_P50_TLP_WD_Ks$dataused)
+plot(slope[slope_from_P50_WD_Ks_limitspec$dataused],slope_from_P50_WD_Ks_limitspec$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50, TLP and Ks (same species as slope_from_P50_TLP_WD_Ks) (NOTE: testing because the fit for slope_from_P50_WD_Ks is only marginally worse than for slope_from_P50_TLP_Ks, but it has many more species)
+slope_from_P50_TLP_Ks_limitspec <- sma_plot_stats(data.frame(P50,TLP,Ks,slope),c("P50","TLP","Ks","slope"),nbtstrp,F,slope_from_P50_TLP_WD_Ks$dataused)
+plot(slope[slope_from_P50_TLP_Ks_limitspec$dataused],slope_from_P50_TLP_Ks_limitspec$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# slope from P50 (same species as slope_from_P50_TLP_WD_Ks)
+slope_from_P50_limitspec <- sma_plot_stats(data.frame(P50,slope),c("P50","slope"),nbtstrp,F,slope_from_P50_TLP_WD_Ks$dataused)
+plot(slope[slope_from_P50_limitspec$dataused],slope_from_P50_limitspec$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+
+# Summarise statistics
+all_testnames_slope <- c("slope_from_P50_TLP_WD_Ks","slope_from_P50_TLP_WD","slope_from_P50_TLP_Ks","slope_from_P50_WD_Ks","slope_from_TLP_WD_Ks","slope_from_P50_TLP","slope_from_P50_TLPP50","slope_from_TLP_TLPP50","slope_from_TLP_Ks","slope_from_TLP_WD","slope_from_TLP","slope_from_P50","slope_from_WD","slope_from_Ks","slope_from_P50_WD_Ks_limitspec","slope_from_P50_TLP_Ks_limitspec","slope_from_P50_limitspec")
+all_R2_slope <- c(slope_from_P50_TLP_WD_Ks$R2,slope_from_P50_TLP_WD$R2,slope_from_P50_TLP_Ks$R2,slope_from_P50_WD_Ks$R2,slope_from_TLP_WD_Ks$R2,slope_from_P50_TLP$R2,slope_from_P50_TLPP50$R2,slope_from_TLP_TLPP50$R2,slope_from_TLP_Ks$R2,slope_from_TLP_WD$R2,slope_from_TLP$R2,slope_from_P50$R2,slope_from_WD$R2,slope_from_Ks$R2,slope_from_P50_WD_Ks_limitspec$R2,slope_from_P50_TLP_Ks_limitspec$R2,slope_from_P50_limitspec$R2)
+all_R2adj_slope <- c(slope_from_P50_TLP_WD_Ks$R2adj,slope_from_P50_TLP_WD$R2adj,slope_from_P50_TLP_Ks$R2adj,slope_from_P50_WD_Ks$R2adj,slope_from_TLP_WD_Ks$R2adj,slope_from_P50_TLP$R2adj,slope_from_P50_TLPP50$R2adj,slope_from_TLP_TLPP50$R2adj,slope_from_TLP_Ks$R2adj,slope_from_TLP_WD$R2adj,slope_from_TLP$R2adj,slope_from_P50$R2adj,slope_from_WD$R2adj,slope_from_Ks$R2adj,slope_from_P50_WD_Ks_limitspec$R2adj,slope_from_P50_TLP_Ks_limitspec$R2adj,slope_from_P50_limitspec$R2adj)
+all_rmse_slope <- c(slope_from_P50_TLP_WD_Ks$rmse,slope_from_P50_TLP_WD$rmse,slope_from_P50_TLP_Ks$rmse,slope_from_P50_WD_Ks$rmse,slope_from_TLP_WD_Ks$rmse,slope_from_P50_TLP$rmse,slope_from_P50_TLPP50$rmse,slope_from_TLP_TLPP50$rmse,slope_from_TLP_Ks$rmse,slope_from_TLP_WD$rmse,slope_from_TLP$rmse,slope_from_P50$rmse,slope_from_WD$rmse,slope_from_Ks$rmse,slope_from_P50_WD_Ks_limitspec$rmse,slope_from_P50_TLP_Ks_limitspec$rmse,slope_from_P50_limitspec$rmse)
+all_ndata_slope <- c(slope_from_P50_TLP_WD_Ks$ndata,slope_from_P50_TLP_WD$ndata,slope_from_P50_TLP_Ks$ndata,slope_from_P50_WD_Ks$ndata,slope_from_TLP_WD_Ks$ndata,slope_from_P50_TLP$ndata,slope_from_P50_TLPP50$ndata,slope_from_TLP_TLPP50$ndata,slope_from_TLP_Ks$ndata,slope_from_TLP_WD$ndata,slope_from_TLP$ndata,slope_from_P50$ndata,slope_from_WD$ndata,slope_from_Ks$ndata,slope_from_P50_WD_Ks_limitspec$ndata,slope_from_P50_TLP_Ks_limitspec$ndata,slope_from_P50_limitspec$ndata)
+
+all_slope <- data.frame(all_testnames_slope,all_R2_slope,all_R2adj_slope,all_rmse_slope,all_ndata_slope)
+View(all_slope)
+
+# CHOICE: slope_from_P50_TLP_Ks
+
+# Test MAT and PPT coverage of species for chosen model
+plot(MAT[slope_from_P50_TLP_Ks$dataused],MAP[slope_from_P50_TLP_Ks$dataused])
+# WIDE CLIMATE COVERAGE
+
+# DECISION: slope_from_P50_TLP_Ks
+
+
+# Optimisation ------------------------------------------------------------
+# Attempt to iteratively converge on the best fit values of Ks, TLP, P50 and LMA given known Hmax and LS
+
+# Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
+limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
+
+# Decide whether to run the uncertainty propagation (T) or not (F)
+propagate_uncer=T
+
+if (propagate_uncer) {
+  n_uncer=nbtstrp
+} else {
+  n_uncer=1
+}
 
 #Calculate minimum and maximum values
 maxP50=max(P50,na.rm=T)
@@ -335,66 +455,67 @@ ind=which(!is.na(Hmax) & !is.na(LS))
 
 Hmax_e=Hmax[ind]
 LS_e=LS[ind]
+LS_Hmax_e=LS_Hmax[ind]
 
 ndata=length(LS_e)
 
-P50_e <- matrix(NA, nrow = ndata)
-LMA_e <- matrix(NA, nrow = ndata)
-TLP_e <- matrix(NA, nrow = ndata)
-WD_e <- matrix(NA, nrow = ndata)
-slope_e <- matrix(NA, nrow = ndata)
+P50_e <- matrix(NA, nrow = ndata, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
+LMA_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
+TLP_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
+Ks_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
+WD_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
+slope_e <- matrix(NA, nrow = ndata, ncol = n_uncer)
 
-# Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
-limitdataranges=F
-
-# Outer loop over all the combinations of Hmax and LS
-# The new estimates of traits use the suffix "_e"
-for (dd in 1:ndata) {
-
-  #Calculate the value for LS*Hmax, which comes direct from the two input traits
-  LS_Hmax_e=log(exp(LS_e[dd])*Hmax_e[dd],base=exp(1))
-  
-  #Calculate the values of Ks based only on the bivariate relationships with LS*Hmax
-  Ks_e[dd]= mod_Ks_LS_Hmax$regression.results$Slope[3]*LS_Hmax_e +
-    mod_Ks_LS_Hmax$regression.results$Intercept[3]
-    
-  if (limitdataranges) {
-    #Do not go beyond observed limits of data
-    if (Ks_e[dd]>maxKs) {Ks_e[dd]=maxKs}
-    if (Ks_e[dd]<minKs) {Ks_e[dd]=minKs}
+# New outer loop which randomly samples regression coefficients from within their uncertainty bounds
+# The random sampling comes from the bootstrap sampling done in the calculations of the SMA regressions themselves. This approach has the big advantages of (a) not having to make any assumptions about the distribution of the coefficient uncertainty and (b) ensuring that the individual slope coefficients within a regression are consistent with each other.
+for (ss in 1:n_uncer) {
+  print(ss)
+  # For now, make samples for the following:
+  # (ensure equation choices are consistent with decisions above)
+  if (ss==1) { #First pass always calculates the best estimate
+    mod_LMA_intercept_sample <- LMA_from_TLP$mod$intercept_R #LMA_from_TLP
+    mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$slope_R.y1
+    mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$intercept_R #TLP_from_LS_LMA_P50
+    mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y1
+    mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y2
+    mod_TLP_slope_y3_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y3
+    mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$intercept_R #P50_from_TLP_Ks
+    mod_P50_slope_y1_sample <- P50_from_TLP_Ks$mod$slope_R.y1
+    mod_P50_slope_y2_sample <- P50_from_TLP_Ks$mod$slope_R.y2
+    mod_Ks_intercept_sample <- Ks_from_LSHmax_P50$mod$intercept_R #Ks_from_LSHmax_P50
+    mod_Ks_slope_y1_sample <- Ks_from_LSHmax_P50$mod$slope_R.y1
+    mod_Ks_slope_y2_sample <- Ks_from_LSHmax_P50$mod$slope_R.y2
+    mod_slope_intercept_sample <- slope_from_P50_TLP_Ks$mod$intercept_R #slope_from_P50_TLP_Ks
+    mod_slope_slope_y1_sample <- slope_from_P50_TLP_Ks$mod$slope_R.y1
+    mod_slope_slope_y2_sample <- slope_from_P50_TLP_Ks$mod$slope_R.y2
+    mod_slope_slope_y3_sample <- slope_from_P50_TLP_Ks$mod$slope_R.y3
+    mod_WD_intercept_sample <- WD_from_slope_P50slope$mod$intercept_R #WD_from_slope_P50slope
+    mod_WD_slope_y1_sample <- WD_from_slope_P50slope$mod$slope_R.y1
+    mod_WD_slope_y2_sample <- WD_from_slope_P50slope$mod$slope_R.y2
+  } else {
+    mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
+    mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
+    mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$boot.intercept[ss] #TLP_from_LS_LMA_P50
+    mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$boot.y1[ss]
+    mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$boot.y2[ss]
+    mod_TLP_slope_y3_sample <- TLP_from_LS_LMA_P50$mod$boot.y3[ss]
+    mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$boot.intercept[ss] #P50_from_TLP_Ks
+    mod_P50_slope_y1_sample <- P50_from_TLP_Ks$mod$boot.y1[ss]
+    mod_P50_slope_y2_sample <- P50_from_TLP_Ks$mod$boot.y2[ss]
+    mod_Ks_intercept_sample <- Ks_from_LSHmax_P50$mod$boot.intercept[ss] #Ks_from_LSHmax_P50
+    mod_Ks_slope_y1_sample <- Ks_from_LSHmax_P50$mod$boot.y1[ss]
+    mod_Ks_slope_y2_sample <- Ks_from_LSHmax_P50$mod$boot.y2[ss]
+    mod_slope_intercept_sample <- slope_from_P50_TLP_Ks$mod$boot.intercept[ss] #slope_from_P50_TLP_Ks
+    mod_slope_slope_y1_sample <- slope_from_P50_TLP_Ks$mod$boot.y1[ss]
+    mod_slope_slope_y2_sample <- slope_from_P50_TLP_Ks$mod$boot.y2[ss]
+    mod_slope_slope_y3_sample <- slope_from_P50_TLP_Ks$mod$boot.y3[ss]
+    mod_WD_intercept_sample <- WD_from_slope_P50slope$mod$boot.intercept[ss] #WD_from_slope_P50slope
+    mod_WD_slope_y1_sample <- WD_from_slope_P50slope$mod$boot.y1[ss]
+    mod_WD_slope_y2_sample <- WD_from_slope_P50slope$mod$boot.y2[ss]
   }
-
-  #TLP, P50, LMA, WD need optimising
-
-  #First set some initial based on simple bivariate relationship. This is just so that the iteration has somewhere to start from. Final result should not be sensitive to these.
-  LMA_e_last = mod_LS_LMA$regression.results$Slope[3]*LS_e[dd] +
-    mod_LS_LMA$regression.results$Intercept[3]
-  TLP_e_last = mod_LS_TLP$regression.results$Slope[3]*LS_e[dd] +
-    mod_LS_TLP$regression.results$Intercept[3]
-  P50_e_last = mod_TLP_P50$regression.results$Slope[3]*TLP_e_last +
-    mod_TLP_P50$regression.results$Intercept[3]
-  WD_e_last = mod_TLP_WD$regression.results$Slope[3]*TLP_e_last +
-    mod_TLP_WD$regression.results$Intercept[3] #Not sure if TLP vs WD is the best choice, but as only for initialisation shouldn't be too important.
-
-  # "diff_" variables hold the difference between the current estimate of a trait value "_e" and the previous
-  # estimate "_last"
-  # "diff_*_last" variables contain the differences from the last round of iteration
-  # (these are compared to differences in the current round of iteration to see if changes are smaller than
-  # "tol" and therefore the iteration can stop)
-  # Here we initialise the "diff_*_last" variables very high (why set 100)
-  diff_P50_last=100
-  diff_LMA_last=100
-  diff_TLP_last=100
-  diff_WD_last=100
-
-  # These arrays are just for output, they store the values of every iteration for the current datapoint.
-  # Useful for debugging and to check that convergence is working.
-  # (only for debugging, can be commented out)
-  P50_c <- matrix(NA, nrow = 100)
-  LMA_c <- matrix(NA, nrow = 100)
-  TLP_c <- matrix(NA, nrow = 100)
-  WD_c <- matrix(NA, nrow = 100)
+  # These regression coefficients will now be used in the optimisation calculations
   
+<<<<<<< HEAD
   # Now we start the optimisation loop. Trait values are iterated until the difference between trait
   # values on successive iterations is less than "tol".
   niter=0;
@@ -422,184 +543,302 @@ for (dd in 1:ndata) {
     #WD_e[dd]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e_last + mod_WD$slope_R.y2*P50_e_last + mod_WD$slope_R.y3*LMA_e_last
     # Test taking WD from a simple bivariate relationship (because not converging with the above multivariate one - need to sort out the multivariate fit!)
     WD_e[dd] = mod_TLP_WD$regression.results$Slope[3]*TLP_e_last + mod_TLP_WD$regression.results$Intercept[3]
+=======
+  # Outer loop over all the combinations of Hmax and LS
+  # The new estimates of traits use the suffix "_e"
+  for (dd in 1:ndata) {
+>>>>>>> 3fa2923b03c55e0264b645fdffeb50bd2ac60773
     
-    if (limitdataranges) {
-      #Do not go beyond observed limits of data
-      if (P50_e[dd]>maxP50 | is.na(P50_e[dd])) {P50_e[dd]=NA; break}
-      if (P50_e[dd]<minP50 | is.na(P50_e[dd])) {P50_e[dd]=NA; break}
-      if (TLP_e[dd]>maxTLP | is.na(TLP_e[dd])) {TLP_e[dd]=NA; break}
-      if (TLP_e[dd]<minTLP | is.na(TLP_e[dd])) {TLP_e[dd]=NA; break}
-      if (LMA_e[dd]>maxLMA | is.na(LMA_e[dd])) {LMA_e[dd]=NA; break}
-      if (LMA_e[dd]<minLMA | is.na(LMA_e[dd])) {LMA_e[dd]=NA; break}
-      if (WD_e[dd]>maxWD | is.na(WD_e[dd])) {WD_e[dd]=NA; break}
-      if (WD_e[dd]<minWD | is.na(WD_e[dd])) {WD_e[dd]=NA; break}
+    #TLP, P50, LMA, Ks need optimising
+    
+    #First set some initial based on simple bivariate relationship. This is just so that the iteration has somewhere to start from. Final result should not be sensitive to these.
+    LMA_e_last = LMA_from_LS$mod$intercept_R + LMA_from_LS$mod$slope_R.y1*LS_e[dd]
+    Ks_e_last = Ks_from_LSHmax$mod$intercept_R + Ks_from_LSHmax$mod$slope_R.y1*LS_Hmax_e[dd]
+    P50_e_last = P50_from_Ks$mod$intercept_R + P50_from_Ks$mod$slope_R.y1*Ks_e_last
+    TLP_e_last = TLP_from_P50$mod$intercept_R + TLP_from_P50$mod$slope_R.y1*P50_e_last
+    
+    # "diff_" variables hold the difference between the current estimate of a trait value "_e" and the previous
+    # estimate "_last"
+    # "diff_*_last" variables contain the differences from the last round of iteration
+    # (these are compared to differences in the current round of iteration to see if changes are smaller than
+    # "tol" and therefore the iteration can stop)
+    # Here we initialise the "diff_*_last" variables very high
+    diff_P50_last=100
+    diff_LMA_last=100
+    diff_TLP_last=100
+    diff_Ks_last=100
+    
+    # These arrays are just for output, they store the values of every iteration for the current datapoint.
+    # Useful for debugging and to check that convergence is working.
+    # (only for debugging, can be commented out)
+    P50_c <- matrix(NA, nrow = 100)
+    LMA_c <- matrix(NA, nrow = 100)
+    TLP_c <- matrix(NA, nrow = 100)
+    Ks_c <- matrix(NA, nrow = 100)
+    
+    # Now we start the optimisation loop. Trait values are iterated until the difference between trait
+    # values on successive iterations is less than "tol".
+    niter=0;
+    while (T) {
+      niter=niter+1 # Number of iterations completed
+      
+      # Make estimates of trait values based on the best SMA regressions (probably multivariate in most cases)
+      # The estimates of traits in each iteration are based on the estimates of their predictor traits from the previous iteration
+      LMA_e[dd,ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last
+      TLP_e[dd,ss]=mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*LS_e[dd] + 
+        mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e_last
+      P50_e[dd,ss]=mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e_last + 
+        mod_P50_slope_y2_sample*Ks_e_last
+      Ks_e[dd,ss]=mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*LS_Hmax_e[dd] + 
+        mod_Ks_slope_y2_sample*P50_e_last
+      
+      if (limitdataranges) {
+        #Do not go beyond observed limits of data - if so, discard.
+        if (P50_e[dd,ss]>maxP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+        if (P50_e[dd,ss]<minP50 | is.na(P50_e[dd,ss])) {P50_e[dd,ss]=NA; break}
+        if (TLP_e[dd,ss]>maxTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+        if (TLP_e[dd,ss]<minTLP | is.na(TLP_e[dd,ss])) {TLP_e[dd,ss]=NA; break}
+        if (LMA_e[dd,ss]>maxLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+        if (LMA_e[dd,ss]<minLMA | is.na(LMA_e[dd,ss])) {LMA_e[dd,ss]=NA; break}
+        if (Ks_e[dd,ss]>maxKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
+        if (Ks_e[dd,ss]<minKs | is.na(Ks_e[dd,ss])) {Ks_e[dd,ss]=NA; break}
+      }
+      
+      # Save the values for this iteration to the output array (only for debugging, can be commented out)
+      P50_c[niter] <- P50_e[dd,ss]
+      LMA_c[niter] <- LMA_e[dd,ss]
+      TLP_c[niter] <- TLP_e[dd,ss]
+      Ks_c[niter] <- Ks_e[dd,ss]
+      
+      # Calculate the difference between the current estimate of a trait value "_e" and the previous estimate "_last"
+      diff_P50 = P50_e[dd,ss]-P50_e_last
+      diff_LMA = LMA_e[dd,ss]-LMA_e_last
+      diff_TLP = TLP_e[dd,ss]-TLP_e_last
+      diff_Ks = Ks_e[dd,ss]-Ks_e_last
+      
+      # Now we test if the difference between trait estimates on this iteration and between trait estimates on
+      # the last iteration is less than "tol" for all traits. If it is we finish the iteration.
+      if (abs(diff_P50-diff_P50_last)<tol &&
+          abs(diff_LMA-diff_LMA_last)<tol &&
+          abs(diff_Ks-diff_Ks_last)<tol &&
+          abs(diff_TLP-diff_TLP_last)<tol) {
+        break
+      }
+      
+      # Save the "diff" values ready for the next iteration
+      diff_P50_last=diff_P50
+      diff_LMA_last=diff_LMA
+      diff_TLP_last=diff_TLP
+      diff_Ks_last=diff_Ks
+      
+      # Save the "_e" values ready for the next iteration
+      P50_e_last=P50_e[dd,ss]
+      LMA_e_last=LMA_e[dd,ss]
+      TLP_e_last=TLP_e[dd,ss]
+      Ks_e_last=Ks_e[dd,ss]
     }
     
-    # Save the values for this iteration to the output array (only for debugging, can be commented out)
-    P50_c[niter] <- P50_e[dd]
-    LMA_c[niter] <- LMA_e[dd]
-    TLP_c[niter] <- TLP_e[dd]
-    WD_c[niter] <- WD_e[dd]
-
-    # Calculate the difference between the current estimate of a trait value "_e" and the previous estimate "_last"
-    diff_P50 = P50_e[dd]-P50_e_last
-    diff_LMA = LMA_e[dd]-LMA_e_last
-    diff_TLP = TLP_e[dd]-TLP_e_last
-    diff_WD = WD_e[dd]-WD_e_last
-
-    # Now we test if the difference between trait estimates on this iteration and between trait estimates on
-    # the last iteration is less than "tol" for all traits. If it is we finish the iteration.
-    if (abs(diff_P50-diff_P50_last)<tol &&
-      abs(diff_LMA-diff_LMA_last)<tol &&
-      abs(diff_WD-diff_WD_last)<tol &&
-      abs(diff_TLP-diff_TLP_last)<tol) {
-      break
-    }
-
-    # Save the "diff" values ready for the next iteration
-    diff_P50_last=diff_P50
-    diff_LMA_last=diff_LMA
-    diff_TLP_last=diff_TLP
-    diff_WD_last=diff_WD
-
-    # Save the "_e" values ready for the next iteration
-    P50_e_last=P50_e[dd]
-    LMA_e_last=LMA_e[dd]
-    TLP_e_last=TLP_e[dd]
-    WD_e_last=WD_e[dd]
+    # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
+    slope_e[dd,ss]=mod_slope_intercept_sample + mod_slope_slope_y1_sample*P50_e[dd,ss] + 
+      mod_slope_slope_y2_sample*TLP_e[dd,ss] + mod_slope_slope_y3_sample*Ks_e[dd,ss]
+    WD_e[dd,ss]=mod_WD_intercept_sample + mod_WD_slope_y1_sample*slope_e[dd,ss] + 
+      mod_WD_slope_y2_sample*slope_e[dd,ss]*P50_e[dd,ss]
+    
+    #if (limitdataranges) {
+    #  #Do not go beyond observed limits of data
+    #  if (slope_e[dd,ss]>maxslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
+    #  if (slope_e[dd,ss]<minslope | is.na(slope_e[dd,ss])) {slope_e[dd,ss]=NA}
+    #  if (WD_e[dd,ss]>maxWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA}
+    #  if (WD_e[dd,ss]<minWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA}
+    #}
+    
   }
-
-  # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
-  #WD_e[dd]=mod_WD$intercept_R + mod_WD$slope_R.y1*TLP_e[dd] + mod_WD$slope_R.y2*P50_e[dd] + mod_WD$slope_R.y3*LMA_e[dd]
-  slope_e[dd]=mod_slope$intercept_R + mod_slope$slope_R.y1*P50_e[dd] + mod_slope$slope_R.y2*TLP_e[dd] + mod_slope$slope_R.y3*Ks_e[dd]
   
-  if (limitdataranges) {
-    #Do not go beyond observed limits of data
-    if (slope_e[dd]>maxslope | is.na(slope_e[dd])) {slope_e[dd]=NA}
-    if (slope_e[dd]<minslope | is.na(slope_e[dd])) {slope_e[dd]=NA}
-  }
+} #Finish nbtstrp loop
 
-}
 
-#Optionally limit to ranges of observed traits
-WD_e[WD_e>maxWD]=maxWD
-WD_e[WD_e<minWD]=minWD
-LMA_e[LMA_e>maxLMA]=maxLMA
-LMA_e[LMA_e<minLMA]=minLMA
-LS_e[LS_e>maxLS]=maxLS
-LS_e[LS_e<minLS]=minLS
-TLP_e[TLP_e>maxTLP]=maxTLP
-TLP_e[TLP_e<minTLP]=minTLP
-P50_e[P50_e>maxP50]=maxP50
-P50_e[P50_e<minP50]=minP50
-slope_e[slope_e>maxslope]=maxslope
-slope_e[slope_e<minslope]=minslope
+#Stats defining the uncertainty range for each point
+Ks_e_mean=unname(apply(Ks_e, 1, mean))
+Ks_e_median=unname(apply(Ks_e, 1, median))
+Ks_e_5perc=unname(apply(Ks_e, 1, quantile,0.05))
+Ks_e_95perc=unname(apply(Ks_e, 1, quantile,0.95))
 
-Hmax_e
-exp(Ks_e)
-WD_e
-exp(LMA_e)
-exp(LS_e)
-exp(slope_e)
--exp(P50_e)
--exp(TLP_e)
+TLP_e_mean=unname(apply(TLP_e, 1, mean,na.rm=T))
+TLP_e_median=unname(apply(TLP_e, 1, median,na.rm=T))
+TLP_e_5perc=unname(apply(TLP_e, 1, quantile,0.05,na.rm=T))
+TLP_e_95perc=unname(apply(TLP_e, 1, quantile,0.95,na.rm=T))
+
+P50_e_mean=unname(apply(P50_e, 1, mean,na.rm=T))
+P50_e_median=unname(apply(P50_e, 1, median,na.rm=T))
+P50_e_5perc=unname(apply(P50_e, 1, quantile,0.05,na.rm=T))
+P50_e_95perc=unname(apply(P50_e, 1, quantile,0.95,na.rm=T))
+
+LMA_e_mean=unname(apply(LMA_e, 1, mean,na.rm=T))
+LMA_e_median=unname(apply(LMA_e, 1, median,na.rm=T))
+LMA_e_5perc=unname(apply(LMA_e, 1, quantile,0.05,na.rm=T))
+LMA_e_95perc=unname(apply(LMA_e, 1, quantile,0.95,na.rm=T))
+
+WD_e_mean=unname(apply(WD_e, 1, mean,na.rm=T))
+WD_e_median=unname(apply(WD_e, 1, median,na.rm=T))
+WD_e_5perc=unname(apply(WD_e, 1, quantile,0.05,na.rm=T))
+WD_e_95perc=unname(apply(WD_e, 1, quantile,0.95,na.rm=T))
+
+slope_e_mean=unname(apply(slope_e, 1, mean,na.rm=T))
+slope_e_median=unname(apply(slope_e, 1, median,na.rm=T))
+slope_e_5perc=unname(apply(slope_e, 1, quantile,0.05,na.rm=T))
+slope_e_95perc=unname(apply(slope_e, 1, quantile,0.95,na.rm=T))
+
 
 #Make plots to compare with original data
 par(mfrow=c(4,4))
 par(mar=c(2,2,2,2))
 
-plot(mod_TLP_P50,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
-points(TLP_e,P50_e,col="red",pch=16)
+plot(TLP,P50,pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
+points(TLP_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(TLP_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e[,1],P50_e_5perc,col="green",pch=16)
+points(TLP_e[,1],P50_e_95perc,col="green",pch=16)
 
-plot(mod_TLP_slope,"SMA",pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
-points(TLP_e,slope_e,col="red",pch=16)
+plot(P50,TLP,pch=16,xlab="P50",ylab="TLP",main="P50 vs TLP")
+points(P50_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(P50_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(P50_e[,1],TLP_e_5perc,col="green",pch=16)
+points(P50_e[,1],TLP_e_95perc,col="green",pch=16)
 
-plot(mod_P50_slope,"SMA",pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
-points(P50_e,slope_e,col="red",pch=16)
+plot(TLP,slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
+points(TLP_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(TLP_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e[,1],slope_e_5perc,col="green",pch=16)
+points(TLP_e[,1],slope_e_95perc,col="green",pch=16)
 
-plot(mod_TLP_WD,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(TLP_e,WD_e,col="red",pch=16)
+plot(slope,TLP,pch=16,xlab="slope",ylab="TLP",main="slope vs TLP")
+points(slope_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(slope_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(slope_e[,1],TLP_e_5perc,col="green",pch=16)
+points(slope_e[,1],TLP_e_95perc,col="green",pch=16)
 
-plot(mod_P50_WD,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
-points(P50_e,WD_e,col="red",pch=16)
+plot(P50,slope,pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
+points(P50_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(P50_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(P50_e[,1],slope_e_5perc,col="green",pch=16)
+points(P50_e[,1],slope_e_95perc,col="green",pch=16)
 
-plot(mod_TLP_LMA,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
-points(TLP_e,LMA_e,col="red",pch=16)
+plot(slope,P50,pch=16,xlab="slope",ylab="P50",main="slope vs P50")
+points(slope_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(slope_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(slope_e[,1],P50_e_5perc,col="green",pch=16)
+points(slope_e[,1],P50_e_95perc,col="green",pch=16)
 
-plot(mod_LS_LMA,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
-points(LS_e,LMA_e,col="red",pch=16)
+plot(TLP,WD,pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+points(TLP_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(TLP_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e[,1],WD_e_5perc,col="green",pch=16)
+points(TLP_e[,1],WD_e_95perc,col="green",pch=16)
 
-plot(mod_Ks_LS_Hmax,"SMA",pch=16,xlab="LS_Hmax",ylab="LS",main="LS_Hmax vs Ks")
-points(log(exp(LS_e)*Hmax_e),LS_e,col="red",pch=16)
-#plot(log(exp(kstem_e)/Hmax_e),LS_e,col="red",pch=16)
+plot(WD,TLP,pch=16,xlab="WD",ylab="TLP",main="WD vs TLP")
+points(WD_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(WD_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(WD_e[,1],TLP_e_5perc,col="green",pch=16)
+points(WD_e[,1],TLP_e_95perc,col="green",pch=16)
 
-plot(mod_Ks_P50,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
-points(Ks_e,P50_e,col="red",pch=16)
+plot(P50,WD,,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+points(P50_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(P50_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(P50_e[,1],WD_e_5perc,col="green",pch=16)
+points(P50_e[,1],WD_e_95perc,col="green",pch=16)
 
-plot(mod_LS_TLP,"SMA",pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
-points(LS_e,TLP_e,col="red",pch=16)
+plot(WD,P50,,pch=16,xlab="WD",ylab="P50",main="WD vs P50")
+points(WD_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(WD_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(WD_e[,1],P50_e_5perc,col="green",pch=16)
+points(WD_e[,1],P50_e_95perc,col="green",pch=16)
 
-plot(mod_WD_LMA,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-points(WD_e,LMA_e,col="red",pch=16) 
+#NOTE: From here onwards I have not made the plots in both directions
+plot(TLP,LMA,pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
+points(TLP_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(TLP_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(TLP_e[,1],LMA_e_5perc,col="green",pch=16)
+points(TLP_e[,1],LMA_e_95perc,col="green",pch=16)
 
-plot(mod_Ks_slope,"SMA",pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
-points(Ks_e,slope_e,col="red",pch=16) 
+plot(LS,LMA,pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
+points(LS_e,LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(LS_e,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(LS_e,LMA_e_5perc,col="green",pch=16)
+points(LS_e,LMA_e_95perc,col="green",pch=16)
 
-plot(mod_Ks_Hmax,"SMA",pch=16,xlab="Ks",ylab="Hmax",main="Ks vs Hmax")
-points(Ks_e,Hmax_e,col="red",pch=16) 
+plot(LS_Hmax,Ks,pch=16,xlab="LS*Hmax",ylab="Ks",main="LS_Hmax vs Ks")
+points(log(exp(LS_e)*Hmax_e),Ks_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(log(exp(LS_e)*Hmax_e),Ks_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(log(exp(LS_e)*Hmax_e),Ks_e_5perc,col="green",pch=16)
+points(log(exp(LS_e)*Hmax_e),Ks_e_95perc,col="green",pch=16)
+
+plot(Ks,P50,pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
+points(Ks_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(Ks_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(Ks_e[,1],P50_e_5perc,col="green",pch=16)
+points(Ks_e[,1],P50_e_95perc,col="green",pch=16)
+
+plot(LS,TLP,pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
+points(LS_e,TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(LS_e,TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(LS_e,TLP_e_5perc,col="green",pch=16)
+points(LS_e,TLP_e_95perc,col="green",pch=16)
+
+plot(WD,LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
+points(WD_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(WD_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(WD_e[,1],LMA_e_5perc,col="green",pch=16)
+points(WD_e[,1],LMA_e_95perc,col="green",pch=16)
+
+#plot(Ks,slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
+#points(Ks_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
+#points(Ks_e_mean,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+#points(Ks_e_5perc,slope_e_5perc,col="green",pch=16)
+#points(Ks_e_95perc,slope_e_95perc,col="green",pch=16)
 
 #Use up remaining unallocated plots and set back to single plot
 par(mfrow=c(1,1))
 par(mar=c(5.1,4.1,4.1,2.1))
 
-#--- Calculate regressions that characterise the optimised relationship ---
 
-par(mfrow=c(4,4))
-par(mar=c(2,2,2,2))
+# Calculate the RMSE
 
-mod_TLP_P50_opt <- lmodel2(P50_e ~ TLP_e, data.frame(TLP_e,P50_e))
-plot(mod_TLP_P50_opt,"SMA",pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
+#P50_res <- P50[ind]-P50_e_mean
+P50_res <- P50[ind]-P50_e[,1]
+P50_e_rmse <- sqrt(mean(P50_res^2,na.rm=T))
+P50_e_ndata <- length(which(is.na(P50_res)==F))
 
-mod_TLP_slope_opt <- lmodel2(slope_e ~ TLP_e, data.frame(TLP_e,slope_e))
-plot(mod_TLP_slope_opt,"SMA",pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
+#TLP_res <- TLP[ind]-TLP_e_mean
+TLP_res <- TLP[ind]-TLP_e[,1]
+TLP_e_rmse <- sqrt(mean(TLP_res^2,na.rm=T))
+TLP_e_ndata <- length(which(is.na(TLP_res)==F))
 
-mod_P50_slope_opt <- lmodel2(slope_e ~ P50_e, data.frame(P50_e,slope_e))
-plot(mod_P50_slope_opt,"SMA",pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
+#LMA_res <- LMA[ind]-LMA_e_mean
+LMA_res <- LMA[ind]-LMA_e[,1]
+LMA_e_rmse <- sqrt(mean(LMA_res^2,na.rm=T))
+LMA_e_ndata <- length(which(is.na(LMA_res)==F))
 
-mod_TLP_WD_opt <- lmodel2(WD_e ~ TLP_e, data.frame(TLP_e,WD_e))
-plot(mod_TLP_WD_opt,"SMA",pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+#Ks_res <- Ks[ind]-Ks_e_mean
+Ks_res <- Ks[ind]-Ks_e[,1]
+Ks_e_rmse <- sqrt(mean(Ks_res^2,na.rm=T))
+Ks_e_ndata <- length(which(is.na(Ks_res)==F))
 
-mod_P50_WD_opt <- lmodel2(WD_e ~ P50_e, data.frame(P50_e,WD_e))
-plot(mod_P50_WD_opt,"SMA",pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+#WD_res <- WD[ind]-WD_e_mean
+WD_res <- WD[ind]-WD_e[,1]
+WD_e_rmse <- sqrt(mean(WD_res^2,na.rm=T))
+WD_e_ndata <- length(which(is.na(WD_res)==F))
 
-mod_TLP_LMA_opt <- lmodel2(LMA_e ~ TLP_e, data.frame(TLP_e,LMA_e))
-plot(mod_TLP_LMA_opt,"SMA",pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
+#slope_res <- slope[ind]-slope_e_mean
+slope_res <- slope[ind]-slope_e[,1]
+slope_e_rmse <- sqrt(mean(slope_res^2,na.rm=T))
+slope_e_ndata <- length(which(is.na(slope_res)==F))
 
-mod_LS_LMA_opt <- lmodel2(LMA_e ~ LS_e, data.frame(LS_e,LMA_e))
-plot(mod_LS_LMA_opt,"SMA",pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
+# Compare to RMSE from best multivarirate regression
 
-#mod_kstemHmax_LS_opt <- lmodel2(LS_e ~ kstemHmax_e, data.frame(kstemHmax_e,LS_e))
-#plot(mod_kstemHmax_LS_opt,"SMA",pch=16,xlab="kstemHmax",ylab="LS",main="kstem/Hmax vs LS")
+all_e_rmse <- c(P50_e_rmse,TLP_e_rmse,LMA_e_rmse,Ks_e_rmse,WD_e_rmse,slope_e_rmse)
+all_e_ndata <- c(P50_e_ndata,TLP_e_ndata,LMA_e_ndata,Ks_e_ndata,WD_e_ndata,slope_e_ndata)
+all_multivar_rmse <- c(P50_from_TLP_Ks$rmse,TLP_from_LS_LMA_P50$rmse,LMA_from_TLP$rmse,Ks_from_LSHmax_P50$rmse,WD_from_slope_P50slope$rmse,slope_from_P50_TLP_Ks$rmse)
+all_multivar_ndata <- c(P50_from_TLP_Ks$ndata,TLP_from_LS_LMA_P50$ndata,LMA_from_TLP$ndata,Ks_from_LSHmax_P50$ndata,WD_from_slope_P50slope$ndata,slope_from_P50_TLP_Ks$ndata)
 
-mod_Ks_P50_opt <- lmodel2(P50_e ~ Ks_e, data.frame(Ks_e,P50_e))
-plot(mod_Ks_P50_opt,"SMA",pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
-
-mod_LS_TLP_opt <- lmodel2(TLP_e ~ LS_e, data.frame(LS_e,TLP_e))
-plot(mod_LS_TLP_opt,"SMA",pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
-
-mod_WD_LMA_opt <- lmodel2(LMA_e ~ WD_e, data.frame(WD_e,LMA_e))
-plot(mod_WD_LMA_opt,"SMA",pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-
-mod_Ks_slope_opt <- lmodel2(slope_e ~ Ks_e, data.frame(Ks_e,slope_e))
-
-plot(mod_Ks_slope_opt,"SMA",pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
-
-mod_Ks_Hmax <- lmodel2(Hmax ~ Ks, data.frame(Ks,Hmax))
-plot(mod_Ks_Hmax,"SMA",pch=16,xlab="Ks",ylab="Hmax",main="Ks vs Hmax")
-
-#Use up remaining unallocated plots and set back to single plot
-#plot.new()
-#plot.new()
-#plot.new()
-par(mfrow=c(1,1))
-par(mar=c(5.1,4.1,4.1,2.1))
+all_rmse_comp <- data.frame(all_e_rmse,all_e_ndata,all_multivar_rmse,all_multivar_ndata)
+View(all_rmse_comp)

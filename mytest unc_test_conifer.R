@@ -6,7 +6,7 @@
 # T. Pugh
 # 15.06.20
 
-nbtstrp=2000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
+nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
 traits=read.csv("/Users/liudy/trait_data/woody_trait.0803.txt",sep="\t")
 #traits=read.table("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0625.txt")
@@ -19,7 +19,7 @@ source('trait_functions.R')
 #attach(traits)
 #detach(traits)
 
-traitb<-subset(traits,group!="CC",drop = T)
+traitb<-subset(traits,group=="CC",drop = T)
 #this is to delete the level that should not exist after subsetting
 traitb<-droplevels(traitb)
 str(traitb)
@@ -79,7 +79,7 @@ all_rmse <- c(TLP_from_P50$rmse,TLP_from_slope$rmse,P50_from_slope$rmse,TLP_from
               Ks_from_LMA$rmse)
 
 all_sma_bivar <- data.frame(all_label1,all_label2,all_R2,all_R2adj,all_rmse)
-write.table(all_sma_bivar, "/Users/liudy/TRY/20200801/centre trait SMA/all_sma_bivar.txt", sep="\t")
+write.table(all_sma_bivar, "/Users/liudy/TRY/20200801/centre trait SMA/all_sma_bivar_c.txt", sep="\t")
 
 #Use up remaining unallocated plots and set back to single plot
 #plot.new()
@@ -97,8 +97,6 @@ par(mar=c(5.1,4.1,4.1,2.1))
 P50_from_TLP_Ks_WD <- sma_plot_stats(data.frame(TLP,Ks,WD,P50),c("TLP","Ks","WD","P50"),nbtstrp)
 plot(P50[P50_from_TLP_Ks_WD$dataused],P50_from_TLP_Ks_WD$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
 #NOTE: This actually reduces R2 compared to the next model which has one variable less. That is strange behaviour (and cannot be attributed to the reduction in species number, as testing that does not explain the difference)
-ind=which(!is.na(TLP) & !is.na(Ks) & !is.na(WD)& !is.na(P50))
-P50_from_TLP_Ks_WD_AIC<-AIC(sma(P50[ind]~TLP[ind]+Ks[ind]+WD[ind],method=c("SMA")))
 
 # P50 from TLP and Ks
 P50_from_TLP_Ks <- sma_plot_stats(data.frame(TLP,Ks,P50),c("TLP","Ks","P50"),nbtstrp)
@@ -106,6 +104,7 @@ plot(P50[P50_from_TLP_Ks$dataused],P50_from_TLP_Ks$var_est,pch=16,xlab="P50",yla
 
 # P50 from TLP
 P50_from_TLP <- sma_plot_stats(data.frame(TLP,P50),c("TLP","P50"),nbtstrp)
+plot(P50[P50_from_TLP$dataused],P50_from_TLP$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
 
 # P50 from Ks
 P50_from_Ks <- sma_plot_stats(data.frame(Ks,P50),c("Ks","P50"),nbtstrp)
@@ -125,20 +124,19 @@ all_ndata_P50 <- c(P50_from_TLP_Ks_WD$ndata,P50_from_TLP_Ks$ndata,P50_from_TLP$n
 
 all_P50 <- data.frame(all_testnames_P50,all_R2_P50,all_R2adj_P50,all_rmse_P50,all_ndata_P50)
 View(all_P50)
-write.table(all_P50, "/Users/liudy/TRY/20200801/centre trait SMA/P50all.txt", sep="\t")
-# BEST MODEL: P50_from_TLP_Ks
+write.table(all_P50, "/Users/liudy/TRY/20200801/centre trait SMA/P50all_c.txt", sep="\t")
+# BEST MODEL: P50_TLP
 # Test MAT and PPT coverage of species for best model
-plot(MAT[P50_from_TLP_Ks$dataused],MAP[P50_from_TLP_Ks$dataused])
+plot(MAT[P50_from_TLP$dataused],MAP[P50_from_TLP$dataused])
 # WIDE CLIMATE COVERAGE
 
-# DECISION: P50_from_TLP_Ks
-coeffnames_P50_from_TLP_Ks <- c("Coefficient","L95","U95")
-intercept_P50_from_TLP_Ks <- c(P50_from_TLP_Ks$mod$intercept_R,P50_from_TLP_Ks$mod$L95_R.intercept,P50_from_TLP_Ks$mod$U95_R.intercept)
-y1_P50_from_TLP_Ks <- c(P50_from_TLP_Ks$mod$slope_R.y1,P50_from_TLP_Ks$mod$L95_R.y1,P50_from_TLP_Ks$mod$U95_R.y1)
-y2_P50_from_TLP_Ks <- c(P50_from_TLP_Ks$mod$slope_R.y2,P50_from_TLP_Ks$mod$L95_R.y2,P50_from_TLP_Ks$mod$U95_R.y2)
+# DECISION: P50_from_TLP
+coeffnames_P50_from_TLP <- c("Coefficient","L95","U95")
+intercept_P50_from_TLP <- c(P50_from_TLP$mod$intercept_R,P50_from_TLP$mod$L95_R.intercept,P50_from_TLP$mod$U95_R.intercept)
+y1_P50_from_TLP <- c(P50_from_TLP$mod$slope_R.y1,P50_from_TLP$mod$L95_R.y1,P50_from_TLP$mod$U95_R.y1)
 
-coeff_P50_from_TLP_Ks <- data.frame(coeffnames_P50_from_TLP_Ks,intercept_P50_from_TLP_Ks,y1_P50_from_TLP_Ks,y2_P50_from_TLP_Ks)
-View(coeff_P50_from_TLP_Ks)
+coeff_P50_from_TLP <- data.frame(coeffnames_P50_from_TLP,intercept_P50_from_TLP,y1_P50_from_TLP)
+View(coeff_P50_from_TLP)
 # NOTE: These coefficients are all over the place, almost certainly because we have high multicolinearity in the predictors, BUT, this is not a problem as we are not interpreting the coefficients, just using them for the prediction.
 
 
@@ -185,26 +183,19 @@ all_rmse_TLP <- c(TLP_from_LS_LMA_P50_WD$rmse,TLP_from_LS_LMA_P50_slope$rmse,TLP
 all_ndata_TLP <- c(TLP_from_LS_LMA_P50_WD$ndata,TLP_from_LS_LMA_P50_slope$ndata,TLP_from_LS_LMA_P50$ndata,TLP_from_LS_LMA$ndata,TLP_from_P50_LMA$ndata,TLP_from_P50_LMA_limitspec$ndata,TLP_from_P50_LS$ndata,TLP_from_LS$ndata,TLP_from_P50$ndata,TLP_from_LMA$ndata,TLP_from_P50_limitspec$ndata)
 
 all_TLP <- data.frame(all_testnames_TLP,all_R2_TLP,all_R2adj_TLP,all_rmse_TLP,all_ndata_TLP)
-#View(all_TLP)
-#write.table(all_TLP, "/Users/liudy/TRY/20200801/centre trait SMA/allTLP.txt", sep="\t")
+View(all_TLP)
+write.table(all_TLP, "/Users/liudy/TRY/20200801/centre trait SMA/allTLP_c.txt", sep="\t")
 
-# CHOICE: Although WD improves the fit, do not use it as our hypothesis framework does not posit a direct link between TLP and WD (only indirect via P50 and slope)
+# CHOICE: P50 and LS
+# BEST MODEL: TLP_from_P50_LS
 
-# BEST MODEL: TLP_from_LS_LMA_P50
-# NO EVIDENCE that the smaller selection of species for 3 variables is the reason behind the fit
 # Test MAT and PPT coverage of species for best model
-plot(MAT[TLP_from_LS_LMA_P50$dataused],MAP[TLP_from_LS_LMA_P50$dataused])
-# Test MAT and PPT coverage of species from TLP_from_P50_LMA
-plot(MAT[TLP_from_P50_LMA$dataused],MAP[TLP_from_P50_LMA$dataused])
-# Test MAT and PPT coverage of species from TLP_from_LMA
-plot(MAT[TLP_from_LMA$dataused],MAP[TLP_from_LMA$dataused])
-# WIDE CLIMATE COVERAGE for TLP_from_LS_LMA_P50 EXCEPT temperate rainforest (which is captured by TLP_from_P50_LMA)
+plot(MAT[TLP_from_P50_LS$dataused],MAP[TLP_from_P50_LS$dataused])
 
 # Test if relationships are consistent in character despite regardless of climate zone differences
-plot(TLP[TLP_from_LS_LMA_P50$dataused],TLP_from_LS_LMA_P50$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
-points(TLP[TLP_from_P50_LMA$dataused],TLP_from_P50_LMA$var_est,pch=16,col="red")
+plot(TLP[TLP_from_P50_LS$dataused],TLP_from_P50_LS$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
 
-# DECISION: TLP_from_LS_LMA_P50
+# DECISION: TLP_from_P50_LS
 
 
 # LMA fits -----------------------------------------------------------------
@@ -243,17 +234,16 @@ all_rmse_LMA <- c(LMA_from_TLP_LS_WD$rmse,LMA_from_TLP_LS$rmse,LMA_from_TLP_WD$r
 all_ndata_LMA <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata)
 
 all_LMA <- data.frame(all_testnames_LMA,all_R2_LMA,all_R2adj_LMA,all_rmse_LMA,all_ndata_LMA)
-#View(all_LMA)
-#write.table(all_LMA, "/Users/liudy/TRY/20200801/centre trait SMA/allLMA.txt", sep="\t")
+View(all_LMA)
+write.table(all_LMA, "/Users/liudy/TRY/20200801/centre trait SMA/allLMA_c.txt", sep="\t")
 
-# CHOICE: best model in R2 terms is LMA_from_LS_WD, but in RMSE is (marginally) LMA_from_TLP
-# Prefer to go with LMA_from_TLP on the basis that it better fits our hypothesis framework, there is also a clearer conceptual link between TLP and LMA than LS and LMA (and WD link is only expected for evergreen species)
+# CHOICE: best model in R2 terms is LMA_from_TLP_LS_WD, due to the indirect with WD, prefer to use TLP and LS
 
 # Test MAT and PPT coverage of species for chosen model
-plot(MAT[LMA_from_TLP$dataused],MAP[LMA_from_TLP$dataused])
+plot(MAT[LMA_from_TLP_LS$dataused],MAP[LMA_from_TLP_LS$dataused])
 # WIDE CLIMATE COVERAGE
 
-# DECISION: LMA_from_TLP
+# DECISION: LMA_from_TLP_LS
 
 
 # Ks fits -----------------------------------------------------------------
@@ -278,13 +268,13 @@ all_rmse_Ks <- c(Ks_from_LSHmax_P50_slope$rmse,Ks_from_LSHmax_P50$rmse,Ks_from_L
 all_ndata_Ks <- c(Ks_from_LSHmax_P50_slope$ndata,Ks_from_LSHmax_P50$ndata,Ks_from_LSHmax_slope$ndata,Ks_from_LSHmax$ndata,Ks_from_P50$ndata,Ks_from_slope$ndata)
 
 all_Ks <- data.frame(all_testnames_Ks,all_R2_Ks,all_R2adj_Ks,all_rmse_Ks,all_ndata_Ks)
-#View(all_Ks)
-#write.table(all_Ks, "/Users/liudy/TRY/20200801/centre trait SMA/all_Ks.txt", sep="\t")
+View(all_Ks)
+write.table(all_Ks, "/Users/liudy/TRY/20200801/centre trait SMA/all_Ks_c.txt", sep="\t")
 
-# CHOICE: Ks_from_LSHmax_P50 has the best combination of R2adj and RMSE
+# CHOICE: Ks_from_P50 has the best R2adj and RMSE
 
 # Test MAT and PPT coverage of species for chosen model
-plot(MAT[Ks_from_LSHmax_P50$dataused],MAP[Ks_from_LSHmax_P50$dataused])
+plot(MAT[Ks_from_P50$dataused],MAP[Ks_from_P50$dataused])
 # WIDE CLIMATE COVERAGE
 
 # DECISION: Ks_from_LSHmax_P50
@@ -322,8 +312,8 @@ all_rmse_WD <- c(WD_from_P50_slope$rmse,WD_from_slope_P50slope$rmse,WD_from_P50_
 all_ndata_WD <- c(WD_from_P50_slope$ndata,WD_from_slope_P50slope$ndata,WD_from_P50_P50slope$ndata,WD_from_P50$ndata,WD_from_slope$ndata)
 
 all_WD <- data.frame(all_testnames_WD,all_R2_WD,all_R2adj_WD,all_rmse_WD,all_ndata_WD)
-#View(all_WD)
-#write.table(all_WD, "/Users/liudy/TRY/20200801/centre trait SMA/all_WD.txt", sep="\t")
+View(all_WD)
+write.table(all_WD, "/Users/liudy/TRY/20200801/centre trait SMA/all_WD_c.txt", sep="\t")
 
 # CHOICE: WD_from_slope_P50slope has the best combination of R2adj and RMSE
 
@@ -411,8 +401,8 @@ all_rmse_slope <- c(slope_from_P50_TLP_WD_Ks$rmse,slope_from_P50_TLP_WD$rmse,slo
 all_ndata_slope <- c(slope_from_P50_TLP_WD_Ks$ndata,slope_from_P50_TLP_WD$ndata,slope_from_P50_TLP_Ks$ndata,slope_from_P50_WD_Ks$ndata,slope_from_TLP_WD_Ks$ndata,slope_from_P50_TLP$ndata,slope_from_P50_TLPP50$ndata,slope_from_TLP_TLPP50$ndata,slope_from_TLP_Ks$ndata,slope_from_TLP_WD$ndata,slope_from_TLP$ndata,slope_from_P50$ndata,slope_from_WD$ndata,slope_from_Ks$ndata,slope_from_P50_WD_Ks_limitspec$ndata,slope_from_P50_TLP_Ks_limitspec$ndata,slope_from_P50_limitspec$ndata)
 
 all_slope <- data.frame(all_testnames_slope,all_R2_slope,all_R2adj_slope,all_rmse_slope,all_ndata_slope)
-#View(all_slope)
-#write.table(all_slope, "/Users/liudy/TRY/20200801/centre trait SMA/all_slope.txt", sep="\t")
+View(all_slope)
+write.table(all_slope, "/Users/liudy/TRY/20200801/centre trait SMA/all_slope_c.txt", sep="\t")
 
 # CHOICE: slope_from_P50_TLP_Ks
 
@@ -420,7 +410,7 @@ all_slope <- data.frame(all_testnames_slope,all_R2_slope,all_R2adj_slope,all_rms
 plot(MAT[slope_from_P50_TLP_Ks$dataused],MAP[slope_from_P50_TLP_Ks$dataused])
 # WIDE CLIMATE COVERAGE
 
-# DECISION: slope_from_P50_TLP_Ks
+# DECISION: slope_from_P50_WD_Ks
 
 
 # Optimisation ------------------------------------------------------------
@@ -481,42 +471,44 @@ for (ss in 1:n_uncer) {
   # For now, make samples for the following:
   # (ensure equation choices are consistent with decisions above)
   if (ss==1) { #First pass always calculates the best estimate
-    mod_LMA_intercept_sample <- LMA_from_TLP$mod$intercept_R #LMA_from_TLP
-    mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$slope_R.y1
-    mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$intercept_R #TLP_from_LS_LMA_P50
-    mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y1
-    mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y2
-    mod_TLP_slope_y3_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y3
-    mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$intercept_R #P50_from_TLP_Ks
-    mod_P50_slope_y1_sample <- P50_from_TLP_Ks$mod$slope_R.y1
-    mod_P50_slope_y2_sample <- P50_from_TLP_Ks$mod$slope_R.y2
-    mod_Ks_intercept_sample <- Ks_from_LSHmax_P50$mod$intercept_R #Ks_from_LSHmax_P50
-    mod_Ks_slope_y1_sample <- Ks_from_LSHmax_P50$mod$slope_R.y1
-    mod_Ks_slope_y2_sample <- Ks_from_LSHmax_P50$mod$slope_R.y2
-    mod_slope_intercept_sample <- slope_from_P50_TLP_Ks$mod$intercept_R #slope_from_P50_TLP_Ks
-    mod_slope_slope_y1_sample <- slope_from_P50_TLP_Ks$mod$slope_R.y1
-    mod_slope_slope_y2_sample <- slope_from_P50_TLP_Ks$mod$slope_R.y2
-    mod_slope_slope_y3_sample <- slope_from_P50_TLP_Ks$mod$slope_R.y3
+    mod_LMA_intercept_sample <- LMA_from_TLP_LS$mod$intercept_R #LMA_from_TLP_LS
+    mod_LMA_slope_y1_sample <- LMA_from_TLP_LS$mod$slope_R.y1
+    mod_LMA_slope_y2_sample <- LMA_from_TLP_LS$mod$slope_R.y2
+    mod_TLP_intercept_sample <- TLP_from_P50_LS$mod$intercept_R #TLP_from_P50_LS
+    mod_TLP_slope_y1_sample <- TLP_from_P50_LS$mod$slope_R.y1
+    mod_TLP_slope_y2_sample <- TLP_from_P50_LS$mod$slope_R.y2
+  
+    mod_P50_intercept_sample <- P50_from_TLP$mod$intercept_R #P50_from_TLP
+    mod_P50_slope_y1_sample <- P50_from_TLP$mod$slope_R.y1
+ 
+    mod_Ks_intercept_sample <- Ks_from_P50$mod$intercept_R #Ks_from_P50
+    mod_Ks_slope_y1_sample <- Ks_from_P50$mod$slope_R.y1
+
+    mod_slope_intercept_sample <- slope_from_P50_WD_Ks$mod$intercept_R #slope_from_P50_WD_Ks
+    mod_slope_slope_y1_sample <- slope_from_P50_WD_Ks$mod$slope_R.y1
+    mod_slope_slope_y2_sample <- slope_from_P50_WD_Ks$mod$slope_R.y2
+    mod_slope_slope_y3_sample <- slope_from_P50_WD_Ks$mod$slope_R.y3
     mod_WD_intercept_sample <- WD_from_slope_P50slope$mod$intercept_R #WD_from_slope_P50slope
     mod_WD_slope_y1_sample <- WD_from_slope_P50slope$mod$slope_R.y1
     mod_WD_slope_y2_sample <- WD_from_slope_P50slope$mod$slope_R.y2
   } else {
-    mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
-    mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
-    mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$boot.intercept[ss] #TLP_from_LS_LMA_P50
-    mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$boot.y1[ss]
-    mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$boot.y2[ss]
-    mod_TLP_slope_y3_sample <- TLP_from_LS_LMA_P50$mod$boot.y3[ss]
-    mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$boot.intercept[ss] #P50_from_TLP_Ks
-    mod_P50_slope_y1_sample <- P50_from_TLP_Ks$mod$boot.y1[ss]
-    mod_P50_slope_y2_sample <- P50_from_TLP_Ks$mod$boot.y2[ss]
+    mod_LMA_intercept_sample <- LMA_from_TLP_LS$mod$boot.intercept[ss] #LMA_from_TLP_LS
+    mod_LMA_slope_y1_sample <- LMA_from_TLP_LS$mod$boot.y1[ss]
+    mod_LMA_slope_y2_sample <- LMA_from_TLP_LS$mod$boot.y2[ss]
+    mod_TLP_intercept_sample <- TLP_from_P50_LS$mod$boot.intercept[ss] #TLP_from_P50_LS
+    mod_TLP_slope_y1_sample <- TLP_from_P50_LS$mod$boot.y1[ss]
+    mod_TLP_slope_y2_sample <- TLP_from_P50_LS$mod$boot.y2[ss]
+   
+    mod_P50_intercept_sample <- P50_from_TLP$mod$boot.intercept[ss] #P50_from_TLP
+    mod_P50_slope_y1_sample <- P50_from_TLP$mod$boot.y1[ss]
+
     mod_Ks_intercept_sample <- Ks_from_LSHmax_P50$mod$boot.intercept[ss] #Ks_from_LSHmax_P50
     mod_Ks_slope_y1_sample <- Ks_from_LSHmax_P50$mod$boot.y1[ss]
     mod_Ks_slope_y2_sample <- Ks_from_LSHmax_P50$mod$boot.y2[ss]
-    mod_slope_intercept_sample <- slope_from_P50_TLP_Ks$mod$boot.intercept[ss] #slope_from_P50_TLP_Ks
-    mod_slope_slope_y1_sample <- slope_from_P50_TLP_Ks$mod$boot.y1[ss]
-    mod_slope_slope_y2_sample <- slope_from_P50_TLP_Ks$mod$boot.y2[ss]
-    mod_slope_slope_y3_sample <- slope_from_P50_TLP_Ks$mod$boot.y3[ss]
+    mod_slope_intercept_sample <- slope_from_P50_WD_Ks$mod$boot.intercept[ss] #slope_from_P50_TLP_Ks
+    mod_slope_slope_y1_sample <- slope_from_P50_WD_Ks$mod$boot.y1[ss]
+    mod_slope_slope_y2_sample <- slope_from_P50_WD_Ks$mod$boot.y2[ss]
+    mod_slope_slope_y3_sample <- slope_from_P50_WD_Ks$mod$boot.y3[ss]
     mod_WD_intercept_sample <- WD_from_slope_P50slope$mod$boot.intercept[ss] #WD_from_slope_P50slope
     mod_WD_slope_y1_sample <- WD_from_slope_P50slope$mod$boot.y1[ss]
     mod_WD_slope_y2_sample <- WD_from_slope_P50slope$mod$boot.y2[ss]
@@ -562,13 +554,11 @@ for (ss in 1:n_uncer) {
       
       # Make estimates of trait values based on the best SMA regressions (probably multivariate in most cases)
       # The estimates of traits in each iteration are based on the estimates of their predictor traits from the previous iteration
-      LMA_e[dd,ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last
-      TLP_e[dd,ss]=mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*LS_e[dd] + 
-        mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e_last
-      P50_e[dd,ss]=mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e_last + 
-        mod_P50_slope_y2_sample*Ks_e_last
-      Ks_e[dd,ss]=mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*LS_Hmax_e[dd] + 
-        mod_Ks_slope_y2_sample*P50_e_last
+      LMA_e[dd,ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last + mod_LMA_slope_y2_sample*LS[dd]
+      TLP_e[dd,ss]=mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*P50_e_last + mod_TLP_slope_y2_sample*LS_e[dd] 
+      P50_e[dd,ss]=mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e_last 
+        
+      Ks_e[dd,ss]=mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*P50_e_last
       
       if (limitdataranges) {
         #Do not go beyond observed limits of data - if so, discard.
@@ -618,9 +608,8 @@ for (ss in 1:n_uncer) {
     
     # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
     slope_e[dd,ss]=mod_slope_intercept_sample + mod_slope_slope_y1_sample*P50_e[dd,ss] + 
-      mod_slope_slope_y2_sample*TLP_e[dd,ss] + mod_slope_slope_y3_sample*Ks_e[dd,ss]
-    WD_e[dd,ss]=mod_WD_intercept_sample + mod_WD_slope_y1_sample*slope_e[dd,ss] + 
-      mod_WD_slope_y2_sample*slope_e[dd,ss]*P50_e[dd,ss]
+      mod_slope_slope_y2_sample*WD_e[dd,ss] + mod_slope_slope_y3_sample*Ks_e[dd,ss]
+    WD_e[dd,ss]=mod_WD_intercept_sample + mod_WD_slope_y1_sample*P50_e[dd,ss] 
     
     #if (limitdataranges) {
     #  #Do not go beyond observed limits of data
