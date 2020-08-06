@@ -4,7 +4,7 @@
 %03.08.20
 
 %Plot summary data provided by Adriane
-plotFUN=readtable('Stand-level-dynamics_v4.csv');
+plotFUN=readtable('/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/inv_Europe_spec/Stand-level-dynamics_v4.csv');
 nplot=height(plotFUN);
 
 %Find all species types in the dataset
@@ -17,6 +17,15 @@ nspecies=length(allspecies);
 traitfile='/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803_NaN.txt';
 traits=readtable(traitfile,'ReadVariableNames',true,'Delimiter','\t','Headerlines',0);
 
+plotFUN.P50=NaN(height(plotFUN),1);
+plotFUN.TLP=NaN(height(plotFUN),1);
+plotFUN.LMA=NaN(height(plotFUN),1);
+plotFUN.Ks=NaN(height(plotFUN),1);
+plotFUN.WD=NaN(height(plotFUN),1);
+plotFUN.slope=NaN(height(plotFUN),1);
+plotFUN.LS=NaN(height(plotFUN),1);
+plotFUN.Hmax=NaN(height(plotFUN),1);
+plotFUN.Ks_Hmax=NaN(height(plotFUN),1);
 for nn=1:nplot
     aa=find(strcmp(traits.x,plotFUN.dom_50_agb_spp(nn)));
     if ~isempty(aa)
@@ -31,8 +40,20 @@ for nn=1:nplot
         plotFUN.Hmax(nn)=traits.Hmax(aa);
         plotFUN.Ks_Hmax(nn)=traits.Ks_Hmax(aa);
     end
+    if (mod(nn,1000)==0)
+        fprintf('nn is %d out of %d\n',nn,nplot)
+    end
 end
 clear nn aa
+
+%Convert traits to units used in LPJ-GUESS for easier comparison later
+plotFUN.P50_LPJG=-exp(plotFUN.P50);
+plotFUN.TLP_LPJG=-exp(plotFUN.TLP);
+plotFUN.SLA_LPJG=(1./exp(plotFUN.LMA))*1000/2;
+plotFUN.Ks_LPJG=exp(plotFUN.Ks);
+plotFUN.WD_LPJG=(plotFUN.WD*1000)/2;
+plotFUN.slope_LPJG=exp(plotFUN.slope);
+plotFUN.LS_LPJG=exp(plotFUN.LS)*10000;
 
 %Mark on a map the locations of the plots dominated by broadleaf species are found
 figure
@@ -54,6 +75,7 @@ nlats_eur=length(lats_eur);
 P50_mean=NaN(nlats_eur,nlats_eur);
 TLP_mean=NaN(nlats_eur,nlats_eur);
 LMA_mean=NaN(nlats_eur,nlats_eur);
+SLA_mean=NaN(nlats_eur,nlats_eur);
 Ks_mean=NaN(nlats_eur,nlats_eur);
 WD_mean=NaN(nlats_eur,nlats_eur);
 slope_mean=NaN(nlats_eur,nlats_eur);
@@ -69,13 +91,14 @@ for xx=1:nlons_eur
             plotFUN.latitude>=lats_eur(yy) & plotFUN.latitude<lats_eur(yy)+0.25);
 
         if length(aa)>5 %Set a minimum of at least 5 plots to calculate stats over %NOTE: This assumption needs revisiting!
-            P50_mean(yy,xx)=nanmean(plotFUN.P50(aa));
-            TLP_mean(yy,xx)=nanmean(plotFUN.TLP(aa));
+            P50_mean(yy,xx)=nanmean(plotFUN.P50_LPJG(aa));
+            TLP_mean(yy,xx)=nanmean(plotFUN.TLP_LPJG(aa));
             LMA_mean(yy,xx)=nanmean(plotFUN.LMA(aa));
-            Ks_mean(yy,xx)=nanmean(plotFUN.Ks(aa));
-            WD_mean(yy,xx)=nanmean(plotFUN.WD(aa));
-            slope_mean(yy,xx)=nanmean(plotFUN.slope(aa));
-            LS_mean(yy,xx)=nanmean(plotFUN.LS(aa));
+            SLA_mean(yy,xx)=nanmean(plotFUN.SLA_LPJG(aa));
+            Ks_mean(yy,xx)=nanmean(plotFUN.Ks_LPJG(aa));
+            WD_mean(yy,xx)=nanmean(plotFUN.WD_LPJG(aa));
+            slope_mean(yy,xx)=nanmean(plotFUN.slope_LPJG(aa));
+            LS_mean(yy,xx)=nanmean(plotFUN.LS_LPJG(aa));
             Hmax_mean(yy,xx)=nanmean(plotFUN.Hmax(aa));
             Ks_Hmax_mean(yy,xx)=nanmean(plotFUN.Ks_Hmax(aa));
             
@@ -112,10 +135,46 @@ AI_0p25=AI_0p25/10000;
 AI_eur=AI_0p25(460:619,640:799);
      
 %Regress trait means against AI
+[latsgrid,lonsgrid]=meshgrid(lats_eur,lons_eur);
+indtoplot=find(latsgrid<55); %Exclude mid-northern Sweden
 
+figure
+subplot(2,4,1); hold on
+plot(AI_eur(indtoplot),P50_mean(indtoplot),'r.')
+title('P50')
+subplot(2,4,2); hold on
+plot(AI_eur(indtoplot),TLP_mean(indtoplot),'r.')
+title('TLP')
+subplot(2,4,3); hold on
+plot(AI_eur(indtoplot),WD_mean(indtoplot),'r.')
+title('WD')
+subplot(2,4,4); hold on
+plot(AI_eur(indtoplot),slope_mean(indtoplot),'r.')
+title('slope')
+subplot(2,4,5); hold on
+plot(AI_eur(indtoplot),SLA_mean(indtoplot),'r.')
+title('SLA')
+subplot(2,4,6); hold on
+plot(AI_eur(indtoplot),LS_mean(indtoplot),'r.')
+title('LS')
+subplot(2,4,7); hold on
+plot(AI_eur(indtoplot),Ks_mean(indtoplot),'r.')
+title('Ks')
 
-
+%---
 %Output a gridlist for LPJ-GUESS using the plot locations
+
 writetable(table(grid_lon'+0.125,grid_lat'+0.125),'gridlist_FUNDIV_0p25.txt','Delimiter',' ','WriteRowNames',false,'WriteVariableNames',false)
 
+%Coarsen to 0.5 degree resolution
+%grid_lon_0p5=(round((grid_lon+0.125)*2)/2)+0.25;
+%grid_lat_0p5=(round((grid_lat+0.125)*2)/2)+0.25;
+
+%grids_0p5=table(grid_lon_0p5',grid_lat_0p5');
+%grids_0p5=unique(grids_0p5);
+
+%writetable(grids_0p5,'gridlist_FUNDIV_0p5.txt','Delimiter',' ','WriteRowNames',false,'WriteVariableNames',false)
+
+aa=randsample(length(grid_lat),30);
+writetable(table(grid_lon(aa)'+0.125,grid_lat(aa)'+0.125),'gridlist_FUNDIV_0p25_sample.txt','Delimiter',' ','WriteRowNames',false,'WriteVariableNames',false)
 
