@@ -8,8 +8,8 @@
 
 nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
-traits=read.csv("/Users/liudy/trait_data/woody_trait.0803.txt",sep="\t")
-#traits=read.table("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0625.txt")
+#traits=read.csv("/Users/liudy/trait_data/woody_trait.0803.txt",sep="\t")
+traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
 
 source('sma_multivar_regress.R')
 source('trait_functions.R')
@@ -102,6 +102,18 @@ plot(P50[P50_from_TLP_Ks_WD$dataused],P50_from_TLP_Ks_WD$var_est,pch=16,xlab="P5
 P50_from_TLP_Ks <- sma_plot_stats(data.frame(TLP,Ks,P50),c("TLP","Ks","P50"),nbtstrp)
 plot(P50[P50_from_TLP_Ks$dataused],P50_from_TLP_Ks$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
 
+# P50 from TLP, LS and Ks
+P50_from_TLP_LS_Ks <- sma_plot_stats(data.frame(TLP,LS,Ks,P50),c("TLP","LS","Ks","P50"),nbtstrp)
+plot(P50[P50_from_TLP_LS_Ks$dataused],P50_from_TLP_LS_Ks$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+
+# P50 from TLP and LS
+P50_from_TLP_LS <- sma_plot_stats(data.frame(TLP,LS,P50),c("TLP","LS","P50"),nbtstrp)
+plot(P50[P50_from_TLP_LS$dataused],P50_from_TLP_LS$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+
+# P50 from Ks and LS
+P50_from_Ks_LS <- sma_plot_stats(data.frame(Ks,LS,P50),c("Ks","LS","P50"),nbtstrp)
+plot(P50[P50_from_Ks_LS$dataused],P50_from_Ks_LS$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+
 # P50 from TLP
 P50_from_TLP <- sma_plot_stats(data.frame(TLP,P50),c("TLP","P50"),nbtstrp)
 plot(P50[P50_from_TLP$dataused],P50_from_TLP$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
@@ -109,23 +121,30 @@ plot(P50[P50_from_TLP$dataused],P50_from_TLP$var_est,pch=16,xlab="P50",ylab="P50
 # P50 from Ks
 P50_from_Ks <- sma_plot_stats(data.frame(Ks,P50),c("Ks","P50"),nbtstrp)
 
-# P50 from TLP (same species as for TLP and Ks)
-P50_from_TLP_limitspec <- sma_plot_stats(data.frame(TLP,P50),c("TLP","P50"),nbtstrp,F,P50_from_TLP_Ks$dataused)
+# P50 from LS
+P50_from_LS <- sma_plot_stats(data.frame(LS,P50),c("LS","P50"),nbtstrp)
+
+# P50 from TLP (same species as for TLP and LS)
+P50_from_TLP_limitspec <- sma_plot_stats(data.frame(TLP,P50),c("TLP","P50"),nbtstrp,F,P50_from_TLP_LS$dataused)
 
 # P50 from Ks (same species as for TLP and Ks)
 P50_from_Ks_limitspec <- sma_plot_stats(data.frame(Ks,P50),c("Ks","P50"),nbtstrp,F,P50_from_TLP_Ks$dataused)
 
+# P50 from LS (same species as for TLP and LS)
+P50_from_LS_limitspec <- sma_plot_stats(data.frame(LS,P50),c("LS","P50"),nbtstrp,F,P50_from_TLP_LS$dataused)
+
 # Summarise statistics
-all_testnames_P50 <- c("P50_from_TLP_Ks_WD","P50_from_TLP_Ks","P50_from_TLP","P50_from_Ks","P50_from_TLP_limitspec","P50_from_Ks_limitspec")
-all_R2_P50 <- c(P50_from_TLP_Ks_WD$R2,P50_from_TLP_Ks$R2,P50_from_TLP$R2,P50_from_Ks$R2,P50_from_TLP_limitspec$R2,P50_from_Ks_limitspec$R2)
-all_R2adj_P50 <- c(P50_from_TLP_Ks_WD$R2adj,P50_from_TLP_Ks$R2adj,P50_from_TLP$R2adj,P50_from_Ks$R2adj,P50_from_TLP_limitspec$R2adj,P50_from_Ks_limitspec$R2adj)
-all_rmse_P50 <- c(P50_from_TLP_Ks_WD$rmse,P50_from_TLP_Ks$rmse,P50_from_TLP$rmse,P50_from_Ks$rmse,P50_from_TLP_limitspec$rmse,P50_from_Ks_limitspec$rmse)
-all_ndata_P50 <- c(P50_from_TLP_Ks_WD$ndata,P50_from_TLP_Ks$ndata,P50_from_TLP$ndata,P50_from_Ks$ndata,P50_from_TLP_limitspec$ndata,P50_from_Ks_limitspec$ndata)
+all_testnames_P50 <- c("P50_from_TLP_Ks_WD","P50_from_TLP_Ks","P50_from_TLP","P50_from_Ks","P50_from_TLP_limitspec","P50_from_Ks_limitspec","P50_from_TLP_LS_Ks","P50_from_TLP_LS","P50_from_Ks_LS","P50_from_LS_limitspec","P50_from_LS")
+all_R2_P50 <- c(P50_from_TLP_Ks_WD$R2,P50_from_TLP_Ks$R2,P50_from_TLP$R2,P50_from_Ks$R2,P50_from_TLP_limitspec$R2,P50_from_Ks_limitspec$R2,P50_from_TLP_LS_Ks$R2,P50_from_TLP_LS$R2,P50_from_Ks_LS$R2,P50_from_LS_limitspec$R2,P50_from_LS$R2)
+all_R2adj_P50 <- c(P50_from_TLP_Ks_WD$R2adj,P50_from_TLP_Ks$R2adj,P50_from_TLP$R2adj,P50_from_Ks$R2adj,P50_from_TLP_limitspec$R2adj,P50_from_Ks_limitspec$R2adj,P50_from_TLP_LS_Ks$R2adj,P50_from_TLP_LS$R2adj,P50_from_Ks_LS$R2adj,P50_from_LS_limitspec$R2adj,P50_from_LS$R2adj)
+all_rmse_P50 <- c(P50_from_TLP_Ks_WD$rmse,P50_from_TLP_Ks$rmse,P50_from_TLP$rmse,P50_from_Ks$rmse,P50_from_TLP_limitspec$rmse,P50_from_Ks_limitspec$rmse,P50_from_TLP_LS_Ks$rmse,P50_from_TLP_LS$rmse,P50_from_Ks_LS$rmse,P50_from_LS_limitspec$rmse,P50_from_LS$rmse)
+all_ndata_P50 <- c(P50_from_TLP_Ks_WD$ndata,P50_from_TLP_Ks$ndata,P50_from_TLP$ndata,P50_from_Ks$ndata,P50_from_TLP_limitspec$ndata,P50_from_Ks_limitspec$ndata,P50_from_TLP_LS_Ks$ndata,P50_from_TLP_LS$ndata,P50_from_Ks_LS$ndata,P50_from_LS_limitspec$ndata,P50_from_LS$ndata)
 
 all_P50 <- data.frame(all_testnames_P50,all_R2_P50,all_R2adj_P50,all_rmse_P50,all_ndata_P50)
 View(all_P50)
 write.table(all_P50, "/Users/liudy/TRY/20200801/centre trait SMA/P50all_c.txt", sep="\t")
 # BEST MODEL: P50_TLP
+# (P50_from_TLP_LS only has a high R2 because of the reduced sample size)
 # Test MAT and PPT coverage of species for best model
 plot(MAT[P50_from_TLP$dataused],MAP[P50_from_TLP$dataused])
 # WIDE CLIMATE COVERAGE
@@ -175,12 +194,15 @@ TLP_from_LS <- sma_plot_stats(data.frame(LS,TLP),c("LS","TLP"),nbtstrp)
 # TLP from P50 (same species as for LS, LMA and P50)
 TLP_from_P50_limitspec <- sma_plot_stats(data.frame(P50,TLP),c("P50","TLP"),nbtstrp,F,TLP_from_LS_LMA_P50$dataused)
 
+# TLP from P50 (same species as for LS and P50)
+TLP_from_P50_limitspecP50LS <- sma_plot_stats(data.frame(P50,TLP),c("P50","TLP"),nbtstrp,F,TLP_from_P50_LS$dataused)
+
 # Summarise statistics
-all_testnames_TLP <- c("TLP_from_LS_LMA_P50_WD","TLP_from_LS_LMA_P50_slope","TLP_from_LS_LMA_P50","TLP_from_LS_LMA","TLP_from_P50_LMA","TLP_from_P50_LMA_limitspec","TLP_from_P50_LS","TLP_from_LS","TLP_from_P50","TLP_from_LMA","TLP_from_P50_limitspec")
-all_R2_TLP <- c(TLP_from_LS_LMA_P50_WD$R2,TLP_from_LS_LMA_P50_slope$R2,TLP_from_LS_LMA_P50$R2,TLP_from_LS_LMA$R2,TLP_from_P50_LMA$R2,TLP_from_P50_LMA_limitspec$R2,TLP_from_P50_LS$R2,TLP_from_LS$R2,TLP_from_P50$R2,TLP_from_LMA$R2,TLP_from_P50_limitspec$R2)
-all_R2adj_TLP <- c(TLP_from_LS_LMA_P50_WD$R2adj,TLP_from_LS_LMA_P50_slope$R2adj,TLP_from_LS_LMA_P50$R2adj,TLP_from_LS_LMA$R2adj,TLP_from_P50_LMA$R2adj,TLP_from_P50_LMA_limitspec$R2adj,TLP_from_P50_LS$R2adj,TLP_from_LS$R2adj,TLP_from_P50$R2adj,TLP_from_LMA$R2adj,TLP_from_P50_limitspec$R2adj)
-all_rmse_TLP <- c(TLP_from_LS_LMA_P50_WD$rmse,TLP_from_LS_LMA_P50_slope$rmse,TLP_from_LS_LMA_P50$rmse,TLP_from_LS_LMA$rmse,TLP_from_P50_LMA$rmse,TLP_from_P50_LMA_limitspec$rmse,TLP_from_P50_LS$rmse,TLP_from_LS$rmse,TLP_from_P50$rmse,TLP_from_LMA$rmse,TLP_from_P50_limitspec$rmse)
-all_ndata_TLP <- c(TLP_from_LS_LMA_P50_WD$ndata,TLP_from_LS_LMA_P50_slope$ndata,TLP_from_LS_LMA_P50$ndata,TLP_from_LS_LMA$ndata,TLP_from_P50_LMA$ndata,TLP_from_P50_LMA_limitspec$ndata,TLP_from_P50_LS$ndata,TLP_from_LS$ndata,TLP_from_P50$ndata,TLP_from_LMA$ndata,TLP_from_P50_limitspec$ndata)
+all_testnames_TLP <- c("TLP_from_LS_LMA_P50_WD","TLP_from_LS_LMA_P50_slope","TLP_from_LS_LMA_P50","TLP_from_LS_LMA","TLP_from_P50_LMA","TLP_from_P50_LMA_limitspec","TLP_from_P50_LS","TLP_from_LS","TLP_from_P50","TLP_from_LMA","TLP_from_P50_limitspec","TLP_from_P50_limitspecP50LS")
+all_R2_TLP <- c(TLP_from_LS_LMA_P50_WD$R2,TLP_from_LS_LMA_P50_slope$R2,TLP_from_LS_LMA_P50$R2,TLP_from_LS_LMA$R2,TLP_from_P50_LMA$R2,TLP_from_P50_LMA_limitspec$R2,TLP_from_P50_LS$R2,TLP_from_LS$R2,TLP_from_P50$R2,TLP_from_LMA$R2,TLP_from_P50_limitspec$R2,TLP_from_P50_limitspecP50LS$R2)
+all_R2adj_TLP <- c(TLP_from_LS_LMA_P50_WD$R2adj,TLP_from_LS_LMA_P50_slope$R2adj,TLP_from_LS_LMA_P50$R2adj,TLP_from_LS_LMA$R2adj,TLP_from_P50_LMA$R2adj,TLP_from_P50_LMA_limitspec$R2adj,TLP_from_P50_LS$R2adj,TLP_from_LS$R2adj,TLP_from_P50$R2adj,TLP_from_LMA$R2adj,TLP_from_P50_limitspec$R2adj,TLP_from_P50_limitspecP50LS$R2adj)
+all_rmse_TLP <- c(TLP_from_LS_LMA_P50_WD$rmse,TLP_from_LS_LMA_P50_slope$rmse,TLP_from_LS_LMA_P50$rmse,TLP_from_LS_LMA$rmse,TLP_from_P50_LMA$rmse,TLP_from_P50_LMA_limitspec$rmse,TLP_from_P50_LS$rmse,TLP_from_LS$rmse,TLP_from_P50$rmse,TLP_from_LMA$rmse,TLP_from_P50_limitspec$rmse,TLP_from_P50_limitspecP50LS$rmse)
+all_ndata_TLP <- c(TLP_from_LS_LMA_P50_WD$ndata,TLP_from_LS_LMA_P50_slope$ndata,TLP_from_LS_LMA_P50$ndata,TLP_from_LS_LMA$ndata,TLP_from_P50_LMA$ndata,TLP_from_P50_LMA_limitspec$ndata,TLP_from_P50_LS$ndata,TLP_from_LS$ndata,TLP_from_P50$ndata,TLP_from_LMA$ndata,TLP_from_P50_limitspec$ndata,TLP_from_P50_limitspecP50LS$ndata)
 
 all_TLP <- data.frame(all_testnames_TLP,all_R2_TLP,all_R2adj_TLP,all_rmse_TLP,all_ndata_TLP)
 View(all_TLP)
@@ -188,6 +210,7 @@ write.table(all_TLP, "/Users/liudy/TRY/20200801/centre trait SMA/allTLP_c.txt", 
 
 # CHOICE: P50 and LS
 # BEST MODEL: TLP_from_P50_LS
+# SEE COMMENTS IN SLACK - I SUGGEST TO CHANGE TO EITHER TLP from LMA or TLP from P50
 
 # Test MAT and PPT coverage of species for best model
 plot(MAT[TLP_from_P50_LS$dataused],MAP[TLP_from_P50_LS$dataused])
@@ -502,10 +525,10 @@ for (ss in 1:n_uncer) {
     mod_P50_intercept_sample <- P50_from_TLP$mod$boot.intercept[ss] #P50_from_TLP
     mod_P50_slope_y1_sample <- P50_from_TLP$mod$boot.y1[ss]
 
-    mod_Ks_intercept_sample <- Ks_from_LSHmax_P50$mod$boot.intercept[ss] #Ks_from_LSHmax_P50
-    mod_Ks_slope_y1_sample <- Ks_from_LSHmax_P50$mod$boot.y1[ss]
-    mod_Ks_slope_y2_sample <- Ks_from_LSHmax_P50$mod$boot.y2[ss]
-    mod_slope_intercept_sample <- slope_from_P50_WD_Ks$mod$boot.intercept[ss] #slope_from_P50_TLP_Ks
+    mod_Ks_intercept_sample <- Ks_from_P50$mod$boot.intercept[ss] #Ks_from_P50
+    mod_Ks_slope_y1_sample <- Ks_from_P50$mod$boot.y1[ss]
+
+    mod_slope_intercept_sample <- slope_from_P50_WD_Ks$mod$boot.intercept[ss] #slope_from_P50_WD_Ks
     mod_slope_slope_y1_sample <- slope_from_P50_WD_Ks$mod$boot.y1[ss]
     mod_slope_slope_y2_sample <- slope_from_P50_WD_Ks$mod$boot.y2[ss]
     mod_slope_slope_y3_sample <- slope_from_P50_WD_Ks$mod$boot.y3[ss]
