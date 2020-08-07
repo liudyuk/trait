@@ -819,6 +819,42 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   close(PFTfile)
 }
 
+# Write out to a set of LPJ-GUESS instruction files, 1 per PFT
+for (nn in 1:length(traits_LPJG$Ks)) {
+  LPJG_outfile_pft <- paste(LPJG_outfile,".PFT",nn,sep="")
+  file.copy("global_cf_base.ins",LPJG_outfile_pft)
+  PFTfile <- file(LPJG_outfile_pft,open="append")
+  
+  Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
+  if (basePFT==1) {
+    Line2 <- TeBE_header
+  } else if (basePFT==2) {
+    Line2 <- TeBS_header
+  } else if (basePFT==3) {
+    Line2 <- IBS_header
+  } else if (basePFT==4) {
+    Line2 <- TrBE_header
+  }
+  Line3 <- "\t !Hydraulics"
+  Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
+  Line5 <- paste("\t delta_psi_max ",traits_LPJG$DeltaPsiWW[nn],sep="")
+  Line6 <- paste("\t cav_slope ",traits_LPJG$polyslope[nn],sep="")
+  Line7 <- paste("\t psi50_xylem ",traits_LPJG$P50[nn],sep="")
+  Line8 <- paste("\t ks_max ",traits_LPJG$Ks[nn],sep="")
+  Line9 <- paste("\t kr_max ",11.2e-4,sep="") # LPJ-GUESS default from Hickler et al. (2006)
+  Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
+  Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
+  Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
+  if (basePFT==1 | basePFT==4) {
+    Line13 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
+  } else {
+    Line13 <- NULL
+  } 
+  
+  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,"",")",""),PFTfile)
+  close(PFTfile)
+}
+
 # Write out a trait values table by PFT to be used for post-processing of LPJ-GUESS output
 write.table(traits_LPJG,file=LPJG_summaryfile,sep=",",row.names = F)
 
