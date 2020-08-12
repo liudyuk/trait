@@ -450,7 +450,7 @@ trait_sel=T
 n_trait_sel=-1
 
 # Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=4
+spec_group_sel=1
 
 # ---
 if (propagate_uncer) {
@@ -763,7 +763,7 @@ traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                                 LS_e,WD_e_mean,Ks_e_mean,Hmax_e)
 
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3) or TrBE (4)
-basePFT=2
+basePFT=4
 
 # Set the name for the output file
 if (basePFT==1) {
@@ -822,7 +822,7 @@ for (nn in 1:length(traits_LPJG$Ks)) {
 # Write out to a set of LPJ-GUESS instruction files, 1 per PFT
 for (nn in 1:length(traits_LPJG$Ks)) {
   LPJG_outfile_pft <- paste(LPJG_outfile,".PFT",nn,sep="")
-  file.copy("global_cf_base.ins",LPJG_outfile_pft)
+  file.copy("global_cf_base.ins",LPJG_outfile_pft,overwrite=T)
   PFTfile <- file(LPJG_outfile_pft,open="append")
   
   Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
