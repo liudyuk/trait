@@ -17,7 +17,7 @@ SLA_to_leaflong <- function(SLA_LPJG) {
 }
 
 lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
-                             LS_e,WD_e_mean,Ks_e_mean) {
+                             LS_e,WD_e_mean,Ks_e_mean,Hmax_e) {
   # Unlog traits
   LMA_e_mean_unlogged <- exp(LMA_e_mean)
   P50_e_mean_unlogged <- -exp(P50_e_mean)
@@ -40,16 +40,17 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged)
   
   #Limit ranges
-  lambda_LPJG[lambda_LPJG<-0.5]=0.5
-  lambda_LPJG[lambda_LPJG>1.0]=1.0
-  DeltaPsiWW_LPJG[DeltaPsiWW_LPJG<0.0]=0.0
+  lambda_LPJG[lambda_LPJG<-0.3]=0.3 # From Papastefanou et al. (2020, Front. Plant Sci.)
+  lambda_LPJG[lambda_LPJG>1.0]=1.0 # From Papastefanou et al. (2020, Front. Plant Sci.)
+  DeltaPsiWW_LPJG[DeltaPsiWW_LPJG<0.3]=0.3 # From Papastefanou et al. (2020, Front. Plant Sci.)
   DeltaPsiWW_LPJG[DeltaPsiWW_LPJG>10.0]=10.0
   
   # No transformation needed
   Ks_LPJG <- Ks_e_mean_unlogged
   P50_LPJG <- P50_e_mean_unlogged
+  Hmax_LPJG <- Hmax_e
   
-  traits_LPJG <- list("WD"=round(WD_LPJG,digits=4),"SLA"=round(SLA_LPJG,digits=4),"P50"=round(P50_LPJG,digits=4),"P88"=round(P88_LPJG,digits=4),"polyslope"=round(polyslope_LPJG,digits=4),"LS"=round(LS_LPJG,digits=4),"leaflong"=round(leaflong_LPJG,digits=4),"lambda"=round(lambda_LPJG,digits=4),"DeltaPsiWW"=round(DeltaPsiWW_LPJG,digits=4),"Ks"=round(Ks_LPJG,digits=4),"Kleaf"=round(Kleaf_LPJG,digits=4),"TLP"=round(TLP_e_mean_unlogged,digits=4),"slope"=round(slope_e_mean_unlogged,digits=4))
+  traits_LPJG <- list("WD"=round(WD_LPJG,digits=4),"SLA"=round(SLA_LPJG,digits=4),"P50"=round(P50_LPJG,digits=4),"P88"=round(P88_LPJG,digits=4),"polyslope"=round(polyslope_LPJG,digits=4),"LS"=round(LS_LPJG,digits=4),"leaflong"=round(leaflong_LPJG,digits=4),"lambda"=round(lambda_LPJG,digits=4),"DeltaPsiWW"=round(DeltaPsiWW_LPJG,digits=4),"Ks"=round(Ks_LPJG,digits=4),"Kleaf"=round(Kleaf_LPJG,digits=4),"TLP"=round(TLP_e_mean_unlogged,digits=4),"slope"=round(slope_e_mean_unlogged,digits=4),"Hmax"=Hmax_LPJG)
   return(traits_LPJG)
 }
 

@@ -760,7 +760,7 @@ write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_040820.csv"
 source('lpjg_traits_conv.R')
 
 traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
-                                LS_e,WD_e_mean,Ks_e_mean)
+                                LS_e,WD_e_mean,Ks_e_mean,Hmax_e)
 
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3) or TrBE (4)
 basePFT=2
