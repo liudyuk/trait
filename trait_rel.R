@@ -273,32 +273,32 @@ plot(MAT[LMA_from_TLP$dataused],MAP[LMA_from_TLP$dataused])
 
 # Ks fits -----------------------------------------------------------------
 
-# Ks from LS_Hmax, P50 and slope
-Ks_from_LSHmax_P50_slope <- sma_plot_stats(data.frame(LS_Hmax,P50,slope,Ks),c("LS*Hmax","P50","slope","Ks"),nbtstrp)
-plot(Ks[Ks_from_LSHmax_P50_slope$dataused],Ks_from_LSHmax_P50_slope$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
+## Ks from LS_Hmax, P50 and slope
+#Ks_from_LSHmax_P50_slope <- sma_plot_stats(data.frame(LS_Hmax,P50,slope,Ks),c("LS*Hmax","P50","slope","Ks"),nbtstrp)
+#plot(Ks[Ks_from_LSHmax_P50_slope$dataused],Ks_from_LSHmax_P50_slope$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
 
-# Ks from LS_Hmax and P50
-Ks_from_LSHmax_P50 <- sma_plot_stats(data.frame(LS_Hmax,P50,Ks),c("LS*Hmax","P50","Ks"),nbtstrp)
-plot(Ks[Ks_from_LSHmax_P50$dataused],Ks_from_LSHmax_P50$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
+## Ks from LS_Hmax and P50
+#Ks_from_LSHmax_P50 <- sma_plot_stats(data.frame(LS_Hmax,P50,Ks),c("LS*Hmax","P50","Ks"),nbtstrp)
+#plot(Ks[Ks_from_LSHmax_P50$dataused],Ks_from_LSHmax_P50$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
 
-# Ks from LS_Hmax and slope
-Ks_from_LSHmax_slope <- sma_plot_stats(data.frame(LS_Hmax,slope,Ks),c("LS*Hmax","slope","Ks"),nbtstrp)
-plot(Ks[Ks_from_LSHmax_slope$dataused],Ks_from_LSHmax_slope$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
+## Ks from LS_Hmax and slope
+#Ks_from_LSHmax_slope <- sma_plot_stats(data.frame(LS_Hmax,slope,Ks),c("LS*Hmax","slope","Ks"),nbtstrp)
+#plot(Ks[Ks_from_LSHmax_slope$dataused],Ks_from_LSHmax_slope$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
 
 # Summarise statistics
-all_testnames_Ks <- c("Ks_from_LSHmax_P50_slope","Ks_from_LSHmax_P50","Ks_from_LSHmax_slope","Ks_from_LSHmax","Ks_from_P50","Ks_from_slope")
-all_R2_Ks <- c(Ks_from_LSHmax_P50_slope$R2,Ks_from_LSHmax_P50$R2,Ks_from_LSHmax_slope$R2,Ks_from_LSHmax$R2,Ks_from_P50$R2,Ks_from_slope$R2)
-all_R2adj_Ks <- c(Ks_from_LSHmax_P50_slope$R2adj,Ks_from_LSHmax_P50$R2adj,Ks_from_LSHmax_slope$R2adj,Ks_from_LSHmax$R2adj,Ks_from_P50$R2adj,Ks_from_slope$R2adj)
-all_rmse_Ks <- c(Ks_from_LSHmax_P50_slope$rmse,Ks_from_LSHmax_P50$rmse,Ks_from_LSHmax_slope$rmse,Ks_from_LSHmax$rmse,Ks_from_P50$rmse,Ks_from_slope$rmse)
-all_ndata_Ks <- c(Ks_from_LSHmax_P50_slope$ndata,Ks_from_LSHmax_P50$ndata,Ks_from_LSHmax_slope$ndata,Ks_from_LSHmax$ndata,Ks_from_P50$ndata,Ks_from_slope$ndata)
+#all_testnames_Ks <- c("Ks_from_LSHmax_P50_slope","Ks_from_LSHmax_P50","Ks_from_LSHmax_slope","Ks_from_LSHmax","Ks_from_P50","Ks_from_slope")
+#all_R2_Ks <- c(Ks_from_LSHmax_P50_slope$R2,Ks_from_LSHmax_P50$R2,Ks_from_LSHmax_slope$R2,Ks_from_LSHmax$R2,Ks_from_P50$R2,Ks_from_slope$R2)
+#all_R2adj_Ks <- c(Ks_from_LSHmax_P50_slope$R2adj,Ks_from_LSHmax_P50$R2adj,Ks_from_LSHmax_slope$R2adj,Ks_from_LSHmax$R2adj,Ks_from_P50$R2adj,Ks_from_slope$R2adj)
+#all_rmse_Ks <- c(Ks_from_LSHmax_P50_slope$rmse,Ks_from_LSHmax_P50$rmse,Ks_from_LSHmax_slope$rmse,Ks_from_LSHmax$rmse,Ks_from_P50$rmse,Ks_from_slope$rmse)
+#all_ndata_Ks <- c(Ks_from_LSHmax_P50_slope$ndata,Ks_from_LSHmax_P50$ndata,Ks_from_LSHmax_slope$ndata,Ks_from_LSHmax$ndata,Ks_from_P50$ndata,Ks_from_slope$ndata)
 
-all_Ks <- data.frame(all_testnames_Ks,all_R2_Ks,all_R2adj_Ks,all_rmse_Ks,all_ndata_Ks)
-View(all_Ks)
+#all_Ks <- data.frame(all_testnames_Ks,all_R2_Ks,all_R2adj_Ks,all_rmse_Ks,all_ndata_Ks)
+#View(all_Ks)
 
 # CHOICE: Ks_from_LSHmax_P50 has the best combination of R2adj and RMSE
 
 # Test MAT and PPT coverage of species for chosen model
-plot(MAT[Ks_from_LSHmax_P50$dataused],MAP[Ks_from_LSHmax_P50$dataused])
+#plot(MAT[Ks_from_LSHmax_P50$dataused],MAP[Ks_from_LSHmax_P50$dataused])
 # WIDE CLIMATE COVERAGE
 
 # DECISION: Ks_from_LSHmax_P50
@@ -436,7 +436,7 @@ plot(MAT[slope_from_P50_TLP_Ks$dataused],MAP[slope_from_P50_TLP_Ks$dataused])
 
 
 # Optimisation ------------------------------------------------------------
-# Attempt to iteratively converge on the best fit values of Ks, TLP, P50 and LMA given known Hmax and LS
+# Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 
 # Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
 limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
@@ -472,12 +472,11 @@ if (spec_group_sel==1) {
   ind_spec_group=which(traits$group=='BD')
 }
 
-# Identify all combinations of Hmax and LS (do this across full range of broadleaf species)
-ind=which(!is.na(Hmax) & !is.na(LS))
+# Identify all combinations of Ks and LS (do this across full range of broadleaf species)
+ind=which(!is.na(Ks) & !is.na(LS))
 
 LS_comb <- LS[ind]
-Hmax_comb <- Hmax[ind]
-LS_Hmax_comb <- LS_Hmax[ind]
+Ks_comb <- Ks[ind]
 
 if (trait_sel) {
   if (n_trait_sel>0) {
@@ -486,50 +485,45 @@ if (trait_sel) {
     index = 1:length(ind)
     trait_samp = sample(index, n_trait_sel, replace=F) 
     LS_e = LS_comb[trait_samp] 
-    Hmax_e = Hmax_comb[trait_samp] 
-    LS_Hmax_e = LS_Hmax_comb[trait_samp] 
+    Ks_e = Ks_comb[trait_samp] 
     # Plot sample against all data as a check for sampling density
-    plot(LS_comb,Hmax_comb)
-    points(LS_e,Hmax_e,col="red")
+    plot(LS_comb,Ks_comb)
+    points(LS_e,Ks_e,col="red")
     
   } else {
     # Systematic sample
     
     library(hypervolume)
-    
-    # Fit a hypervolume (KDE at 99%)
-    Hmax_rescale = Hmax_comb/sd(Hmax_comb)
-    hv = hypervolume(data.frame(LS_comb,Hmax_rescale),method="gaussian",quantile.requested=0.99)
+    # Fit a hypervolume (KDE at 95%)
+    # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
+    hv = hypervolume(data.frame(LS_comb,Ks_comb),method="gaussian",quantile.requested=0.95)
     plot(hv)
     
     # Set the number of points distributed systematically across LS and Hmax space to test for inclusion in the hypervolume
-    sampHmax=8
+    sampKs=8
     sampLS=8
     
     maxLS=max(LS_comb,na.rm=T)
     minLS=min(LS_comb,na.rm=T)
-    maxHmax=max(Hmax_comb,na.rm=T)
-    minHmax=min(Hmax_comb,na.rm=T)
+    maxKs=max(Ks_comb,na.rm=T)
+    minKs=min(Ks_comb,na.rm=T)
     intLS=(maxLS-minLS)/sampLS
-    intHmax=(maxHmax-minHmax)/sampHmax
+    intKs=(maxKs-minKs)/sampKs
     
     LS_seq <- seq(minLS+intLS,maxLS-intLS,by=intLS)
-    Hmax_seq <- seq(minHmax+intHmax,maxHmax-intHmax,by=intHmax)
-    Hmax_rescale_seq <- Hmax_seq/sd(Hmax_comb)
-    LS_Hmax_seq <- expand.grid(LS_seq,Hmax_rescale_seq)
+    Ks_seq <- seq(minKs+intKs,maxKs-intKs,by=intKs)
+    LS_Ks_seq <- expand.grid(LS_seq,Ks_seq)
     
     # Test those points for inclusion in the hypervolume
-    in_hv <- hypervolume_inclusion_test(hv,LS_Hmax_seq,fast.or.accurate = "accurate")
+    in_hv <- hypervolume_inclusion_test(hv,LS_Ks_seq,fast.or.accurate = "accurate")
     
-    LS_e <- LS_Hmax_seq$Var1[in_hv]
-    Hmax_e <- LS_Hmax_seq$Var2[in_hv] * sd(Hmax_comb)
-    LS_Hmax_e <- log(exp(LS_e) * Hmax_e)
+    LS_e <- LS_Ks_seq$Var1[in_hv]
+    Ks_e <- LS_Ks_seq$Var2[in_hv]
   }
 } else {
   # Go through all observed combinations of Hmax and LS
-  Hmax_e=Hmax_comb
+  Ks_e=Ks_comb
   LS_e=LS_comb
-  LS_Hmax_e=LS_Hmax_comb
 }
 
 ndata=length(LS_e)
@@ -537,7 +531,6 @@ ndata=length(LS_e)
 P50_e <- matrix(NA, nrow= ndata, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
 LMA_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 TLP_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-Ks_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 WD_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 slope_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 
@@ -547,22 +540,16 @@ for (dd in 1:ndata) {
   print(dd)
   
   # Carry out the optimisation
-  opt_vals <- trait_opt(P50[ind_spec_group],TLP[ind_spec_group],Ks[ind_spec_group],LS[ind_spec_group],LMA[ind_spec_group],WD[ind_spec_group],slope[ind_spec_group],LMA_from_TLP,TLP_from_LS_LMA_P50,P50_from_TLP_Ks,Ks_from_LSHmax_P50,slope_from_P50_TLP_Ks,WD_from_slope_P50slope,Hmax_e[dd],LS_e[dd],LS_Hmax_e[dd],n_uncer)
+  opt_vals <- trait_opt(P50[ind_spec_group],TLP[ind_spec_group],LMA[ind_spec_group],WD[ind_spec_group],slope[ind_spec_group],LMA_from_TLP,TLP_from_LS_LMA_P50,P50_from_TLP_Ks,slope_from_P50_TLP_Ks,WD_from_slope_P50slope,LMA_from_LS,P50_from_Ks,TLP_from_P50,Ks_e[dd],LS_e[dd],n_uncer)
   
   P50_e[dd,] <- opt_vals$P50_e
   TLP_e[dd,] <- opt_vals$TLP_e
   LMA_e[dd,] <- opt_vals$LMA_e
-  Ks_e[dd,] <- opt_vals$Ks_e
   WD_e[dd,] <- opt_vals$WD_e
   slope_e[dd,] <- opt_vals$slope_e
 }
   
 #Stats defining the uncertainty range for each point
-Ks_e_mean=unname(apply(Ks_e, 1, mean,na.rm=T))
-Ks_e_median=unname(apply(Ks_e, 1, median,na.rm=T))
-Ks_e_5perc=unname(apply(Ks_e, 1, quantile,0.05,na.rm=T))
-Ks_e_95perc=unname(apply(Ks_e, 1, quantile,0.95,na.rm=T))
-
 TLP_e_mean=unname(apply(TLP_e, 1, mean,na.rm=T))
 TLP_e_median=unname(apply(TLP_e, 1, median,na.rm=T))
 TLP_e_5perc=unname(apply(TLP_e, 1, quantile,0.05,na.rm=T))
@@ -666,17 +653,11 @@ points(LS_e,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estima
 points(LS_e,LMA_e_5perc,col="green",pch=16)
 points(LS_e,LMA_e_95perc,col="green",pch=16)
 
-plot(LS_Hmax,Ks,pch=16,xlab="LS*Hmax",ylab="Ks",main="LS_Hmax vs Ks")
-points(log(exp(LS_e)*Hmax_e),Ks_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(log(exp(LS_e)*Hmax_e),Ks_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(log(exp(LS_e)*Hmax_e),Ks_e_5perc,col="green",pch=16)
-points(log(exp(LS_e)*Hmax_e),Ks_e_95perc,col="green",pch=16)
-
 plot(Ks,P50,pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
-points(Ks_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(Ks_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(Ks_e[,1],P50_e_5perc,col="green",pch=16)
-points(Ks_e[,1],P50_e_95perc,col="green",pch=16)
+points(Ks_e,P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(Ks_e,P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(Ks_e,P50_e_5perc,col="green",pch=16)
+points(Ks_e,P50_e_95perc,col="green",pch=16)
 
 plot(LS,TLP,pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
 points(LS_e,TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
@@ -690,11 +671,11 @@ points(WD_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped es
 points(WD_e[,1],LMA_e_5perc,col="green",pch=16)
 points(WD_e[,1],LMA_e_95perc,col="green",pch=16)
 
-#plot(Ks,slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
-#points(Ks_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
-#points(Ks_e_mean,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-#points(Ks_e_5perc,slope_e_5perc,col="green",pch=16)
-#points(Ks_e_95perc,slope_e_95perc,col="green",pch=16)
+plot(Ks,slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
+points(Ks_e,slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
+points(Ks_e,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
+points(Ks_e,slope_e_5perc,col="green",pch=16)
+points(Ks_e,slope_e_95perc,col="green",pch=16)
 
 #Use up remaining unallocated plots and set back to single plot
 par(mfrow=c(1,1))
@@ -718,11 +699,6 @@ LMA_res <- LMA[ind]-LMA_e[,1]
 LMA_e_rmse <- sqrt(mean(LMA_res^2,na.rm=T))
 LMA_e_ndata <- length(which(is.na(LMA_res)==F))
 
-#Ks_res <- Ks[ind]-Ks_e_mean
-Ks_res <- Ks[ind]-Ks_e[,1]
-Ks_e_rmse <- sqrt(mean(Ks_res^2,na.rm=T))
-Ks_e_ndata <- length(which(is.na(Ks_res)==F))
-
 #WD_res <- WD[ind]-WD_e_mean
 WD_res <- WD[ind]-WD_e[,1]
 WD_e_rmse <- sqrt(mean(WD_res^2,na.rm=T))
@@ -735,24 +711,23 @@ slope_e_ndata <- length(which(is.na(slope_res)==F))
 
 # Compare to RMSE from best multivariate regression
 
-all_e_rmse <- c(P50_e_rmse,TLP_e_rmse,LMA_e_rmse,Ks_e_rmse,WD_e_rmse,slope_e_rmse)
-all_e_ndata <- c(P50_e_ndata,TLP_e_ndata,LMA_e_ndata,Ks_e_ndata,WD_e_ndata,slope_e_ndata)
-all_multivar_rmse <- c(P50_from_TLP_Ks$rmse,TLP_from_LS_LMA_P50$rmse,LMA_from_TLP$rmse,Ks_from_LSHmax_P50$rmse,WD_from_slope_P50slope$rmse,slope_from_P50_TLP_Ks$rmse)
-all_multivar_ndata <- c(P50_from_TLP_Ks$ndata,TLP_from_LS_LMA_P50$ndata,LMA_from_TLP$ndata,Ks_from_LSHmax_P50$ndata,WD_from_slope_P50slope$ndata,slope_from_P50_TLP_Ks$ndata)
+all_e_rmse <- c(P50_e_rmse,TLP_e_rmse,LMA_e_rmse,WD_e_rmse,slope_e_rmse)
+all_e_ndata <- c(P50_e_ndata,TLP_e_ndata,LMA_e_ndata,WD_e_ndata,slope_e_ndata)
+all_multivar_rmse <- c(P50_from_TLP_Ks$rmse,TLP_from_LS_LMA_P50$rmse,LMA_from_TLP$rmse,WD_from_slope_P50slope$rmse,slope_from_P50_TLP_Ks$rmse)
+all_multivar_ndata <- c(P50_from_TLP_Ks$ndata,TLP_from_LS_LMA_P50$ndata,LMA_from_TLP$ndata,WD_from_slope_P50slope$ndata,slope_from_P50_TLP_Ks$ndata)
 
 all_rmse_comp <- data.frame(all_e_rmse,all_e_ndata,all_multivar_rmse,all_multivar_ndata)
 View(all_rmse_comp)
 
 
 # Write the optimised trait values out to a file
-traits_e_out <- data.frame(LS_e,Hmax_e,LS_Hmax_e,
+traits_e_out <- data.frame(LS_e,Ks_e,
                            P50_e_mean,P50_e_5perc,P50_e_95perc,
                            TLP_e_mean,TLP_e_5perc,TLP_e_95perc,
                            LMA_e_mean,LMA_e_5perc,LMA_e_95perc,
-                           Ks_e_mean,Ks_e_5perc,Ks_e_95perc,
                            WD_e_mean,WD_e_5perc,WD_e_95perc,
                            slope_e_mean,slope_e_5perc,slope_e_95perc)
-write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_040820.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
+write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_260820.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
 
 
 # Convert to the values needed in LPJ-GUESS and write out -----------------
@@ -760,10 +735,10 @@ write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_040820.csv"
 source('lpjg_traits_conv.R')
 
 traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
-                                LS_e,WD_e_mean,Ks_e_mean,Hmax_e)
+                                LS_e,WD_e_mean,Ks_e)
 
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3) or TrBE (4)
-basePFT=4
+basePFT=2
 
 # Set the name for the output file
 if (basePFT==1) {
