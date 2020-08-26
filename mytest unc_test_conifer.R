@@ -8,8 +8,8 @@
 
 nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
-traits=read.csv("/Users/liudy/trait_data/woody_trait.0803.txt",sep="\t")
-#traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
+#traits=read.csv("/Users/liudy/trait_data/woody_trait.0803.txt",sep="\t")
+traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
 
 source('sma_multivar_regress.R')
 source('trait_functions.R')
@@ -253,12 +253,18 @@ LMA_from_LS <- sma_plot_stats(data.frame(LS,LMA),c("LS","LMA"),nbtstrp)
 # LMA from WD
 LMA_from_WD <- sma_plot_stats(data.frame(WD,LMA),c("WD","LMA"),nbtstrp)
 
+# LMA from LS (same species as for TLP and LS)
+LMA_from_LS_limitspec <- sma_plot_stats(data.frame(LS,LMA),c("LS","LMA"),nbtstrp,F,LMA_from_TLP_LS$dataused)
+
+# LMA from TLP (same species as for TLP and LS)
+LMA_from_TLP_limitspec <- sma_plot_stats(data.frame(TLP,LMA),c("TLP","LMA"),nbtstrp,F,LMA_from_TLP_LS$dataused)
+
 # Summarise statistics
-all_testnames_LMA <- c("LMA_from_TLP_LS_WD","LMA_from_TLP_LS","LMA_from_TLP_WD","LMA_from_LS_WD","LMA_from_TLP","LMA_from_LS","LMA_from_WD")
-all_R2_LMA <- c(LMA_from_TLP_LS_WD$R2,LMA_from_TLP_LS$R2,LMA_from_TLP_WD$R2,LMA_from_LS_WD$R2,LMA_from_TLP$R2,LMA_from_LS$R2,LMA_from_WD$R2)
-all_R2adj_LMA <- c(LMA_from_TLP_LS_WD$R2adj,LMA_from_TLP_LS$R2adj,LMA_from_TLP_WD$R2adj,LMA_from_LS_WD$R2adj,LMA_from_TLP$R2adj,LMA_from_LS$R2adj,LMA_from_WD$R2adj)
-all_rmse_LMA <- c(LMA_from_TLP_LS_WD$rmse,LMA_from_TLP_LS$rmse,LMA_from_TLP_WD$rmse,LMA_from_LS_WD$rmse,LMA_from_TLP$rmse,LMA_from_LS$rmse,LMA_from_WD$rmse)
-all_ndata_LMA <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata)
+all_testnames_LMA <- c("LMA_from_TLP_LS_WD","LMA_from_TLP_LS","LMA_from_TLP_WD","LMA_from_LS_WD","LMA_from_TLP","LMA_from_LS","LMA_from_WD","LMA_from_LS_limitspec","LMA_from_TLP_limitspec")
+all_R2_LMA <- c(LMA_from_TLP_LS_WD$R2,LMA_from_TLP_LS$R2,LMA_from_TLP_WD$R2,LMA_from_LS_WD$R2,LMA_from_TLP$R2,LMA_from_LS$R2,LMA_from_WD$R2,LMA_from_LS_limitspec$R2,LMA_from_TLP_limitspec$R2)
+all_R2adj_LMA <- c(LMA_from_TLP_LS_WD$R2adj,LMA_from_TLP_LS$R2adj,LMA_from_TLP_WD$R2adj,LMA_from_LS_WD$R2adj,LMA_from_TLP$R2adj,LMA_from_LS$R2adj,LMA_from_WD$R2adj,LMA_from_LS_limitspec$R2adj,LMA_from_TLP_limitspec$R2adj)
+all_rmse_LMA <- c(LMA_from_TLP_LS_WD$rmse,LMA_from_TLP_LS$rmse,LMA_from_TLP_WD$rmse,LMA_from_LS_WD$rmse,LMA_from_TLP$rmse,LMA_from_LS$rmse,LMA_from_WD$rmse,LMA_from_LS_limitspec$rmse,LMA_from_TLP_limitspec$rmse)
+all_ndata_LMA <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata,LMA_from_LS_limitspec$ndata,LMA_from_TLP_limitspec$ndata)
 
 all_LMA <- data.frame(all_testnames_LMA,all_R2_LMA,all_R2adj_LMA,all_rmse_LMA,all_ndata_LMA)
 View(all_LMA)
@@ -507,7 +513,7 @@ for (ss in 1:n_uncer) {
     
     mod_P50_intercept_sample <- P50_from_TLP_LS$mod$intercept_R #P50_from_TLP_LS
     mod_P50_slope_y1_sample <- P50_from_TLP_LS$mod$slope_R.y1
-    mod_P50_slope_y1_sample <- P50_from_TLP_LS$mod$slope_R.y2
+    mod_P50_slope_y2_sample <- P50_from_TLP_LS$mod$slope_R.y2
  
     mod_Ks_intercept_sample <- Ks_from_P50$mod$intercept_R #Ks_from_P50
     mod_Ks_slope_y1_sample <- Ks_from_P50$mod$slope_R.y1
@@ -582,10 +588,11 @@ for (ss in 1:n_uncer) {
       # Make estimates of trait values based on the best SMA regressions (probably multivariate in most cases)
       # The estimates of traits in each iteration are based on the estimates of their predictor traits from the previous iteration
       #To Tom, here if LMA from LS and WD, we may also LS_e_last.here need to modify.
-      LMA_e[dd,ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*LS_e_last + mod_LMA_slope_y2_sample*WD[dd]
+      #To Daijun, no need to do this as LS is one of our starting variables - i.e. we do not optimise it.
+      LMA_e[dd,ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*LS_e[dd] + mod_LMA_slope_y2_sample*WD[dd]
       TLP_e[dd,ss]=mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*LMA_e_last 
       P50_e[dd,ss]=mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e_last +
-                   mod_P50_slope_y2_sample*LS_e_last
+                   mod_P50_slope_y2_sample*LS_e[dd]
         
       Ks_e[dd,ss]=mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*P50_e_last
       
@@ -639,7 +646,7 @@ for (ss in 1:n_uncer) {
     slope_e[dd,ss]=mod_slope_intercept_sample + mod_slope_slope_y1_sample*P50_e[dd,ss]  
       
     WD_e[dd,ss]=mod_WD_intercept_sample + mod_WD_slope_y1_sample*slope_e[dd,ss] +
-                mod_WD_slope_y2_sample*slope_e[dd,ss]*P50slope_e[dd,ss]
+                mod_WD_slope_y2_sample*slope_e[dd,ss]*P50_e[dd,ss]
     
     #if (limitdataranges) {
     #  #Do not go beyond observed limits of data
