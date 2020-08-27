@@ -25,6 +25,10 @@ traitb<-droplevels(traitb)
 str(traitb)
 attach(traitb)
 
+#Also create tables with just BE or BD+BT for later use
+trait_BE<-subset(traits,group=="BE",drop = T)
+trait_BDT<-subset(traits,group=="BD" | group=="BT",drop = T)
+
 #--- Bivariate plots with SMA regression ---
 
 par(mfrow=c(4,4))
@@ -270,6 +274,23 @@ plot(MAT[LMA_from_TLP$dataused],MAP[LMA_from_TLP$dataused])
 
 # DECISION: LMA_from_TLP
 
+# CHECK: Range of LMA differs substantially between evergreen and deciduous, whilst that for TLP does not. Is this relationship robust for both BE and BD+BT?
+
+LMA_from_TLP_BEvsBDBT <- sma_plot_stats_comp(data.frame(trait_BE$LMA,trait_BE$TLP),data.frame(trait_BDT$LMA,trait_BDT$TLP),c("LMA","TLP"),nbtstrp,T)
+
+# RESULT: Relationship is significantly different depending on whether deciduous or evergreen
+# Therefore define relationship separately for these two groups
+
+# LMA from TLP (BE)
+LMA_from_TLP_BE <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$LMA),c("TLP","LMA"),nbtstrp)
+plot(trait_BE$LMA[LMA_from_TLP_BE$dataused],LMA_from_TLP_BE$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est (BE)")
+
+# LMA from TLP (BD+BT)
+LMA_from_TLP_BDT <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LMA),c("TLP","LMA"),nbtstrp)
+plot(trait_BDT$LMA[LMA_from_TLP_BDT$dataused],LMA_from_TLP_BDT$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est (BD+BT)")
+
+# DECISION: Apply different LMA_from_TLP relationship depending on whether making assessments for deciduous or evergreen broadleaves
+
 
 # Ks fits -----------------------------------------------------------------
 
@@ -450,7 +471,7 @@ trait_sel=T
 n_trait_sel=-1
 
 # Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=1
+spec_group_sel=2
 
 # ---
 if (propagate_uncer) {
@@ -526,6 +547,23 @@ if (trait_sel) {
   LS_e=LS_comb
 }
 
+# ---
+# Select the LMA relationship to use
+if (spec_group_sel==1) {
+  LMA_from_TLP_select=LMA_from_TLP
+} else if (spec_group_sel==2) {
+  LMA_from_TLP_select=LMA_from_TLP_BDT
+} else if (spec_group_sel==3) {
+  LMA_from_TLP_select=LMA_from_TLP_BE
+} else if (spec_group_sel==4) {
+  LMA_from_TLP_select=LMA_from_TLP_BDT
+} else if (spec_group_sel==5) {
+  LMA_from_TLP_select=LMA_from_TLP_BDT
+}
+
+# ---
+# Actually do the optimisation
+
 ndata=length(LS_e)
 
 P50_e <- matrix(NA, nrow= ndata, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
@@ -540,7 +578,7 @@ for (dd in 1:ndata) {
   print(dd)
   
   # Carry out the optimisation
-  opt_vals <- trait_opt(P50[ind_spec_group],TLP[ind_spec_group],LMA[ind_spec_group],WD[ind_spec_group],slope[ind_spec_group],LMA_from_TLP,TLP_from_LS_LMA_P50,P50_from_TLP_Ks,slope_from_P50_TLP_Ks,WD_from_slope_P50slope,LMA_from_LS,P50_from_Ks,TLP_from_P50,Ks_e[dd],LS_e[dd],n_uncer)
+  opt_vals <- trait_opt(P50[ind_spec_group],TLP[ind_spec_group],LMA[ind_spec_group],WD[ind_spec_group],slope[ind_spec_group],LMA_from_TLP_select,TLP_from_LS_LMA_P50,P50_from_TLP_Ks,slope_from_P50_TLP_Ks,WD_from_slope_P50slope,LMA_from_LS,P50_from_Ks,TLP_from_P50,Ks_e[dd],LS_e[dd],n_uncer)
   
   P50_e[dd,] <- opt_vals$P50_e
   TLP_e[dd,] <- opt_vals$TLP_e
@@ -784,13 +822,14 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
   Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
+  Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
   if (basePFT==1 | basePFT==4) {
-    Line13 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
+    Line14 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
   } else {
-    Line13 <- NULL
+    Line14 <- NULL
   } 
   
-  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,"",")",""),PFTfile)
+  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,"",")",""),PFTfile)
   close(PFTfile)
 }
 
@@ -820,13 +859,14 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
   Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
+  Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
   if (basePFT==1 | basePFT==4) {
-    Line13 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
+    Line14 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
   } else {
-    Line13 <- NULL
+    Line14 <- NULL
   } 
   
-  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,"",")",""),PFTfile)
+  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,"",")",""),PFTfile)
   close(PFTfile)
 }
 
