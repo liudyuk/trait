@@ -9,7 +9,8 @@
 nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
 #traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
-traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
+#traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
+traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/woody_trait.0827.txt",sep="\t")
 
 source('sma_multivar_regress.R')
 source('trait_functions.R')
@@ -471,7 +472,7 @@ trait_sel=T
 n_trait_sel=-1
 
 # Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=2
+spec_group_sel=3
 
 # ---
 if (propagate_uncer) {
@@ -768,15 +769,21 @@ traits_e_out <- data.frame(LS_e,Ks_e,
 write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_260820.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
 
 
+
+# Calculate regression of leafL from LMA ----------------------------------
+
+leafL_from_LMA <- sma_plot_stats(data.frame(LMA,log(leafL)),c("LMA","leafL"),nbtstrp,T)
+
 # Convert to the values needed in LPJ-GUESS and write out -----------------
 
 source('lpjg_traits_conv.R')
 
 traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
-                                LS_e,WD_e_mean,Ks_e)
+                                LS_e,WD_e_mean,Ks_e,
+                                leafL_from_LMA)
 
-# Select which base PFT to use: TeBE (1), TeBS (2), IBS (3) or TrBE (4)
-basePFT=2
+# Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
+basePFT=1
 
 # Set the name for the output file
 if (basePFT==1) {
@@ -791,8 +798,11 @@ if (basePFT==1) {
 } else if (basePFT==4) {
   LPJG_outfile <- "LPJG_PFT_insfile_TrBE.ins"
   LPJG_summaryfile <- "LPJG_PFT_summary_TrBE.csv"
+} else if (basePFT==5) {
+  LPJG_outfile <- "LPJG_PFT_insfile_TrBR.ins"
+  LPJG_summaryfile <- "LPJG_PFT_summary_TrBR.csv"
 } else {
-  stop("basePFT must be equal to 1, 2 or 3")
+  stop("basePFT must be equal to 1, 2, 3, 4 or 5")
 }
 
 # Write out to LPJ-GUESS instruction file
@@ -811,6 +821,8 @@ for (nn in 1:length(traits_LPJG$Ks)) {
     Line2 <- IBS_header
   } else if (basePFT==4) {
     Line2 <- TrBE_header
+  } else if (basePFT==5) {
+    Line2 <- TrBR_header
   }
   Line3 <- "\t !Hydraulics"
   Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
@@ -826,7 +838,8 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   if (basePFT==1 | basePFT==4) {
     Line14 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
   } else {
-    Line14 <- NULL
+    #Use LPJ-GUESS standard values for deciduous
+    Line14 <- paste("\t leaflong 0.5")
   } 
   
   writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,"",")",""),PFTfile)
@@ -848,6 +861,8 @@ for (nn in 1:length(traits_LPJG$Ks)) {
     Line2 <- IBS_header
   } else if (basePFT==4) {
     Line2 <- TrBE_header
+  } else if (basePFT==5) {
+    Line2 <- TrBR_header
   }
   Line3 <- "\t !Hydraulics"
   Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
@@ -863,7 +878,8 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   if (basePFT==1 | basePFT==4) {
     Line14 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
   } else {
-    Line14 <- NULL
+    #Use LPJ-GUESS standard values for deciduous
+    Line14 <- paste("\t leaflong 0.5")
   } 
   
   writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,"",")",""),PFTfile)
