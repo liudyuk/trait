@@ -4,7 +4,7 @@
 # 04.08.20
 
 SLA_to_leaflong <- function(SLA_LPJG) {
-  # Calculate leaf longevity based on equation for SLA from leaf longevsity in LPJ-GUESS v4.0
+  # Calculate leaf longevity based on equation for SLA from leaf longevity in LPJ-GUESS v4.0
   leaflong_exponent <- (log10(SLA_LPJG/0.2)-2.41)/-0.38
   leaflong_raw <- (10^leaflong_exponent)/12
   # Limit values to a maximum of 10 years
@@ -17,7 +17,8 @@ SLA_to_leaflong <- function(SLA_LPJG) {
 }
 
 lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
-                             LS_e,WD_e_mean,Ks_e) {
+                             LS_e,WD_e_mean,Ks_e,
+                             leafL_from_LMA=NULL) {
   # Unlog traits
   LMA_e_mean_unlogged <- exp(LMA_e_mean)
   P50_e_mean_unlogged <- -exp(P50_e_mean)
@@ -34,7 +35,15 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   LS_LPJG <- LS_e_mean_unlogged*10000 # From m2 (leaf) cm-2 (sap) to m2 (leaf) m-2 (sap)
   
   # Empirical transformations
-  leaflong_LPJG <- SLA_to_leaflong(SLA_LPJG)
+  if (is.null(leafL_from_LMA)) {
+    #Calculate leaf longevity using equation taken from LPJ-GUESS
+    leaflong_LPJG <- SLA_to_leaflong(SLA_LPJG)
+  } else {
+    #Base the calculation on dataset herein
+    leaflong_LPJG <- exp(leafL_from_LMA$mod$intercept_R + leafL_from_LMA$mod$slope_R.y1*LMA_e_mean)
+    #Apply a minimum of 0.5 for LPJ-GUESS
+    leaflong_LPJG <- pmax(leaflong_LPJG,0.5)
+  }
   lambda_LPJG <- -0.188+(-0.3*TLP_e_mean_unlogged) # Based on https://docs.google.com/spreadsheets/d/1KvB97vt6OVdy3GPUdOdlxd8c9TdjEk9z4qIl2mcfPHk/edit#gid=51069844
   DeltaPsiWW_LPJG <- -0.5571 + (2.9748*WD_e_mean) # Based on https://docs.google.com/spreadsheets/d/1KvB97vt6OVdy3GPUdOdlxd8c9TdjEk9z4qIl2mcfPHk/edit#gid=51069844
   Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged)
@@ -139,3 +148,21 @@ TrBE_header <- c(  "\t ! Tropical broadleaved evergreen tree",
                    "\t storfrac_mon 0.",
                    "")
 
+TrBR_header <- c(  "\t ! Tropical broadleaved raingreen tree",
+                   "",
+                   "\t include 1",
+                   "\t tree",
+                   "\t broadleaved",
+                   "\t shade_intolerant",
+                   "\t tropical",
+                   "\t phenology \"raingreen\"",
+                   "\t fnstorage 0.15",
+                   "\t leaflong 0.5",
+                   "\t turnover_leaf 1",
+                   "\t longevity 400    ! from Thomas h 2010-03-30",
+                   "\t fireresist 0.3",
+                   "\t eps_iso 45.0",
+                   "\t seas_iso 0",
+                   "\t eps_mon 2.4",
+                   "\t storfrac_mon 0.",
+                   "")
