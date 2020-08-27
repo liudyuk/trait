@@ -6,7 +6,7 @@
 # T. Pugh
 # 15.06.20
 
-nbtstrp=2000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
+nbtstrp=10000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
 traits=read.csv("/Users/liudy/trait_data/woody_trait.0803.txt",sep="\t")
 #traits=read.table("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0625.txt")
@@ -821,7 +821,7 @@ all_multivar_ndata <- c(P50_from_TLP_Ks$ndata,TLP_from_LS_LMA_P50$ndata,LMA_from
 
 all_rmse_comp <- data.frame(all_e_rmse,all_e_ndata,all_multivar_rmse,all_multivar_ndata)
 View(all_rmse_comp)
-write.table(all_rmse_comp, "/Users/liudy/TRY/20200801/centre trait SMA/all_rmse_comp_b.txt", sep="\t")
+write.table(all_rmse_comp, "/Users/liudy/TRY/20200801/centre trait SMA/all_rmse_comp_b_10k.txt", sep="\t")
 
 
 

@@ -8,8 +8,8 @@
 
 nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
-#traits=read.csv("/Users/liudy/trait_data/woody_trait.0803.txt",sep="\t")
-traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
+traits=read.csv("/Users/liudy/trait_data/woody_trait.0803.txt",sep="\t")
+#traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
 
 source('sma_multivar_regress.R')
 source('trait_functions.R')
