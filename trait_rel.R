@@ -472,7 +472,7 @@ trait_sel=T
 n_trait_sel=-1
 
 # Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=3
+spec_group_sel=2
 
 # ---
 if (propagate_uncer) {
@@ -774,16 +774,26 @@ write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_260820.csv"
 
 leafL_from_LMA <- sma_plot_stats(data.frame(LMA,log(leafL)),c("LMA","leafL"),nbtstrp,T)
 
+
+# Calculate limits of leafN vs LMA to allow estimate of leaf C:N m --------
+
+leafN_from_LMA_limit <- regress_limit_adjust(leafN,LMA,leafN_from_LMA,0.05)
+
+plot(LMA,leafN)
+points(LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lower,col="green")
+points(LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
+
+
 # Convert to the values needed in LPJ-GUESS and write out -----------------
 
 source('lpjg_traits_conv.R')
 
 traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                                 LS_e,WD_e_mean,Ks_e,
-                                leafL_from_LMA)
+                                leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
-basePFT=1
+basePFT=2
 
 # Set the name for the output file
 if (basePFT==1) {
@@ -835,14 +845,15 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
   Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
+  Line14 <- paste("\t leaf_cton_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
   if (basePFT==1 | basePFT==4) {
-    Line14 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
+    Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
   } else {
     #Use LPJ-GUESS standard values for deciduous
-    Line14 <- paste("\t leaflong 0.5")
+    Line15 <- paste("\t leaflong 0.5")
   } 
   
-  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,"",")",""),PFTfile)
+  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,Line15,"",")",""),PFTfile)
   close(PFTfile)
 }
 
@@ -875,14 +886,15 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
   Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
+  Line14 <- paste("\t leaf_cton_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
   if (basePFT==1 | basePFT==4) {
-    Line14 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
+    Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
   } else {
     #Use LPJ-GUESS standard values for deciduous
-    Line14 <- paste("\t leaflong 0.5")
+    Line15 <- paste("\t leaflong 0.5")
   } 
   
-  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,"",")",""),PFTfile)
+  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,Line15,"",")",""),PFTfile)
   close(PFTfile)
 }
 
