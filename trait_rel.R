@@ -793,7 +793,7 @@ traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                                 leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
-basePFT=2
+basePFT=5
 
 # Set the name for the output file
 if (basePFT==1) {
@@ -845,7 +845,7 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
   Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
-  Line14 <- paste("\t leaf_cton_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
+  Line14 <- paste("\t cton_leaf_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
   if (basePFT==1 | basePFT==4) {
     Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
   } else {
@@ -886,7 +886,7 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
   Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
-  Line14 <- paste("\t leaf_cton_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
+  Line14 <- paste("\t cton_leaf_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
   if (basePFT==1 | basePFT==4) {
     Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
   } else {
