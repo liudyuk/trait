@@ -775,7 +775,7 @@ write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_260820.csv"
 leafL_from_LMA <- sma_plot_stats(data.frame(LMA,log(leafL)),c("LMA","leafL"),nbtstrp,T)
 
 
-# Calculate limits of leafN vs LMA to allow estimate of leaf C:N m --------
+# Calculate limits of leafN vs LMA to allow estimate of leaf C:N ----------
 
 leafN_from_LMA_limit <- regress_limit_adjust(leafN,LMA,leafN_from_LMA,0.05)
 
@@ -848,12 +848,14 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line14 <- paste("\t cton_leaf_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
   if (basePFT==1 | basePFT==4) {
     Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
+    Line16 <- paste("\t turnover_leaf ",1/traits_LPJG$leaflong[nn],sep="")
   } else {
     #Use LPJ-GUESS standard values for deciduous
     Line15 <- paste("\t leaflong 0.5")
+    Line16 <- paste("\t turnover_leaf 1.0")
   } 
   
-  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,Line15,"",")",""),PFTfile)
+  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,Line15,Line16,"",")",""),PFTfile)
   close(PFTfile)
 }
 
@@ -889,12 +891,14 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line14 <- paste("\t cton_leaf_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
   if (basePFT==1 | basePFT==4) {
     Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
+    Line16 <- paste("\t turnover_leaf ",1/traits_LPJG$leaflong[nn],sep="")
   } else {
     #Use LPJ-GUESS standard values for deciduous
     Line15 <- paste("\t leaflong 0.5")
+    Line16 <- paste("\t turnover_leaf 1.0")
   } 
   
-  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,Line15,"",")",""),PFTfile)
+  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,Line15,Line16,"",")",""),PFTfile)
   close(PFTfile)
 }
 
