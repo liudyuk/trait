@@ -61,10 +61,10 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL) {
   
   #Make plot against the first variable
   if (makeplot) {
-    plot(vars[ind,nvars],vars[ind,1],pch=16,xlab=labels[nvars],ylab=labels[1],main=paste(labels[nvars]," vs ",labels[1]))
-    points(var_est,vars[ind,1],col="red",pch=16)
-    points(var_est_L95,vars[ind,1],col="green",pch=5)
-    points(var_est_U95,vars[ind,1],col="green",pch=5)
+    plot(vars[ind,1],vars[ind,nvars],pch=16,xlab=labels[nvars],ylab=labels[1],main=paste(labels[nvars]," vs ",labels[1]))
+    points(vars[ind,1],var_est,col="red",pch=16)
+    points(vars[ind,1],var_est_L95,col="green",pch=5)
+    points(vars[ind,1],var_est_U95,col="green",pch=5)
   }
   
   #Calculate RMSE
@@ -143,14 +143,14 @@ sma_plot_stats_comp <- function(vars1,vars2,labels,nbtstrp,makeplot=F,indin=NULL
     ymax=max(max(vars1[ind1,1],na.rm=T),max(vars2[ind2,1],na.rm=T),na.rm=T)
     ymin=min(min(vars1[ind1,1],na.rm=T),min(vars2[ind2,1],na.rm=T),na.rm=T)
     
-    plot(vars1[ind1,nvars1],vars1[ind1,1],pch=16,xlab=labels[nvars1],ylab=labels[1],main=paste(labels[nvars1]," vs ",labels[1]),xlim=c(xmin,xmax),ylim=c(ymin,ymax))
-    points(vars2[ind2,nvars2],vars2[ind2,1],col="blue",pch=16)
-    lines(var1_est,vars1[ind1,1],col="red")
-    lines(var1_est_L95,vars1[ind1,1],col="red",lty="dotted")
-    lines(var1_est_U95,vars1[ind1,1],col="red",lty="dotted")
-    lines(var2_est,vars2[ind2,1],col="green",pch=16)
-    lines(var2_est_L95,vars2[ind2,1],col="green",lty="dotted")
-    lines(var2_est_U95,vars2[ind2,1],col="green",lty="dotted")
+    plot(vars1[ind1,1],vars1[ind1,nvars1],pch=16,xlab=labels[nvars1],ylab=labels[1],main=paste(labels[nvars1]," vs ",labels[1]),xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+    points(vars2[ind2,1],vars2[ind2,nvars2],col="blue",pch=16)
+    lines(vars1[ind1,1],var1_est,col="red")
+    lines(vars1[ind1,1],var1_est_L95,col="red",lty="dotted")
+    lines(vars1[ind1,1],var1_est_U95,col="red",lty="dotted")
+    lines(vars2[ind2,1],var2_est,col="green",pch=16)
+    lines(vars2[ind2,1],var2_est_L95,col="green",lty="dotted")
+    lines(vars2[ind2,1],var2_est_U95,col="green",lty="dotted")
   }
   
   #Calculate RMSE
