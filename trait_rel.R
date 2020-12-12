@@ -472,7 +472,7 @@ trait_sel=T
 n_trait_sel=-1
 
 # Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=2
+spec_group_sel=3
 
 # ---
 if (propagate_uncer) {
@@ -795,22 +795,25 @@ traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
 basePFT=5
 
+# Select output folder
+output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/TrBR_with_BE_traits_test"
+
 # Set the name for the output file
 if (basePFT==1) {
-  LPJG_outfile <- "LPJG_PFT_insfile_TeBE.ins"
-  LPJG_summaryfile <- "LPJG_PFT_summary_TeBE.csv"
+  LPJG_outfile <- paste(output_fol,"/LPJG_PFT_insfile_TeBE.ins",sep="")
+  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_TeBE.csv",sep="")
 } else if (basePFT==2) {
-  LPJG_outfile <- "LPJG_PFT_insfile_TeBS.ins"
-  LPJG_summaryfile <- "LPJG_PFT_summary_TeBS.csv"
+  LPJG_outfile <- paste(output_fol,"/LPJG_PFT_insfile_TeBS.ins",sep="")
+  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_TeBS.csv",sep="")
 } else if (basePFT==3) {
-  LPJG_outfile <- "LPJG_PFT_insfile_IBS.ins"
-  LPJG_summaryfile <- "LPJG_PFT_summary_IBS.csv"
+  LPJG_outfile <- paste(output_fol,"LPJG_PFT_insfile_IBS.ins",sep="")
+  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_IBS.csv",sep="")
 } else if (basePFT==4) {
-  LPJG_outfile <- "LPJG_PFT_insfile_TrBE.ins"
-  LPJG_summaryfile <- "LPJG_PFT_summary_TrBE.csv"
+  LPJG_outfile <- paste(output_fol,"/LPJG_PFT_insfile_TrBE.ins",sep="")
+  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_TrBE.csv",sep="")
 } else if (basePFT==5) {
-  LPJG_outfile <- "LPJG_PFT_insfile_TrBR.ins"
-  LPJG_summaryfile <- "LPJG_PFT_summary_TrBR.csv"
+  LPJG_outfile <- paste(output_fol,"/LPJG_PFT_insfile_TrBR.ins",sep="")
+  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_TrBR.csv",sep="")
 } else {
   stop("basePFT must be equal to 1, 2, 3, 4 or 5")
 }
