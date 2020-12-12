@@ -14,14 +14,12 @@ traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/
 
 source('sma_multivar_regress.R')
 source('trait_functions.R')
+source('make_bivar_plots.R')
 
 #--- Read in the trait data ---
-#traits=read.table(traitfile)
-#attach(traits)
-#detach(traits)
 
+# Subset only the broadleaf species
 traitb<-subset(traits,group!="CC",drop = T)
-#this is to delete the level that should not exist after subsetting
 traitb<-droplevels(traitb)
 str(traitb)
 attach(traitb)
@@ -30,68 +28,21 @@ attach(traitb)
 trait_BE<-subset(traits,group=="BE",drop = T)
 trait_BDT<-subset(traits,group=="BD" | group=="BT",drop = T)
 
-#--- Bivariate plots with SMA regression ---
+#--- Bivariate plots and statistics with SMA regression ---
+# These are used to fill out the hypothesis framework plot with R
 
-par(mfrow=c(4,4))
-par(mar=c(2,2,2,2))
+# Calculate for all broadleaf
+bivar <- make_bivar_plots(traitb,nbtstrp)
+View(bivar$all_sma_bivar)
 
-TLP_from_P50 <- sma_plot_stats(data.frame(P50,TLP),c("P50","TLP"),nbtstrp,T)
+# Calculate for all evergreen broadleaf
+bivar_BE <- make_bivar_plots(trait_BE,nbtstrp)
+View(bivar_BE$all_sma_bivar)
 
-TLP_from_slope <- sma_plot_stats(data.frame(slope,TLP),c("slope","TLP"),nbtstrp,T)
+# Calculate for all deciduous broadleaf
+bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp)
+View(bivar_BDT$all_sma_bivar)
 
-P50_from_slope <- sma_plot_stats(data.frame(slope,P50),c("slope","P50"),nbtstrp,T)
-
-TLP_from_WD <- sma_plot_stats(data.frame(WD,TLP),c("WD","TLP"),nbtstrp,T)
-
-P50_from_WD <- sma_plot_stats(data.frame(WD,P50),c("WD","P50"),nbtstrp,T)
-
-TLP_from_LMA <- sma_plot_stats(data.frame(LMA,TLP),c("LMA","TLP"),nbtstrp,T)
-
-LS_from_LMA <- sma_plot_stats(data.frame(LMA,LS),c("LMA","LS"),nbtstrp,T)
-
-Ks_from_LSHmax <- sma_plot_stats(data.frame(LS_Hmax,Ks),c("LS*Hmax","Ks"),nbtstrp,T)
-
-Ks_from_P50 <- sma_plot_stats(data.frame(P50,Ks),c("P50","Ks"),nbtstrp,T)
-
-LS_from_TLP <- sma_plot_stats(data.frame(TLP,LS),c("TLP","LS"),nbtstrp,T)
-
-WD_from_LMA <- sma_plot_stats(data.frame(LMA,WD),c("LMA","WD"),nbtstrp,T)
-
-Ks_from_slope <- sma_plot_stats(data.frame(slope,Ks),c("slope","Ks"),nbtstrp,T)
-
-Ks_from_Hmax <- sma_plot_stats(data.frame(Hmax,Ks),c("Hmax","Ks"),nbtstrp,T)
-
-leafN_from_LMA <- sma_plot_stats(data.frame(LMA,leafN),c("LMA","leafN"),nbtstrp,T)
-
-LS_from_KsHmax <- sma_plot_stats(data.frame(Ks_Hmax,LS),c("Ks/Hmax","LS"),nbtstrp,T)
-
-Ks_from_LMA <- sma_plot_stats(data.frame(LMA,Ks),c("LMA","Ks"),nbtstrp,T)
-
-# Make a data frame summarising the fits of the regressions
-all_label1 <- c("TLP","slope","slope","WD","WD","LMA","LMA","LS*Hmax","P50","TLP","LMA","slope","Hmax","LMA","Ks/Hmax","LMA")
-all_label2 <- c("P50","TLP","P50","TLP","P50","TLP","LS","Ks","Ks","LS","WD","Ks","Ks","leafN","LS","Ks")
-all_R2 <- c(TLP_from_P50$R2,TLP_from_slope$R2,P50_from_slope$R2,TLP_from_WD$R2,P50_from_WD$R2,
-               TLP_from_LMA$R2,LS_from_LMA$R2,Ks_from_LSHmax$R2,Ks_from_P50$R2,LS_from_TLP$R2,
-               WD_from_LMA$R2,Ks_from_slope$R2,Ks_from_Hmax$R2,leafN_from_LMA$R2,LS_from_KsHmax$R2,
-               Ks_from_LMA$R2)
-all_R2adj <- c(TLP_from_P50$R2adj,TLP_from_slope$R2adj,P50_from_slope$R2adj,TLP_from_WD$R2adj,P50_from_WD$R2adj,
-               TLP_from_LMA$R2adj,LS_from_LMA$R2adj,Ks_from_LSHmax$R2adj,Ks_from_P50$R2adj,LS_from_TLP$R2adj,
-               WD_from_LMA$R2adj,Ks_from_slope$R2adj,Ks_from_Hmax$R2adj,leafN_from_LMA$R2adj,LS_from_KsHmax$R2adj,
-               Ks_from_LMA$R2adj)
-all_rmse <- c(TLP_from_P50$rmse,TLP_from_slope$rmse,P50_from_slope$rmse,TLP_from_WD$rmse,P50_from_WD$rmse,
-              TLP_from_LMA$rmse,LS_from_LMA$rmse,Ks_from_LSHmax$rmse,Ks_from_P50$rmse,LS_from_TLP$rmse,
-              WD_from_LMA$rmse,Ks_from_slope$rmse,Ks_from_Hmax$rmse,leafN_from_LMA$rmse,LS_from_KsHmax$rmse,
-              Ks_from_LMA$rmse)
-
-all_sma_bivar <- data.frame(all_label1,all_label2,all_R2,all_R2adj,all_rmse)
-View(all_sma_bivar)
-
-#Use up remaining unallocated plots and set back to single plot
-#plot.new()
-#plot.new()
-#plot.new()
-par(mfrow=c(1,1))
-par(mar=c(5.1,4.1,4.1,2.1))
 
 #--- Experiment with different plausible multivariate SMA models, based on our theory ---
 
@@ -776,6 +727,8 @@ leafL_from_LMA <- sma_plot_stats(data.frame(LMA,log(leafL)),c("LMA","leafL"),nbt
 
 
 # Calculate limits of leafN vs LMA to allow estimate of leaf C:N ----------
+
+leafN_from_LMA <- sma_plot_stats(data.frame(LMA,leafN),c("LMA","leafN"),nbtstrp,T)
 
 leafN_from_LMA_limit <- regress_limit_adjust(leafN,LMA,leafN_from_LMA,0.05)
 
