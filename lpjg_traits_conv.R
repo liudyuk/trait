@@ -44,7 +44,7 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
     #Base the calculation on dataset herein
     leaflong_LPJG <- exp(leafL_from_LMA$mod$intercept_R + leafL_from_LMA$mod$slope_R.y1*LMA_e_mean)
     #Apply a minimum of 0.5 for LPJ-GUESS
-    leaflong_LPJG <- pmax(leaflong_LPJG,0.5)
+    #leaflong_LPJG <- pmax(leaflong_LPJG,0.5)
   }
   
   leafN_LPJG <- exp(leafN_from_LMA$mod$intercept_R + leafN_from_LMA$mod$slope_R.y1*LMA_e_mean) # mg N per g leaf
