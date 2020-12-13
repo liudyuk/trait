@@ -1,7 +1,14 @@
 # Script to read in the processed trait data, make bivariate and multivariate SMA regressions and then
 # carry out an optimisation procedure to unify inter-trait relationships across the whole trait dataset.
 #
-# Dependencies: sma_multivar_regress.R
+# Dependencies: 
+# - sma_multivar_regress.R
+# - trait_functions.R
+# - make_bivar_plots.R
+# - multivar_model_selection.R
+# - whittaker_biomes_plot.R
+# - trait_opt.R
+# - hypervolume package (if taking a systematic sample)
 #
 # T. Pugh
 # 15.06.20
@@ -17,6 +24,7 @@ source('trait_functions.R')
 source('make_bivar_plots.R')
 source('multivar_model_selection.R')
 source("whittaker_biomes_plot.R")
+source("trait_opt.R")
 
 #--- Read in the trait data ---
 
@@ -112,6 +120,7 @@ data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5),
 
 whittaker_biomes_plot(data_MATp_MAPp)
 
+
 # Optimisation ------------------------------------------------------------
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 
@@ -121,13 +130,13 @@ limitdataranges=T # Currently does not converge in uncertainty propagation if no
 # Decide whether to run the uncertainty propagation (T) or not (F)
 propagate_uncer=T
 
-# Decide whether to run all trait combinations in the database for LS and Hmax (F), or just a selection (T)
+# Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T)
 trait_sel=T
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified
 n_trait_sel=-1
 
 # Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=3
+spec_group_sel=2
 
 # ---
 if (propagate_uncer) {
@@ -138,7 +147,7 @@ if (propagate_uncer) {
 
 # Get index for selected species group
 if (spec_group_sel==1) {
-  ind_spec_group=1:length(traits$group) # Take everything (assumes that conifers were scopes out at the top of the file)
+  ind_spec_group=1:length(traits$group=='BT' | traits$group=='BD'| traits$group=='BE')
 } else if (spec_group_sel==2) {
   ind_spec_group=which(traits$group=='BT' | traits$group=='BD')
 } else if (spec_group_sel==3) {
@@ -150,10 +159,10 @@ if (spec_group_sel==1) {
 }
 
 # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
-ind=which(!is.na(Ks) & !is.na(LS))
+ind=which(!is.na(traits$Ks) & !is.na(traits$LS))
 
-LS_comb <- LS[ind]
-Ks_comb <- Ks[ind]
+LS_comb <- traits$LS[ind]
+Ks_comb <- traits$Ks[ind]
 
 if (trait_sel) {
   if (n_trait_sel>0) {
@@ -170,6 +179,7 @@ if (trait_sel) {
   } else {
     # Systematic sample
     
+    #install.packages("hypervolume")
     library(hypervolume)
     # Fit a hypervolume (KDE at 95%)
     # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
@@ -206,19 +216,19 @@ if (trait_sel) {
 # ---
 # Select the LMA relationship to use
 if (spec_group_sel==1) {
-  LMA_from_TLP_select=LMA_from_TLP
+  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP
 } else if (spec_group_sel==2) {
-  LMA_from_TLP_select=LMA_from_TLP_BDT
+  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP_BDT
 } else if (spec_group_sel==3) {
-  LMA_from_TLP_select=LMA_from_TLP_BE
+  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP_BE
 } else if (spec_group_sel==4) {
-  LMA_from_TLP_select=LMA_from_TLP_BDT
+  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP_BDT
 } else if (spec_group_sel==5) {
-  LMA_from_TLP_select=LMA_from_TLP_BDT
+  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP_BDT
 }
 
 # ---
-# Actually do the optimisation
+# Do the optimisation
 
 ndata=length(LS_e)
 
@@ -234,7 +244,22 @@ for (dd in 1:ndata) {
   print(dd)
   
   # Carry out the optimisation
-  opt_vals <- trait_opt(P50[ind_spec_group],TLP[ind_spec_group],LMA[ind_spec_group],WD[ind_spec_group],slope[ind_spec_group],LMA_from_TLP_select,TLP_from_LS_LMA_P50,P50_from_TLP_Ks,slope_from_P50_TLP_Ks,WD_from_slope_P50slope,LMA_from_LS,P50_from_Ks,TLP_from_P50,Ks_e[dd],LS_e[dd],n_uncer)
+  opt_vals <- trait_opt(traits$P50[ind_spec_group],
+                        traits$TLP[ind_spec_group],
+                        traits$LMA[ind_spec_group],
+                        traits$WD[ind_spec_group],
+                        traits$slope[ind_spec_group],
+                        LMA_from_TLP_select,
+                        TLP_multivar$TLP_from_LS_LMA_P50,
+                        P50_multivar$P50_from_TLP_Ks,
+                        slope_multivar$slope_from_P50_TLP_Ks,
+                        WD_multivar$WD_from_slope_P50slope,
+                        bivar$LMA_from_TLP,
+                        bivar$P50_from_Ks,
+                        bivar$TLP_from_P50,
+                        Ks_e[dd],
+                        LS_e[dd],
+                        n_uncer)
   
   P50_e[dd,] <- opt_vals$P50_e
   TLP_e[dd,] <- opt_vals$TLP_e
@@ -274,104 +299,104 @@ slope_e_95perc=unname(apply(slope_e, 1, quantile,0.95,na.rm=T))
 par(mfrow=c(4,4))
 par(mar=c(2,2,2,2))
 
-plot(TLP,P50,pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
+plot(trait_B$TLP,trait_B$P50,pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
 points(TLP_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(TLP_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(TLP_e[,1],P50_e_5perc,col="green",pch=16)
 points(TLP_e[,1],P50_e_95perc,col="green",pch=16)
 
-plot(P50,TLP,pch=16,xlab="P50",ylab="TLP",main="P50 vs TLP")
+plot(trait_B$P50,trait_B$TLP,pch=16,xlab="P50",ylab="TLP",main="P50 vs TLP")
 points(P50_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(P50_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(P50_e[,1],TLP_e_5perc,col="green",pch=16)
 points(P50_e[,1],TLP_e_95perc,col="green",pch=16)
 
-plot(TLP,slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
+plot(trait_B$TLP,trait_B$slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
 points(TLP_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(TLP_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(TLP_e[,1],slope_e_5perc,col="green",pch=16)
 points(TLP_e[,1],slope_e_95perc,col="green",pch=16)
 
-plot(slope,TLP,pch=16,xlab="slope",ylab="TLP",main="slope vs TLP")
+plot(trait_B$slope,trait_B$TLP,pch=16,xlab="slope",ylab="TLP",main="slope vs TLP")
 points(slope_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(slope_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(slope_e[,1],TLP_e_5perc,col="green",pch=16)
 points(slope_e[,1],TLP_e_95perc,col="green",pch=16)
 
-plot(P50,slope,pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
+plot(trait_B$P50,trait_B$slope,pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
 points(P50_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(P50_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(P50_e[,1],slope_e_5perc,col="green",pch=16)
 points(P50_e[,1],slope_e_95perc,col="green",pch=16)
 
-plot(slope,P50,pch=16,xlab="slope",ylab="P50",main="slope vs P50")
+plot(trait_B$slope,trait_B$P50,pch=16,xlab="slope",ylab="P50",main="slope vs P50")
 points(slope_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(slope_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(slope_e[,1],P50_e_5perc,col="green",pch=16)
 points(slope_e[,1],P50_e_95perc,col="green",pch=16)
 
-plot(TLP,WD,pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
+plot(trait_B$TLP,trait_B$WD,pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
 points(TLP_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(TLP_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(TLP_e[,1],WD_e_5perc,col="green",pch=16)
 points(TLP_e[,1],WD_e_95perc,col="green",pch=16)
 
-plot(WD,TLP,pch=16,xlab="WD",ylab="TLP",main="WD vs TLP")
+plot(trait_B$WD,trait_B$TLP,pch=16,xlab="WD",ylab="TLP",main="WD vs TLP")
 points(WD_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(WD_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(WD_e[,1],TLP_e_5perc,col="green",pch=16)
 points(WD_e[,1],TLP_e_95perc,col="green",pch=16)
 
-plot(P50,WD,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
+plot(trait_B$P50,trait_B$WD,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
 points(P50_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(P50_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(P50_e[,1],WD_e_5perc,col="green",pch=16)
 points(P50_e[,1],WD_e_95perc,col="green",pch=16)
 
-plot(WD,P50,pch=16,xlab="WD",ylab="P50",main="WD vs P50")
+plot(trait_B$WD,trait_B$P50,pch=16,xlab="WD",ylab="P50",main="WD vs P50")
 points(WD_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(WD_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(WD_e[,1],P50_e_5perc,col="green",pch=16)
 points(WD_e[,1],P50_e_95perc,col="green",pch=16)
 
 #NOTE: From here onwards I have not made the plots in both directions
-plot(TLP,LMA,pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
+plot(trait_B$TLP,trait_B$LMA,pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
 points(TLP_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(TLP_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(TLP_e[,1],LMA_e_5perc,col="green",pch=16)
 points(TLP_e[,1],LMA_e_95perc,col="green",pch=16)
 
-plot(LS,LMA,pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
+plot(trait_B$LS,trait_B$LMA,pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
 points(LS_e,LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(LS_e,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(LS_e,LMA_e_5perc,col="green",pch=16)
 points(LS_e,LMA_e_95perc,col="green",pch=16)
 
-plot(Ks,P50,pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
+plot(trait_B$Ks,trait_B$P50,pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
 points(Ks_e,P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(Ks_e,P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(Ks_e,P50_e_5perc,col="green",pch=16)
 points(Ks_e,P50_e_95perc,col="green",pch=16)
 
-plot(LS,TLP,pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
+plot(trait_B$LS,trait_B$TLP,pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
 points(LS_e,TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(LS_e,TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(LS_e,TLP_e_5perc,col="green",pch=16)
 points(LS_e,TLP_e_95perc,col="green",pch=16)
 
-plot(WD,LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
+plot(trait_B$WD,trait_B$LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
 points(WD_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(WD_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(WD_e[,1],LMA_e_5perc,col="green",pch=16)
 points(WD_e[,1],LMA_e_95perc,col="green",pch=16)
 
-plot(Ks,slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
+plot(trait_B$Ks,trait_B$slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
 points(Ks_e,slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
 points(Ks_e,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
 points(Ks_e,slope_e_5perc,col="green",pch=16)
 points(Ks_e,slope_e_95perc,col="green",pch=16)
 
-#Use up remaining unallocated plots and set back to single plot
+#Set back to single plot
 par(mfrow=c(1,1))
 par(mar=c(5.1,4.1,4.1,2.1))
 
