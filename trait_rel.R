@@ -16,6 +16,7 @@ source('sma_multivar_regress.R')
 source('trait_functions.R')
 source('make_bivar_plots.R')
 source('multivar_model_selection.R')
+source("whittaker_biomes_plot.R")
 
 #--- Read in the trait data ---
 
@@ -82,6 +83,34 @@ WD_multivar <- WD_multivar_test(trait_B)
 
 slope_multivar <- slope_multivar_test(trait_B)
 
+
+# Make plots showing quality of fits and climate coverage -----------------
+
+MATp1 <- trait_B$MAT[P50_multivar$P50_from_TLP_Ks$dataused]
+MAPp1 <- trait_B$MAP[P50_multivar$P50_from_TLP_Ks$dataused]/10
+name1 <- rep("P50",length(MATp1))
+
+MATp2 <- trait_B$MAT[TLP_multivar$TLP_from_LS_LMA_P50$dataused]
+MAPp2 <- trait_B$MAP[TLP_multivar$TLP_from_LS_LMA_P50$dataused]/10
+name2 <- rep("TLP",length(MATp2))
+
+MATp3 <- trait_B$MAT[LMA_multivar$LMA_from_TLP$dataused]
+MAPp3 <- trait_B$MAP[LMA_multivar$LMA_from_TLP$dataused]/10
+name3 <- rep("LMA",length(MATp3))
+
+MATp4 <- trait_B$MAT[WD_multivar$WD_from_slope_P50slope$dataused]
+MAPp4 <- trait_B$MAP[WD_multivar$WD_from_slope_P50slope$dataused]/10
+name4 <- rep("WD",length(MATp4))
+
+MATp5 <- trait_B$MAT[slope_multivar$slope_from_P50_TLP_Ks$dataused]
+MAPp5 <- trait_B$MAP[slope_multivar$slope_from_P50_TLP_Ks$dataused]/10
+name5 <- rep("Slope",length(MATp5))
+
+data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5),
+                             "MAPp"=c(MAPp1,MAPp2,MAPp3,MAPp4,MAPp5),
+                             "name"=c(name1,name2,name3,name4,name5))
+
+whittaker_biomes_plot(data_MATp_MAPp)
 
 # Optimisation ------------------------------------------------------------
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
