@@ -9,6 +9,7 @@
 # - whittaker_biomes_plot.R
 # - trait_opt.R
 # - opt_test_plots.R
+# - lpjg_traits_conv.R
 # - hypervolume package (if taking a systematic sample)
 #
 # T. Pugh
@@ -27,6 +28,7 @@ source('multivar_model_selection.R')
 source("whittaker_biomes_plot.R")
 source("trait_opt.R")
 source("opt_test_plots.R")
+source('lpjg_traits_conv.R')
 
 #--- Read in the trait data ---
 
@@ -141,7 +143,7 @@ limitdataranges=T # Currently does not converge in uncertainty propagation if no
 propagate_uncer=T
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T)
-trait_sel=T
+trait_sel=F
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified
 n_trait_sel=-1
 
@@ -305,14 +307,10 @@ slope_e_95perc=unname(apply(slope_e, 1, quantile,0.95,na.rm=T))
 
 #Make plots to compare with original data
 
-if (spec_group_sel==1) {
+if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
   trait_plot=trait_BDT
 } else if (spec_group_sel==2) {
   trait_plot=trait_BE
-} else if (spec_group_sel==3) {
-  trait_plot=trait_BDT
-} else if (spec_group_sel==4) {
-  trait_plot=trait_BDT
 }
 
 opt_test_plots(trait_plot,
@@ -338,42 +336,11 @@ opt_test_plots(trait_plot,
                slope_e)
 
 
-# Calculate the RMSE
+# Calculate the RMSE (only if running with actual values of Ks and LS)
 
-#P50_res <- P50[ind]-P50_e_mean
-P50_res <- P50[ind]-P50_e[,1]
-P50_e_rmse <- sqrt(mean(P50_res^2,na.rm=T))
-P50_e_ndata <- length(which(is.na(P50_res)==F))
-
-#TLP_res <- TLP[ind]-TLP_e_mean
-TLP_res <- TLP[ind]-TLP_e[,1]
-TLP_e_rmse <- sqrt(mean(TLP_res^2,na.rm=T))
-TLP_e_ndata <- length(which(is.na(TLP_res)==F))
-
-#LMA_res <- LMA[ind]-LMA_e_mean
-LMA_res <- LMA[ind]-LMA_e[,1]
-LMA_e_rmse <- sqrt(mean(LMA_res^2,na.rm=T))
-LMA_e_ndata <- length(which(is.na(LMA_res)==F))
-
-#WD_res <- WD[ind]-WD_e_mean
-WD_res <- WD[ind]-WD_e[,1]
-WD_e_rmse <- sqrt(mean(WD_res^2,na.rm=T))
-WD_e_ndata <- length(which(is.na(WD_res)==F))
-
-#slope_res <- slope[ind]-slope_e_mean
-slope_res <- slope[ind]-slope_e[,1]
-slope_e_rmse <- sqrt(mean(slope_res^2,na.rm=T))
-slope_e_ndata <- length(which(is.na(slope_res)==F))
-
-# Compare to RMSE from best multivariate regression
-
-all_e_rmse <- c(P50_e_rmse,TLP_e_rmse,LMA_e_rmse,WD_e_rmse,slope_e_rmse)
-all_e_ndata <- c(P50_e_ndata,TLP_e_ndata,LMA_e_ndata,WD_e_ndata,slope_e_ndata)
-all_multivar_rmse <- c(P50_from_TLP_Ks$rmse,TLP_from_LS_LMA_P50$rmse,LMA_from_TLP$rmse,WD_from_slope_P50slope$rmse,slope_from_P50_TLP_Ks$rmse)
-all_multivar_ndata <- c(P50_from_TLP_Ks$ndata,TLP_from_LS_LMA_P50$ndata,LMA_from_TLP$ndata,WD_from_slope_P50slope$ndata,slope_from_P50_TLP_Ks$ndata)
-
-all_rmse_comp <- data.frame(all_e_rmse,all_e_ndata,all_multivar_rmse,all_multivar_ndata)
-View(all_rmse_comp)
+if(trait_sel==F) {
+  opt_rmse(traits,P50_e,TLP_e,LMA_e,WD_e,slope_e,ind)
+}
 
 
 # Write the optimised trait values out to a file
@@ -404,8 +371,6 @@ points(LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="r
 
 
 # Convert to the values needed in LPJ-GUESS and write out -----------------
-
-source('lpjg_traits_conv.R')
 
 traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                                 LS_e,WD_e_mean,Ks_e,
