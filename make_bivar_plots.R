@@ -21,7 +21,7 @@ make_bivar_plots <- function(trait,nbtstrp) {
   
   WD_from_slope <- sma_plot_stats(data.frame(trait$slope,trait$WD),c("slope","WD"),nbtstrp,T)
   
-  TLP_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$TLP),c("LMA","TLP"),nbtstrp,T)
+  LMA_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$LMA),c("TLP","LMA"),nbtstrp,T)
   
   LS_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$LS),c("LMA","LS"),nbtstrp,T)
   
@@ -48,7 +48,7 @@ make_bivar_plots <- function(trait,nbtstrp) {
               TLP_from_WD$R,
               WD_from_P50$R,
               WD_from_slope$R,
-              TLP_from_LMA$R,
+              LMA_from_TLP$R,
               LS_from_LMA$R,
               P50_from_Ks$R,
               P50_from_LS$R,
@@ -61,7 +61,7 @@ make_bivar_plots <- function(trait,nbtstrp) {
               TLP_from_WD$R2,
               WD_from_P50$R2,
               WD_from_slope$R2,
-              TLP_from_LMA$R2,
+              LMA_from_TLP$R2,
               LS_from_LMA$R2,
               P50_from_Ks$R2,
               P50_from_LS$R2,
@@ -74,7 +74,7 @@ make_bivar_plots <- function(trait,nbtstrp) {
                  TLP_from_WD$R2adj,
                  WD_from_P50$R2adj,
                  WD_from_slope$R2adj,
-                 TLP_from_LMA$R2adj,
+                 LMA_from_TLP$R2adj,
                  LS_from_LMA$R2adj,
                  P50_from_Ks$R2adj,
                  P50_from_LS$R2adj,
@@ -87,7 +87,7 @@ make_bivar_plots <- function(trait,nbtstrp) {
                 TLP_from_WD$rmse,
                 WD_from_P50$rmse,
                 WD_from_slope$rmse,
-                TLP_from_LMA$rmse,
+                LMA_from_TLP$rmse,
                 LS_from_LMA$rmse,
                 P50_from_Ks$rmse,
                 P50_from_LS$rmse,
@@ -103,7 +103,7 @@ make_bivar_plots <- function(trait,nbtstrp) {
                       "TLP_from_WD"=TLP_from_WD,
                       "WD_from_P50"=WD_from_P50,
                       "WD_from_slope"=WD_from_slope,
-                      "TLP_from_LMA"=TLP_from_LMA,
+                      "LMA_from_TLP"=LMA_from_TLP,
                       "LS_from_LMA"=LS_from_LMA,
                       "P50_from_Ks"=P50_from_Ks,
                       "P50_from_LS"=P50_from_LS,

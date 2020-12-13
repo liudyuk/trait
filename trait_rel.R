@@ -8,6 +8,7 @@
 # - multivar_model_selection.R
 # - whittaker_biomes_plot.R
 # - trait_opt.R
+# - opt_test_plots.R
 # - hypervolume package (if taking a systematic sample)
 #
 # T. Pugh
@@ -25,6 +26,7 @@ source('make_bivar_plots.R')
 source('multivar_model_selection.R')
 source("whittaker_biomes_plot.R")
 source("trait_opt.R")
+source("opt_test_plots.R")
 
 #--- Read in the trait data ---
 
@@ -78,8 +80,12 @@ TLP_multivar <- TLP_multivar_test(trait_B)
 
 
 # LMA fits -----------------------------------------------------------------
+# Separate for BE and BDT (BD + BT) on the basis that LMA has a very different range and set of bivariate relationships for these
+# two different groups, unlike the other traits here.
 
-LMA_multivar <- LMA_multivar_test(trait_B,trait_BE,trait_BDT)
+LMA_multivar_BE <- LMA_multivar_test_BE(trait_BE)
+
+LMA_multivar_BDT <- LMA_multivar_test_BDT(trait_BDT)
 
 
 # WD fits -----------------------------------------------------------------
@@ -102,21 +108,25 @@ MATp2 <- trait_B$MAT[TLP_multivar$TLP_from_LS_LMA_P50$dataused]
 MAPp2 <- trait_B$MAP[TLP_multivar$TLP_from_LS_LMA_P50$dataused]/10
 name2 <- rep("TLP",length(MATp2))
 
-MATp3 <- trait_B$MAT[LMA_multivar$LMA_from_TLP$dataused]
-MAPp3 <- trait_B$MAP[LMA_multivar$LMA_from_TLP$dataused]/10
-name3 <- rep("LMA",length(MATp3))
+MATp3 <- trait_B$MAT[WD_multivar$WD_from_slope_P50slope$dataused]
+MAPp3 <- trait_B$MAP[WD_multivar$WD_from_slope_P50slope$dataused]/10
+name3 <- rep("WD",length(MATp3))
 
-MATp4 <- trait_B$MAT[WD_multivar$WD_from_slope_P50slope$dataused]
-MAPp4 <- trait_B$MAP[WD_multivar$WD_from_slope_P50slope$dataused]/10
-name4 <- rep("WD",length(MATp4))
+MATp4 <- trait_B$MAT[slope_multivar$slope_from_P50_TLP_Ks$dataused]
+MAPp4 <- trait_B$MAP[slope_multivar$slope_from_P50_TLP_Ks$dataused]/10
+name4 <- rep("Slope",length(MATp4))
 
-MATp5 <- trait_B$MAT[slope_multivar$slope_from_P50_TLP_Ks$dataused]
-MAPp5 <- trait_B$MAP[slope_multivar$slope_from_P50_TLP_Ks$dataused]/10
-name5 <- rep("Slope",length(MATp5))
+MATp5 <- trait_BE$MAT[LMA_multivar_BE$LMA_from_TLP$dataused]
+MAPp5 <- trait_BE$MAP[LMA_multivar_BE$LMA_from_TLP$dataused]/10
+name5 <- rep("LMA (BE)",length(MATp5))
 
-data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5),
-                             "MAPp"=c(MAPp1,MAPp2,MAPp3,MAPp4,MAPp5),
-                             "name"=c(name1,name2,name3,name4,name5))
+MATp6 <- trait_BDT$MAT[LMA_multivar_BDT$LMA_from_TLP$dataused]
+MAPp6 <- trait_BDT$MAP[LMA_multivar_BDT$LMA_from_TLP$dataused]/10
+name6 <- rep("LMA (BD)",length(MATp6))
+
+data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6),
+                             "MAPp"=c(MAPp1,MAPp2,MAPp3,MAPp4,MAPp5,MAPp6),
+                             "name"=c(name1,name2,name3,name4,name5,name6))
 
 whittaker_biomes_plot(data_MATp_MAPp)
 
@@ -135,7 +145,7 @@ trait_sel=T
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified
 n_trait_sel=-1
 
-# Run for all Broadleaved (i.e. BE + BT + BD) (=1), or all deciduous (BT + BD) (=2), or BE (=3), or BT (=4), or BD (=5). This is used to set the maximum and minimum bounds in trait_opt().
+# Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel=2
 
 # ---
@@ -147,14 +157,12 @@ if (propagate_uncer) {
 
 # Get index for selected species group
 if (spec_group_sel==1) {
-  ind_spec_group=1:length(traits$group=='BT' | traits$group=='BD'| traits$group=='BE')
-} else if (spec_group_sel==2) {
   ind_spec_group=which(traits$group=='BT' | traits$group=='BD')
-} else if (spec_group_sel==3) {
+} else if (spec_group_sel==2) {
   ind_spec_group=which(traits$group=='BE')
-} else if (spec_group_sel==4) {
+} else if (spec_group_sel==3) {
   ind_spec_group=which(traits$group=='BT')
-} else if (spec_group_sel==5) {
+} else if (spec_group_sel==4) {
   ind_spec_group=which(traits$group=='BD')
 }
 
@@ -216,15 +224,13 @@ if (trait_sel) {
 # ---
 # Select the LMA relationship to use
 if (spec_group_sel==1) {
-  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP
+  use_LMA_from_TLP_LS=F
 } else if (spec_group_sel==2) {
-  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP_BDT
+  use_LMA_from_TLP_LS=T
 } else if (spec_group_sel==3) {
-  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP_BE
+  use_LMA_from_TLP_LS=F
 } else if (spec_group_sel==4) {
-  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP_BDT
-} else if (spec_group_sel==5) {
-  LMA_from_TLP_select=LMA_multivar$LMA_from_TLP_BDT
+  use_LMA_from_TLP_LS=F
 }
 
 # ---
@@ -249,7 +255,8 @@ for (dd in 1:ndata) {
                         traits$LMA[ind_spec_group],
                         traits$WD[ind_spec_group],
                         traits$slope[ind_spec_group],
-                        LMA_from_TLP_select,
+                        LMA_multivar_BDT$LMA_from_TLP,
+                        LMA_multivar_BE$LMA_from_TLP_LS,
                         TLP_multivar$TLP_from_LS_LMA_P50,
                         P50_multivar$P50_from_TLP_Ks,
                         slope_multivar$slope_from_P50_TLP_Ks,
@@ -259,7 +266,8 @@ for (dd in 1:ndata) {
                         bivar$TLP_from_P50,
                         Ks_e[dd],
                         LS_e[dd],
-                        n_uncer)
+                        n_uncer,
+                        use_LMA_from_TLP_LS)
   
   P50_e[dd,] <- opt_vals$P50_e
   TLP_e[dd,] <- opt_vals$TLP_e
@@ -296,109 +304,38 @@ slope_e_95perc=unname(apply(slope_e, 1, quantile,0.95,na.rm=T))
 
 
 #Make plots to compare with original data
-par(mfrow=c(4,4))
-par(mar=c(2,2,2,2))
 
-plot(trait_B$TLP,trait_B$P50,pch=16,xlab="TLP",ylab="P50",main="TLP vs P50")
-points(TLP_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(TLP_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(TLP_e[,1],P50_e_5perc,col="green",pch=16)
-points(TLP_e[,1],P50_e_95perc,col="green",pch=16)
+if (spec_group_sel==1) {
+  trait_plot=trait_BDT
+} else if (spec_group_sel==2) {
+  trait_plot=trait_BE
+} else if (spec_group_sel==3) {
+  trait_plot=trait_BDT
+} else if (spec_group_sel==4) {
+  trait_plot=trait_BDT
+}
 
-plot(trait_B$P50,trait_B$TLP,pch=16,xlab="P50",ylab="TLP",main="P50 vs TLP")
-points(P50_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(P50_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(P50_e[,1],TLP_e_5perc,col="green",pch=16)
-points(P50_e[,1],TLP_e_95perc,col="green",pch=16)
-
-plot(trait_B$TLP,trait_B$slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
-points(TLP_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(TLP_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(TLP_e[,1],slope_e_5perc,col="green",pch=16)
-points(TLP_e[,1],slope_e_95perc,col="green",pch=16)
-
-plot(trait_B$slope,trait_B$TLP,pch=16,xlab="slope",ylab="TLP",main="slope vs TLP")
-points(slope_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(slope_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(slope_e[,1],TLP_e_5perc,col="green",pch=16)
-points(slope_e[,1],TLP_e_95perc,col="green",pch=16)
-
-plot(trait_B$P50,trait_B$slope,pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
-points(P50_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(P50_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(P50_e[,1],slope_e_5perc,col="green",pch=16)
-points(P50_e[,1],slope_e_95perc,col="green",pch=16)
-
-plot(trait_B$slope,trait_B$P50,pch=16,xlab="slope",ylab="P50",main="slope vs P50")
-points(slope_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(slope_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(slope_e[,1],P50_e_5perc,col="green",pch=16)
-points(slope_e[,1],P50_e_95perc,col="green",pch=16)
-
-plot(trait_B$TLP,trait_B$WD,pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
-points(TLP_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(TLP_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(TLP_e[,1],WD_e_5perc,col="green",pch=16)
-points(TLP_e[,1],WD_e_95perc,col="green",pch=16)
-
-plot(trait_B$WD,trait_B$TLP,pch=16,xlab="WD",ylab="TLP",main="WD vs TLP")
-points(WD_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(WD_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(WD_e[,1],TLP_e_5perc,col="green",pch=16)
-points(WD_e[,1],TLP_e_95perc,col="green",pch=16)
-
-plot(trait_B$P50,trait_B$WD,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
-points(P50_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(P50_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(P50_e[,1],WD_e_5perc,col="green",pch=16)
-points(P50_e[,1],WD_e_95perc,col="green",pch=16)
-
-plot(trait_B$WD,trait_B$P50,pch=16,xlab="WD",ylab="P50",main="WD vs P50")
-points(WD_e[,1],P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(WD_e[,1],P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(WD_e[,1],P50_e_5perc,col="green",pch=16)
-points(WD_e[,1],P50_e_95perc,col="green",pch=16)
-
-#NOTE: From here onwards I have not made the plots in both directions
-plot(trait_B$TLP,trait_B$LMA,pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
-points(TLP_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(TLP_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(TLP_e[,1],LMA_e_5perc,col="green",pch=16)
-points(TLP_e[,1],LMA_e_95perc,col="green",pch=16)
-
-plot(trait_B$LS,trait_B$LMA,pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
-points(LS_e,LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(LS_e,LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(LS_e,LMA_e_5perc,col="green",pch=16)
-points(LS_e,LMA_e_95perc,col="green",pch=16)
-
-plot(trait_B$Ks,trait_B$P50,pch=16,xlab="Ks",ylab="P50",main="Ks vs P50")
-points(Ks_e,P50_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(Ks_e,P50_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(Ks_e,P50_e_5perc,col="green",pch=16)
-points(Ks_e,P50_e_95perc,col="green",pch=16)
-
-plot(trait_B$LS,trait_B$TLP,pch=16,xlab="LS",ylab="TLP",main="LS vs TLP")
-points(LS_e,TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(LS_e,TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(LS_e,TLP_e_5perc,col="green",pch=16)
-points(LS_e,TLP_e_95perc,col="green",pch=16)
-
-plot(trait_B$WD,trait_B$LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
-points(WD_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(WD_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(WD_e[,1],LMA_e_5perc,col="green",pch=16)
-points(WD_e[,1],LMA_e_95perc,col="green",pch=16)
-
-plot(trait_B$Ks,trait_B$slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
-points(Ks_e,slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
-points(Ks_e,slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-points(Ks_e,slope_e_5perc,col="green",pch=16)
-points(Ks_e,slope_e_95perc,col="green",pch=16)
-
-#Set back to single plot
-par(mfrow=c(1,1))
-par(mar=c(5.1,4.1,4.1,2.1))
+opt_test_plots(trait_plot,
+               TLP_e_mean,
+               TLP_e_5perc,
+               TLP_e_95perc,
+               TLP_e,
+               P50_e_mean,
+               P50_e_5perc,
+               P50_e_95perc,
+               P50_e,
+               LMA_e_mean,
+               LMA_e_5perc,
+               LMA_e_95perc,
+               LMA_e,
+               WD_e_mean,
+               WD_e_5perc,
+               WD_e_95perc,
+               WD_e,
+               slope_e_mean,
+               slope_e_5perc,
+               slope_e_95perc,
+               slope_e)
 
 
 # Calculate the RMSE

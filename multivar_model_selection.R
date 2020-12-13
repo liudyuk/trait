@@ -146,33 +146,34 @@ TLP_multivar_test <- function(trait) {
   return(return_vals)
 }
 
-LMA_multivar_test <- function(trait,trait_BE,trait_BDT) {
+LMA_multivar_test_BDT <- function(trait_BDT) {
+  # This version for BD and BT only.
   
   # LMA from TLP, LS and WD
-  LMA_from_TLP_LS_WD <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$WD,trait$LMA),c("TLP","LS","WD","LMA"),nbtstrp)
-  plot(trait$LMA[LMA_from_TLP_LS_WD$dataused],LMA_from_TLP_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  LMA_from_TLP_LS_WD <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$WD,trait_BDT$LMA),c("TLP","LS","WD","LMA"),nbtstrp)
+  plot(trait_BDT$LMA[LMA_from_TLP_LS_WD$dataused],LMA_from_TLP_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from TLP and LS
-  LMA_from_TLP_LS <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$LMA),c("TLP","LS","LMA"),nbtstrp)
-  plot(trait$LMA[LMA_from_TLP_LS$dataused],LMA_from_TLP_LS$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  LMA_from_TLP_LS <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$LMA),c("TLP","LS","LMA"),nbtstrp)
+  plot(trait_BDT$LMA[LMA_from_TLP_LS$dataused],LMA_from_TLP_LS$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from TLP and WD
-  LMA_from_TLP_WD <- sma_plot_stats(data.frame(trait$TLP,trait$WD,trait$LMA),c("TLP","WD","LMA"),nbtstrp)
-  plot(trait$LMA[LMA_from_TLP_WD$dataused],LMA_from_TLP_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  LMA_from_TLP_WD <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$WD,trait_BDT$LMA),c("TLP","WD","LMA"),nbtstrp)
+  plot(trait_BDT$LMA[LMA_from_TLP_WD$dataused],LMA_from_TLP_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from LS and WD
-  LMA_from_LS_WD <- sma_plot_stats(data.frame(trait$LS,trait$WD,trait$LMA),c("LS","WD","LMA"),nbtstrp)
-  plot(trait$LMA[LMA_from_LS_WD$dataused],LMA_from_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  LMA_from_LS_WD <- sma_plot_stats(data.frame(trait_BDT$LS,trait_BDT$WD,trait_BDT$LMA),c("LS","WD","LMA"),nbtstrp)
+  plot(trait_BDT$LMA[LMA_from_LS_WD$dataused],LMA_from_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from TLP
-  LMA_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$LMA),c("TLP","LMA"),nbtstrp)
-  plot(trait$LMA[LMA_from_TLP$dataused],LMA_from_TLP$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  LMA_from_TLP <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LMA),c("TLP","LMA"),nbtstrp)
+  plot(trait_BDT$LMA[LMA_from_TLP$dataused],LMA_from_TLP$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from LS
-  LMA_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$LMA),c("LS","LMA"),nbtstrp)
+  LMA_from_LS <- sma_plot_stats(data.frame(trait_BDT$LS,trait_BDT$LMA),c("LS","LMA"),nbtstrp)
   
   # LMA from WD
-  LMA_from_WD <- sma_plot_stats(data.frame(trait$WD,trait$LMA),c("WD","LMA"),nbtstrp)
+  LMA_from_WD <- sma_plot_stats(data.frame(trait_BDT$WD,trait_BDT$LMA),c("WD","LMA"),nbtstrp)
   
   # Summarise statistics
   all_testnames_LMA <- c("LMA_from_TLP_LS_WD","LMA_from_TLP_LS","LMA_from_TLP_WD","LMA_from_LS_WD","LMA_from_TLP","LMA_from_LS","LMA_from_WD")
@@ -184,35 +185,80 @@ LMA_multivar_test <- function(trait,trait_BE,trait_BDT) {
   all_LMA <- data.frame(all_testnames_LMA,all_R2_LMA,all_R2adj_LMA,all_rmse_LMA,all_ndata_LMA)
   View(all_LMA)
   
-  # CHOICE: best model in R2 terms is LMA_from_LS_WD, but in RMSE is (marginally) LMA_from_TLP
-  # Choose to go with LMA_from_TLP on the basis that it better fits our hypothesis framework, there is also a clearer conceptual link between TLP and LMA than LS and LMA (and WD link is only expected for evergreen species)
+  # CHOICE: best model is LMA_from_TLP
   
   # Test MAT and PPT coverage of species for chosen model
-  plot(trait$MAT[LMA_from_TLP$dataused],trait$MAP[LMA_from_TLP$dataused])
+  plot(trait_BDT$MAT[LMA_from_TLP$dataused],trait_BDT$MAP[LMA_from_TLP$dataused])
   # RESULT: WIDE CLIMATE COVERAGE
   
   # DECISION: LMA_from_TLP
+
+  return_vals <- list("all_LMA"=all_LMA,
+                      "LMA_from_TLP"=LMA_from_TLP)
+  return(return_vals)
+}
+
+LMA_multivar_test_BE <- function(trait_BE) {
+  # This version for BE only.
   
-  # CHECK: Range of LMA differs substantially between evergreen and deciduous, whilst that for TLP does not. Is this relationship robust for both BE and BD+BT?
+  # LMA from TLP, LS and WD
+  LMA_from_TLP_LS_WD <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$WD,trait_BE$LMA),c("TLP","LS","WD","LMA"),nbtstrp)
+  plot(trait_BE$LMA[LMA_from_TLP_LS_WD$dataused],LMA_from_TLP_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
-  LMA_from_TLP_BEvsBDBT <- sma_plot_stats_comp(data.frame(trait_BE$LMA,trait_BE$TLP),data.frame(trait_BDT$LMA,trait_BDT$TLP),c("LMA","TLP"),nbtstrp,T)
+  # LMA from TLP and LS
+  LMA_from_TLP_LS <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$LMA),c("TLP","LS","LMA"),nbtstrp)
+  plot(trait_BE$LMA[LMA_from_TLP_LS$dataused],LMA_from_TLP_LS$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
-  # RESULT: Relationship is significantly different depending on whether deciduous or evergreen
-  # Therefore define relationship separately for these two groups
+  # LMA from TLP and WD
+  LMA_from_TLP_WD <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$WD,trait_BE$LMA),c("TLP","WD","LMA"),nbtstrp)
+  plot(trait_BE$LMA[LMA_from_TLP_WD$dataused],LMA_from_TLP_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
-  # LMA from TLP (BE)
-  LMA_from_TLP_BE <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$LMA),c("TLP","LMA"),nbtstrp)
-  plot(trait_BE$LMA[LMA_from_TLP_BE$dataused],LMA_from_TLP_BE$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est (BE)")
+  # LMA from LS and WD
+  LMA_from_LS_WD <- sma_plot_stats(data.frame(trait_BE$LS,trait_BE$WD,trait_BE$LMA),c("LS","WD","LMA"),nbtstrp)
+  plot(trait_BE$LMA[LMA_from_LS_WD$dataused],LMA_from_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
-  # LMA from TLP (BD+BT)
-  LMA_from_TLP_BDT <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LMA),c("TLP","LMA"),nbtstrp)
-  plot(trait_BDT$LMA[LMA_from_TLP_BDT$dataused],LMA_from_TLP_BDT$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est (BD+BT)")
+  # LMA from TLP
+  LMA_from_TLP <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$LMA),c("TLP","LMA"),nbtstrp)
+  plot(trait_BE$LMA[LMA_from_TLP$dataused],LMA_from_TLP$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
-  # DECISION: Apply different LMA_from_TLP relationship depending on whether making assessments for deciduous or evergreen broadleaves
+  # LMA from LS
+  LMA_from_LS <- sma_plot_stats(data.frame(trait_BE$LS,trait_BE$LMA),c("LS","LMA"),nbtstrp)
+  
+  # LMA from WD
+  LMA_from_WD <- sma_plot_stats(data.frame(trait_BE$WD,trait_BE$LMA),c("WD","LMA"),nbtstrp)
+  
+  # Some of the above combinations have relatively high R2adj, but very reduced data points. Therefore test if the worse-performing combinations are only worse performing because they include a greater diversity of data.
+  
+  # LMA from LS and WD (same species as for LS, WD and TLP)
+  LMA_from_LS_WD_limitTLPLSWD <- sma_plot_stats(data.frame(trait_BE$LS,trait_BE$WD,trait_BE$LMA),c("LS","WD","LMA"),nbtstrp,F,LMA_from_TLP_LS_WD$dataused)
+  plot(trait_BE$LMA[LMA_from_LS_WD_limitTLPLSWD$dataused],LMA_from_LS_WD_limitTLPLSWD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  
+  # LMA from TLP and WD (same species as for LS, WD and TLP)
+  LMA_from_TLP_WD_limitTLPLSWD <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$WD,trait_BE$LMA),c("TLP","WD","LMA"),nbtstrp,F,LMA_from_TLP_LS_WD$dataused)
+  plot(trait_BE$LMA[LMA_from_TLP_WD_limitTLPLSWD$dataused],LMA_from_TLP_WD_limitTLPLSWD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  
+  # Summarise statistics
+  all_testnames_LMA <- c("LMA_from_TLP_LS_WD","LMA_from_TLP_LS","LMA_from_TLP_WD","LMA_from_LS_WD","LMA_from_TLP","LMA_from_LS","LMA_from_WD","LMA_from_LS_WD_limitTLPLSWD","LMA_from_TLP_WD_limitTLPLSWD")
+  all_R2_LMA <- c(LMA_from_TLP_LS_WD$R2,LMA_from_TLP_LS$R2,LMA_from_TLP_WD$R2,LMA_from_LS_WD$R2,LMA_from_TLP$R2,LMA_from_LS$R2,LMA_from_WD$R2,LMA_from_LS_WD_limitTLPLSWD$R2,LMA_from_TLP_WD_limitTLPLSWD$R2)
+  all_R2adj_LMA <- c(LMA_from_TLP_LS_WD$R2adj,LMA_from_TLP_LS$R2adj,LMA_from_TLP_WD$R2adj,LMA_from_LS_WD$R2adj,LMA_from_TLP$R2adj,LMA_from_LS$R2adj,LMA_from_WD$R2adj,LMA_from_LS_WD_limitTLPLSWD$R2adj,LMA_from_TLP_WD_limitTLPLSWD$R2adj)
+  all_rmse_LMA <- c(LMA_from_TLP_LS_WD$rmse,LMA_from_TLP_LS$rmse,LMA_from_TLP_WD$rmse,LMA_from_LS_WD$rmse,LMA_from_TLP$rmse,LMA_from_LS$rmse,LMA_from_WD$rmse,LMA_from_LS_WD_limitTLPLSWD$rmse,LMA_from_TLP_WD_limitTLPLSWD$rmse)
+  all_ndata_LMA <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata,LMA_from_LS_WD_limitTLPLSWD$ndata,LMA_from_TLP_WD_limitTLPLSWD$ndata)
+  
+  all_LMA <- data.frame(all_testnames_LMA,all_R2_LMA,all_R2adj_LMA,all_rmse_LMA,all_ndata_LMA)
+  View(all_LMA)
+  
+  # CHOICE: best model in R2 terms is LMA_from_TLP_LS, but in RMSE is (marginally) LMA_from_TLP_LS_WD
+  # Choose to go with LMA_from_TLP_LS on the basis that it is more parsimonious.
+  
+  # Test MAT and PPT coverage of species for chosen model
+  plot(trait_BE$MAT[LMA_from_TLP_LS$dataused],trait_BE$MAP[LMA_from_TLP_LS$dataused])
+  # RESULT: WIDE CLIMATE COVERAGE
+  
+  # DECISION: LMA_from_TLP_LS
   
   return_vals <- list("all_LMA"=all_LMA,
-                      "LMA_from_TLP_BE"=LMA_from_TLP_BE,
-                      "LMA_from_TLP_BDT"=LMA_from_TLP_BDT)
+                      "LMA_from_TLP_LS"=LMA_from_TLP_LS)
+  return(return_vals)
 }
 
 WD_multivar_test <- function(trait) {
@@ -257,6 +303,7 @@ WD_multivar_test <- function(trait) {
   
   return_vals <- list("all_WD"=all_WD,
                       "WD_from_slope_P50slope"=WD_from_slope_P50slope)
+  return(return_vals)
 }
 
 slope_multivar_test <- function(trait) {
@@ -352,5 +399,6 @@ slope_multivar_test <- function(trait) {
   return_vals <- list("all_slope"=all_slope,
                       "slope_from_P50_TLP_Ks"=slope_from_P50_TLP_Ks)
   
+  return(return_vals)
 }
   

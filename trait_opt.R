@@ -1,15 +1,26 @@
-trait_opt <- function(P50,TLP,LMA,WD,slope,
-                      LMA_from_TLP,TLP_from_LS_LMA_P50,P50_from_TLP_Ks,
-                      slope_from_P50_TLP_Ks,WD_from_slope_P50slope,
-                      LMA_from_LS,P50_from_Ks,TLP_from_P50,
-                      Ks_e,LS_e,
-                      n_uncer) {
+trait_opt <- function(P50,
+                      TLP,
+                      LMA,
+                      WD,
+                      slope,
+                      LMA_from_TLP,
+                      LMA_from_TLP_LS,
+                      TLP_from_LS_LMA_P50,
+                      P50_from_TLP_Ks,
+                      slope_from_P50_TLP_Ks,
+                      WD_from_slope_P50slope,
+                      LMA_from_LS,P50_from_Ks,
+                      TLP_from_P50,
+                      Ks_e,
+                      LS_e,
+                      n_uncer,
+                      use_LMA_from_TLP_LS) {
   # Input
   # The following are just used for calculating maximum and minimum values of each trait, beyond which the optimisation should not extend:
   # - P50,TLP,LMA,WD,slope
   # The following are the relationships on which the optimisation and associated trait estimates are based:
   # (note that if the relationships used are changed, these need to be updated)
-  # - LMA_from_TLP
+  # - LMA_from_TLP or LMA_from_TLP_LS (choice of which is used is based on use_LMA_from_TLP_LS)
   # - TLP_from_LS_LMA_P50
   # - P50_from_TLP_Ks,
   # - slope_from_P50_TLP_Ks
@@ -49,8 +60,14 @@ trait_opt <- function(P50,TLP,LMA,WD,slope,
     # For now, make samples for the following:
     # (ensure equation choices are consistent with decisions above)
     if (ss==1) { #First pass always calculates the best estimate
-      mod_LMA_intercept_sample <- LMA_from_TLP$mod$intercept_R #LMA_from_TLP
-      mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$slope_R.y1
+      if(use_LMA_from_TLP_LS) {
+        mod_LMA_intercept_sample <- LMA_from_TLP_LS$mod$intercept_R #LMA_from_TLP_LS
+        mod_LMA_slope_y1_sample <- LMA_from_TLP_LS$mod$slope_R.y1
+        mod_LMA_slope_y2_sample <- LMA_from_TLP_LS$mod$slope_R.y2
+      } else {
+        mod_LMA_intercept_sample <- LMA_from_TLP$mod$intercept_R #LMA_from_TLP
+        mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$slope_R.y1
+      }
       mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$intercept_R #TLP_from_LS_LMA_P50
       mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y1
       mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y2
@@ -66,8 +83,14 @@ trait_opt <- function(P50,TLP,LMA,WD,slope,
       mod_WD_slope_y1_sample <- WD_from_slope_P50slope$mod$slope_R.y1
       mod_WD_slope_y2_sample <- WD_from_slope_P50slope$mod$slope_R.y2
     } else {
-      mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
-      mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
+      if(use_LMA_from_TLP_LS) {
+        mod_LMA_intercept_sample <- LMA_from_TLP_LS$mod$boot.intercept[ss] #LMA_from_TLP_LS
+        mod_LMA_slope_y1_sample <- LMA_from_TLP_LS$mod$boot.y1[ss]
+        mod_LMA_slope_y2_sample <- LMA_from_TLP_LS$mod$boot.y2[ss]
+      } else {
+        mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
+        mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
+      }
       mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$boot.intercept[ss] #TLP_from_LS_LMA_P50
       mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$boot.y1[ss]
       mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$boot.y2[ss]
@@ -117,7 +140,12 @@ trait_opt <- function(P50,TLP,LMA,WD,slope,
       
       # Make estimates of trait values based on the best SMA regressions (probably multivariate in most cases)
       # The estimates of traits in each iteration are based on the estimates of their predictor traits from the previous iteration
-      LMA_e[ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last
+      if(use_LMA_from_TLP_LS) {
+        LMA_e[ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last +
+          mod_LMA_slope_y2_sample*LS_e
+      } else {
+        LMA_e[ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last
+      }
       TLP_e[ss]=mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*LS_e + 
         mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e_last
       P50_e[ss]=mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e_last + 
