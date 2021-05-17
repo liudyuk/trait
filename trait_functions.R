@@ -176,7 +176,7 @@ sma_plot_stats_comp <- function(vars1,vars2,labels,nbtstrp,makeplot=F,indin=NULL
 
 
 regress_limit_adjust <- function(var1,var2,var1_from_var2,thres) {
-  # Function to adjust the intercept of a linear regression equation to encompass a defined selection of data below the regression line.
+  # Function to adjust the intercept of a linear regression equation to encompass a defined selection of data below the regression line (effectively a quantile regression which we can apply to the SMA regression).
   #
   # Input: var1 - dependent variable
   # Input: var2 - independent variable
