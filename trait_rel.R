@@ -353,21 +353,20 @@ traits_e_out <- data.frame(LS_e,Ks_e,
 write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_260820.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
 
 
-
 # Calculate regression of leafL from LMA ----------------------------------
 
-leafL_from_LMA <- sma_plot_stats(data.frame(LMA,log(leafL)),c("LMA","leafL"),nbtstrp,T)
+leafL_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T)
 
 
 # Calculate limits of leafN vs LMA to allow estimate of leaf C:N ----------
 
-leafN_from_LMA <- sma_plot_stats(data.frame(LMA,leafN),c("LMA","leafN"),nbtstrp,T)
+leafN_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,trait_B$leafN),c("LMA","leafN"),nbtstrp,T)
 
-leafN_from_LMA_limit <- regress_limit_adjust(leafN,LMA,leafN_from_LMA,0.05)
+leafN_from_LMA_limit <- regress_limit_adjust(trait_B$leafN,trait_B$LMA,leafN_from_LMA,0.05)
 
-plot(LMA,leafN)
-points(LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lower,col="green")
-points(LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
+plot(trait_B$LMA,trait_B$leafN)
+points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lower,col="green")
+points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
 
 
 # Convert to the values needed in LPJ-GUESS and write out -----------------
@@ -380,7 +379,7 @@ traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
 basePFT=5
 
 # Select output folder
-output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/TrBR_with_BE_traits_test"
+output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
 
 # Set the name for the output file
 if (basePFT==1) {
