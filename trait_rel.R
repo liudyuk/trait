@@ -14,13 +14,17 @@
 #
 # T. Pugh
 # 15.06.20
+#
+# Annemarie Eckes-Shephard
+# May 2021
+# Minor changes to make output reproducible.
 
 nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
 #traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/woody_trait.0827.txt",sep="\t")
-traits= read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/woody_trait.0827.txt",sep="\t")
+traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/woody_trait.0827.txt",sep="\t")
 
 source('sma_multivar_regress.R')
 source('trait_functions.R')
@@ -143,13 +147,13 @@ limitdataranges=T # Currently does not converge in uncertainty propagation if no
 # Decide whether to run the uncertainty propagation (T) or not (F)
 propagate_uncer=T
 
-# Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T)
-trait_sel=F
-# Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified
-n_trait_sel=-1
+# Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
+trait_sel= T 
+# Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
+n_trait_sel=28#-1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=2
+spec_group_sel=3
 
 # ---
 if (propagate_uncer) {
@@ -177,7 +181,7 @@ Ks_comb <- traits$Ks[ind]
 
 if (trait_sel) {
   if (n_trait_sel>0) {
-    # Random selection of LS and Hmax values to be tested
+    # Random selection of LS and Ks values to be tested
     set.seed(1234)
     index = 1:length(ind)
     trait_samp = sample(index, n_trait_sel, replace=F) 
@@ -193,11 +197,17 @@ if (trait_sel) {
     #install.packages("hypervolume")
     library(hypervolume)
     # Fit a hypervolume (KDE at 95%)
+    
+    # The hypervolume algorithm uses a stochastic 'dart throwing' algorithm to determine the topography of the data. 
+    # This stochasticity can sometimes lead to the hypervolume edges changing between code runs.
+    # In order to reliably obtain a systematic sample 28 PFTs from the sampling space, set.seed is used
+    # https://benjaminblonder.org/hypervolume_faq.html
+    set.seed(293)
     # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
     hv = hypervolume(data.frame(LS_comb,Ks_comb),method="gaussian",quantile.requested=0.95)
     plot(hv)
     
-    # Set the number of points distributed systematically across LS and Hmax space to test for inclusion in the hypervolume
+    # Set the number of points distributed systematically across LS and Ks space to test for inclusion in the hypervolume
     sampKs=8
     sampLS=8
     
@@ -211,15 +221,17 @@ if (trait_sel) {
     LS_seq <- seq(minLS+intLS,maxLS-intLS,by=intLS)
     Ks_seq <- seq(minKs+intKs,maxKs-intKs,by=intKs)
     LS_Ks_seq <- expand.grid(LS_seq,Ks_seq)
-    
+    LS_Ks_seq2<- expand.grid(LS_seq,Ks_seq)
     # Test those points for inclusion in the hypervolume
     in_hv <- hypervolume_inclusion_test(hv,LS_Ks_seq,fast.or.accurate = "accurate")
     
     LS_e <- LS_Ks_seq$Var1[in_hv]
+    length( LS_e )
     Ks_e <- LS_Ks_seq$Var2[in_hv]
+    length( Ks_e )
   }
 } else {
-  # Go through all observed combinations of Hmax and LS
+  # Go through all observed combinations of KS and LS
   Ks_e=Ks_comb
   LS_e=LS_comb
 }
@@ -247,7 +259,7 @@ TLP_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 WD_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 slope_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 
-# Loop over all the combinations of Hmax and LS
+# Loop over all the combinations of KS and LS
 # The new estimates of traits use the suffix "_e"
 for (dd in 1:ndata) {
   print(dd)
