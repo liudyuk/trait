@@ -402,3 +402,45 @@ slope_multivar_test <- function(trait) {
   return(return_vals)
 }
   
+
+Ks_multivar_test <- function(trait) {
+  # not really a test, as the trait network is already established, but testing the thin lines in slide 10, too:
+  
+  # Ks from P50, TLP, LS
+  Ks_from_P50_TLP_LS <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$LS,trait$Ks),c("P50","TLP","LS","Ks"),nbtstrp)
+  plot(trait$Ks[ Ks_from_P50_TLP_LS$dataused], Ks_from_P50_TLP_LS$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
+  
+  # Ks from P50, LS
+  Ks_from_P50_LS <- sma_plot_stats(data.frame(trait$P50,trait$LS,trait$Ks),c("P50","LS","Ks"),nbtstrp)
+  plot(trait$Ks[Ks_from_P50_LS$dataused],Ks_from_P50_LS$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
+  
+  # Ks from LS
+  Ks_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$Ks),c("LS","Ks"),nbtstrp)
+  plot(trait$Ks[ Ks_from_LS$dataused], Ks_from_LS$var_est,pch=16,xlab="KS",ylab="KS_est",main="KS vs Ks_est")
+  
+  # Ks from P50 
+  Ks_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$Ks),c("P50","Ks"),nbtstrp)
+  plot(trait$Ks[Ks_from_P50$dataused], Ks_from_P50$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
+
+  # Summarise statistics
+  all_testnames_Ks <- c("Ks_from_P50_TLP_LS ","Ks_from_P50_LS","Ks_from_LS ","Ks_from_P50")
+  all_R2_Ks <- c(Ks_from_P50_TLP_LS$R,Ks_from_P50_LS$R,Ks_from_LS$R,Ks_from_P50$R)
+  all_R2adj_Ks <- c(Ks_from_P50_TLP_LS$R2adj,Ks_from_P50_LS$R2adj,Ks_from_LS$R2adj,Ks_from_P50$R2adj)
+  all_rmse_Ks <- c(Ks_from_P50_TLP_LS$rmse,Ks_from_P50_LS$rmse,Ks_from_LS$rmse,Ks_from_P50$rmse)
+  all_ndata_Ks <- c(Ks_from_P50_TLP_LS$ndata,Ks_from_P50_LS$ndata,Ks_from_LS$ndata,Ks_from_P50$ndata)
+  
+  all_Ks <- data.frame(all_testnames_Ks,all_R2_Ks,all_R2adj_Ks,all_rmse_Ks,all_ndata_Ks)
+  View(all_Ks)
+  
+  
+  # Test MAT and PPT coverage of species for chosen model
+  plot(trait$MAT[Ks_from_LS$dataused],trait$MAP[Ks_from_LS$dataused],main = "Climate coverage")
+  # WIDE CLIMATE COVERAGE
+  
+  # DECISION: Ks_from_LS
+  
+  return_vals <- list("all_Ks"=all_Ks,
+                      "Ks_from_Ls"= Ks_from_LS)
+  
+  return(return_vals)
+}
