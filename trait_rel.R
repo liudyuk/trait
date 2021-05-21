@@ -17,7 +17,10 @@
 #
 # Annemarie Eckes-Shephard
 # May 2021
-# Minor changes to make output reproducible.
+# *Minor changes to make output reproducible.
+# *outsource some code bits into separate functions
+# *modify existing functions to test optimisation efficacy when starting with other variable combinations (not Ks LS)
+
 
 nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
@@ -34,6 +37,13 @@ source("whittaker_biomes_plot.R")
 source("trait_opt.R")
 source("opt_test_plots.R")
 source('lpjg_traits_conv.R')
+
+
+source('create_uncertainty_range_stats.R')
+source('trait_optim.R')
+source('trait_optim_bivar_startLSTLP.R') #for testing multiple starting variables for the optimisation
+source('trait_opt_bivar_start_LSTLP.R')
+source('opt_test_plots_LSTLP.R')
 
 #--- Read in the trait data ---
 
@@ -105,6 +115,12 @@ WD_multivar <- WD_multivar_test(trait_B)
 slope_multivar <- slope_multivar_test(trait_B)
 
 
+# Ks fits --------------------------------------------------------------
+
+Ks_multivar <- Ks_multivar_test(trait_B)
+
+
+
 # Make plots showing quality of fits and climate coverage -----------------
 
 MATp1 <- trait_B$MAT[P50_multivar$P50_from_TLP_Ks$dataused]
@@ -137,9 +153,9 @@ data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6),
 
 whittaker_biomes_plot(data_MATp_MAPp)
 
-
-# Optimisation ------------------------------------------------------------
-# Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
+# Optimisation with TLP and LS------------------------------------------------------------
+# lowest bivariate relationship 0.36
+# Attempt to iteratively converge on the best fit values of Ks, P50 and LMA given known TLP and LS
 
 # Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
 limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
@@ -155,168 +171,46 @@ n_trait_sel=28#-1
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel=3
 
-# ---
-if (propagate_uncer) {
-  n_uncer=nbtstrp
-} else {
-  n_uncer=1
-}
+outs_LSTLP <- trait_optim_bivar_startLSTLP(limitdataranges = T,propagate_uncer = T,trait_sel = F, n_trait_sel = 28, spec_group_sel = 4)
+list2env(outs_LSTLP$predictors , envir = .GlobalEnv)
+list2env(outs_LSTLP$predicted , envir = .GlobalEnv)
 
-# Get index for selected species group
-if (spec_group_sel==1) {
-  ind_spec_group=which(traits$group=='BT' | traits$group=='BD')
-} else if (spec_group_sel==2) {
-  ind_spec_group=which(traits$group=='BE')
-} else if (spec_group_sel==3) {
-  ind_spec_group=which(traits$group=='BT')
-} else if (spec_group_sel==4) {
-  ind_spec_group=which(traits$group=='BD')
-}
-
-# Identify all combinations of Ks and LS (do this across full range of broadleaf species)
-ind=which(!is.na(traits$Ks) & !is.na(traits$LS))
-
-LS_comb <- traits$LS[ind]
-Ks_comb <- traits$Ks[ind]
-
-if (trait_sel) {
-  if (n_trait_sel>0) {
-    # Random selection of LS and Ks values to be tested
-    set.seed(1234)
-    index = 1:length(ind)
-    trait_samp = sample(index, n_trait_sel, replace=F) 
-    LS_e = LS_comb[trait_samp] 
-    Ks_e = Ks_comb[trait_samp] 
-    # Plot sample against all data as a check for sampling density
-    plot(LS_comb,Ks_comb)
-    points(LS_e,Ks_e,col="red")
-    
-  } else {
-    # Systematic sample
-    
-    #install.packages("hypervolume")
-    library(hypervolume)
-    # Fit a hypervolume (KDE at 95%)
-    
-    # The hypervolume algorithm uses a stochastic 'dart throwing' algorithm to determine the topography of the data. 
-    # This stochasticity can sometimes lead to the hypervolume edges changing between code runs.
-    # In order to reliably obtain a systematic sample 28 PFTs from the sampling space, set.seed is used
-    # https://benjaminblonder.org/hypervolume_faq.html
-    set.seed(293)
-    # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
-    hv = hypervolume(data.frame(LS_comb,Ks_comb),method="gaussian",quantile.requested=0.95)
-    plot(hv)
-    
-    # Set the number of points distributed systematically across LS and Ks space to test for inclusion in the hypervolume
-    sampKs=8
-    sampLS=8
-    
-    maxLS=max(LS_comb,na.rm=T)
-    minLS=min(LS_comb,na.rm=T)
-    maxKs=max(Ks_comb,na.rm=T)
-    minKs=min(Ks_comb,na.rm=T)
-    intLS=(maxLS-minLS)/sampLS
-    intKs=(maxKs-minKs)/sampKs
-    
-    LS_seq <- seq(minLS+intLS,maxLS-intLS,by=intLS)
-    Ks_seq <- seq(minKs+intKs,maxKs-intKs,by=intKs)
-    LS_Ks_seq <- expand.grid(LS_seq,Ks_seq)
-    LS_Ks_seq2<- expand.grid(LS_seq,Ks_seq)
-    # Test those points for inclusion in the hypervolume
-    in_hv <- hypervolume_inclusion_test(hv,LS_Ks_seq,fast.or.accurate = "accurate")
-    
-    LS_e <- LS_Ks_seq$Var1[in_hv]
-    length( LS_e )
-    Ks_e <- LS_Ks_seq$Var2[in_hv]
-    length( Ks_e )
-  }
-} else {
-  # Go through all observed combinations of KS and LS
-  Ks_e=Ks_comb
-  LS_e=LS_comb
-}
-
-# ---
-# Select the LMA relationship to use
-if (spec_group_sel==1) {
-  use_LMA_from_TLP_LS=F
-} else if (spec_group_sel==2) {
-  use_LMA_from_TLP_LS=T
-} else if (spec_group_sel==3) {
-  use_LMA_from_TLP_LS=F
-} else if (spec_group_sel==4) {
-  use_LMA_from_TLP_LS=F
-}
-
-# ---
-# Do the optimisation
-
-ndata=length(LS_e)
-
-P50_e <- matrix(NA, nrow= ndata, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
-LMA_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-TLP_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-WD_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-slope_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-
-# Loop over all the combinations of KS and LS
-# The new estimates of traits use the suffix "_e"
-for (dd in 1:ndata) {
-  print(dd)
-  
-  # Carry out the optimisation
-  opt_vals <- trait_opt(traits$P50[ind_spec_group],
-                        traits$TLP[ind_spec_group],
-                        traits$LMA[ind_spec_group],
-                        traits$WD[ind_spec_group],
-                        traits$slope[ind_spec_group],
-                        LMA_multivar_BDT$LMA_from_TLP,
-                        LMA_multivar_BE$LMA_from_TLP_LS,
-                        TLP_multivar$TLP_from_LS_LMA_P50,
-                        P50_multivar$P50_from_TLP_Ks,
-                        slope_multivar$slope_from_P50_TLP_Ks,
-                        WD_multivar$WD_from_slope_P50slope,
-                        bivar$LMA_from_TLP,
-                        bivar$P50_from_Ks,
-                        bivar$TLP_from_P50,
-                        Ks_e[dd],
-                        LS_e[dd],
-                        n_uncer,
-                        use_LMA_from_TLP_LS)
-  
-  P50_e[dd,] <- opt_vals$P50_e
-  TLP_e[dd,] <- opt_vals$TLP_e
-  LMA_e[dd,] <- opt_vals$LMA_e
-  WD_e[dd,] <- opt_vals$WD_e
-  slope_e[dd,] <- opt_vals$slope_e
-}
-  
 #Stats defining the uncertainty range for each point
-TLP_e_mean=unname(apply(TLP_e, 1, mean,na.rm=T))
-TLP_e_median=unname(apply(TLP_e, 1, median,na.rm=T))
-TLP_e_5perc=unname(apply(TLP_e, 1, quantile,0.05,na.rm=T))
-TLP_e_95perc=unname(apply(TLP_e, 1, quantile,0.95,na.rm=T))
+create_uncertainty_range_stats(outs_LSTLP)
 
-P50_e_mean=unname(apply(P50_e, 1, mean,na.rm=T))
-P50_e_median=unname(apply(P50_e, 1, median,na.rm=T))
-P50_e_5perc=unname(apply(P50_e, 1, quantile,0.05,na.rm=T))
-P50_e_95perc=unname(apply(P50_e, 1, quantile,0.95,na.rm=T))
+opt_test_plots_LSTLP(trait_plot,
+                     Ks_e_mean,
+                     Ks_e_5perc,
+                     Ks_e_95perc,
+                     Ks_e,
+                     P50_e_mean,
+                     P50_e_5perc,
+                     P50_e_95perc,
+                     P50_e,
+                     LMA_e_mean,
+                     LMA_e_5perc,
+                     LMA_e_95perc,
+                     LMA_e,
+                     WD_e_mean,
+                     WD_e_5perc,
+                     WD_e_95perc,
+                     WD_e,
+                     slope_e_mean,
+                     slope_e_5perc,
+                     slope_e_95perc,
+                     slope_e)
 
-LMA_e_mean=unname(apply(LMA_e, 1, mean,na.rm=T))
-LMA_e_median=unname(apply(LMA_e, 1, median,na.rm=T))
-LMA_e_5perc=unname(apply(LMA_e, 1, quantile,0.05,na.rm=T))
-LMA_e_95perc=unname(apply(LMA_e, 1, quantile,0.95,na.rm=T))
 
-WD_e_mean=unname(apply(WD_e, 1, mean,na.rm=T))
-WD_e_median=unname(apply(WD_e, 1, median,na.rm=T))
-WD_e_5perc=unname(apply(WD_e, 1, quantile,0.05,na.rm=T))
-WD_e_95perc=unname(apply(WD_e, 1, quantile,0.95,na.rm=T))
 
-slope_e_mean=unname(apply(slope_e, 1, mean,na.rm=T))
-slope_e_median=unname(apply(slope_e, 1, median,na.rm=T))
-slope_e_5perc=unname(apply(slope_e, 1, quantile,0.05,na.rm=T))
-slope_e_95perc=unname(apply(slope_e, 1, quantile,0.95,na.rm=T))
+# Optimisation with Ks and LS------------------------------------------------------------
+# Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 
+outs_LsKS <- trait_optim(limitdataranges = T,propagate_uncer = T,trait_sel = T, n_trait_sel = 28, spec_group_sel = 4)
+list2env(outs_LsKS$predictors , envir = .GlobalEnv)
+list2env(outs_LsKS$predicted , envir = .GlobalEnv)
+
+#Stats defining the uncertainty range for each point
+create_uncertainty_range_stats(outs_LsKS)
 
 #Make plots to compare with original data
 
@@ -364,6 +258,9 @@ traits_e_out <- data.frame(LS_e,Ks_e,
                            WD_e_mean,WD_e_5perc,WD_e_95perc,
                            slope_e_mean,slope_e_5perc,slope_e_95perc)
 write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_260820.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
+
+
+
 
 
 # Calculate regression of leafL from LMA ----------------------------------
