@@ -112,7 +112,7 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
   for (dd in 1:ndata) {
     print(dd)
     
-    # Carry out the optimisation - based on Ks_e and LS_e as starting points
+    # Carry out the optimisation - based on TLP_e and LS_e as starting points
     
     opt_vals <- trait_opt_bivar_start_LSTLP(
       traits$P50[ind_spec_group],
@@ -122,13 +122,12 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
       traits$slope[ind_spec_group],
       LMA_multivar_BDT$LMA_from_TLP,
       LMA_multivar_BE$LMA_from_TLP_LS,
-      TLP_multivar$TLP_from_LS_LMA_P50,
       Ks_multivar$Ks_from_Ls,
+      P50_multivar$P50_from_TLP_Ks,
       slope_multivar$slope_from_P50_TLP_Ks,
       WD_multivar$WD_from_slope_P50slope,
       bivar$LMA_from_TLP,
       bivar$P50_from_Ks,
-      bivar$TLP_from_P50,
       TLP_e[dd],
       LS_e[dd],
       n_uncer,

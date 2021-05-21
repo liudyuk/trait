@@ -12,12 +12,12 @@ trait_opt_bivar_start_LSTLP <- function(P50,
                       P50_from_TLP_Ks,
                       slope_from_P50_TLP_Ks,
                       WD_from_slope_P50slope,
-                      LMA_from_LS,P50_from_Ks,
-                      TLP_from_P50,
+                      LMA_from_LS,
+                      P50_from_Ks,
                       TLP_e,
                       LS_e,
                       n_uncer,
-                      use_LMA_from_TLP_LS) {
+                      use_LMA_from_TLP_LS){
   # Input
   # The following are just used for calculating maximum and minimum values of each trait, beyond which the optimisation should not extend:
   # - P50,Ks,LMA,WD,slope
@@ -31,7 +31,7 @@ trait_opt_bivar_start_LSTLP <- function(P50,
   # The following are all used for initial estimates before optimisation (not expected to have any effect on the results):
   # - LMA_from_LS
   # - P50_from_Ks
-  # - TLP_from_P50
+  # - Ks_from_LS
   # The following are the traits from which the other traits are predicted:
   # - TLP_e
   # - LS_e
