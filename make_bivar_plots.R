@@ -37,13 +37,16 @@ make_bivar_plots <- function(trait,nbtstrp) {
   
   WD_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$WD),c("Ks","WD"),nbtstrp,T)
   
+  LS_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$LS),c("Ks","LS"),nbtstrp,T)
+  
+ 
   # Set back to single plot
   par(mfrow=c(1,1))
   par(mar=c(5.1,4.1,4.1,2.1))
   
   # Make a data frame summarising the fits of the regressions
-  all_label1 <- c("P50","TLP",   "P50", "WD", "P50","slope","LMA","LMA","Ks", "LS", "TLP","LMA","Ks","Ks")
-  all_label2 <- c("TLP","slope","slope","TLP","WD", "WD",   "TLP","LS", "P50","P50","LS", "WD", "slope","WD")
+  all_label1 <- c("P50","TLP",   "P50", "WD", "P50","slope","LMA","LMA","Ks", "LS", "TLP","LMA","Ks","Ks","Ks")
+  all_label2 <- c("TLP","slope","slope","TLP","WD", "WD",   "TLP","LS", "P50","P50","LS", "WD", "slope","WD","LS")
   all_R <- c(TLP_from_P50$R,
               slope_from_TLP$R,
               slope_from_P50$R,
@@ -57,7 +60,8 @@ make_bivar_plots <- function(trait,nbtstrp) {
               LS_from_TLP$R,
               WD_from_LMA$R,
               slope_from_Ks$R,
-              WD_from_Ks$R)
+              WD_from_Ks$R,
+              LS_from_Ks$R)
   all_R2 <- c(TLP_from_P50$R2,
               slope_from_TLP$R2,
               slope_from_P50$R2,
@@ -71,7 +75,8 @@ make_bivar_plots <- function(trait,nbtstrp) {
               LS_from_TLP$R2,
               WD_from_LMA$R2,
               slope_from_Ks$R2,
-              WD_from_Ks$R2)
+              WD_from_Ks$R2, 
+              LS_from_Ks$R2)
   all_R2adj <- c(TLP_from_P50$R2adj,
                  slope_from_TLP$R2adj,
                  slope_from_P50$R2adj,
@@ -85,7 +90,8 @@ make_bivar_plots <- function(trait,nbtstrp) {
                  LS_from_TLP$R2adj,
                  WD_from_LMA$R2adj,
                  slope_from_Ks$R2adj,
-                 WD_from_Ks$R2adj)
+                 WD_from_Ks$R2adj,
+                 LS_from_Ks$R2adj)
   all_rmse <- c(TLP_from_P50$rmse,
                 slope_from_TLP$rmse,
                 slope_from_P50$rmse,
@@ -99,7 +105,8 @@ make_bivar_plots <- function(trait,nbtstrp) {
                 LS_from_TLP$rmse,
                 WD_from_LMA$rmse,
                 slope_from_Ks$rmse,
-                WD_from_Ks$rmse)
+                WD_from_Ks$rmse,
+                LS_from_Ks$rmse)
   
   all_sma_bivar <- data.frame(all_label1,all_label2,all_R,all_R2,all_R2adj,all_rmse)
   
@@ -117,6 +124,7 @@ make_bivar_plots <- function(trait,nbtstrp) {
                       "WD_from_LMA"=WD_from_LMA,
                       "slope_from_Ks"=slope_from_Ks,
                       "WD_from_Ks"=WD_from_Ks,
+                      "LS_from_Ks" = LS_from_Ks,
                       "all_sma_bivar"=all_sma_bivar)
   
   return(return_vals)
