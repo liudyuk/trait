@@ -1,4 +1,7 @@
 #-------------------------------------  
+# Original code form T.Pugh
+# Enabling of more flexible handling of input and automatised file naming by Annemarie Eckes-Shephard May 2021
+
 # Stats defining the uncertainty range for each point
 # input is the output from trait_optim. 
 # The function will use the optimised (predicted) values and creates summary statistics (sum_stat) on their
@@ -7,7 +10,7 @@
 create_uncertainty_range_stats <- function(ins){
   
   predicted_names <- names(ins$predicted)
-  extended_names <- c('_mean','median','_5perc','_95perc')
+  extended_names <- c('_mean','_median','_5perc','_95perc')
   for (pn in predicted_names){
     collect <- list()
     collect[[1]] <- unname(apply(ins$predicted[[pn]], 1, mean,na.rm=T))
