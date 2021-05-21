@@ -1,3 +1,4 @@
+# Annemarie Eckes-Shephard moved this code from T. Pugh into this function ( 2021 May )
 # this function subsets the data, chooses options for the type of sampling (random or strategic subset vs. use all Ks LS combinations)
 # it then carries out the optimisation. The number of outputs optimised values depends on the subset options parsed into the function
 # if propagate_uncer=T, must provide nbtsrp value

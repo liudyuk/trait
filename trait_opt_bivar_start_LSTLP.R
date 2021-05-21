@@ -1,4 +1,6 @@
-trait_optim_bivar_start_LSTLP <- function(P50,
+# Code heavily based on T. Pugh's function in trait_opt.R
+# Code adaptations to accommodate TLP and LS as 'predictors' from Annemarie Eckes-Shephard, May 2021
+trait_opt_bivar_start_LSTLP <- function(P50,
                       Ks,
                       LMA,
                       WD,
@@ -203,6 +205,6 @@ trait_optim_bivar_start_LSTLP <- function(P50,
   } #Finish nbtstrp loop
   
   return_vals <- list("P50_e"=P50_e,"Ks_e"=Ks_e,"LMA_e"=LMA_e,"WD_e"=WD_e,"slope_e"=slope_e)
-  
+
   return(return_vals)
 }
