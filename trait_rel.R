@@ -172,7 +172,9 @@ n_trait_sel=28#-1
 spec_group_sel=3
 
 outs_LSTLP <- trait_optim_bivar_startLSTLP(limitdataranges = T,propagate_uncer = T,trait_sel = F, n_trait_sel = 28, spec_group_sel = 4)
-list2env(outs_LSTLP$predictors , envir = .GlobalEnv)
+# not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
+# single objects
+list2env(outs_LSTLP$predictors , envir = .GlobalEnv) 
 list2env(outs_LSTLP$predicted , envir = .GlobalEnv)
 
 #Stats defining the uncertainty range for each point
@@ -200,12 +202,22 @@ opt_test_plots_LSTLP(trait_plot,
                      slope_e_95perc,
                      slope_e)
 
+# Calculate the RMSE (only if running with actual values of Ks and LS [i.e. trait_sel =F in function trait_optim])
+trait_sel = F
 
+if(trait_sel==F) {
+  # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
+  ind = which(!is.na(traits$TLP) & !is.na(traits$LS))
+  
+  # provide list of trait names which are the predicted traits
+  trait_names = c('P50','Ks','LMA','WD','slope')
+  RMSE_withTLPLS_start <- opt_rmse(traits,trait_names,ind)
+}
 
 # Optimisation with Ks and LS------------------------------------------------------------
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 
-outs_LsKS <- trait_optim(limitdataranges = T,propagate_uncer = T,trait_sel = T, n_trait_sel = 28, spec_group_sel = 4)
+outs_LsKS <- trait_optim(limitdataranges = T,propagate_uncer = T,trait_sel = F, n_trait_sel = 28, spec_group_sel = 4)
 list2env(outs_LsKS$predictors , envir = .GlobalEnv)
 list2env(outs_LsKS$predicted , envir = .GlobalEnv)
 
@@ -243,10 +255,15 @@ opt_test_plots(trait_plot,
                slope_e)
 
 
-# Calculate the RMSE (only if running with actual values of Ks and LS)
+# Calculate the RMSE (only if running with actual values of Ks and LS [i.e. trait_sel =F in function trait_optim])
 
 if(trait_sel==F) {
-  opt_rmse(traits,P50_e,TLP_e,LMA_e,WD_e,slope_e,ind)
+  # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
+  ind = which(!is.na(traits$Ks) & !is.na(traits$LS))
+  
+  # provide list of trait names which are the predicted traits
+  trait_names = c('P50','TLP','LMA','WD','slope')
+  RMSE_withKsLS_start <- opt_rmse(traits,trait_names,ind)
 }
 
 
