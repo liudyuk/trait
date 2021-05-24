@@ -1,10 +1,14 @@
+#-------------------------------------  
+# Original code from T.Pugh
+# Enabling of more flexible handling of inputs by Annemarie Eckes-Shephard May 2021
+#trait: trait dataaframe from which to extract the observed trait values
+#trait_names: list of traits (plain names, no _e suffix) for which to calculate summary statistics. Used to call the related objsects and perform stats on them.
+#ind: indeces of the variables which were used to start the optimisation with. Used for subsetting trait dataframe
+#output: dataframe with summary statistics on fit between predicted traits vs these traits' observations.
 opt_rmse <- function(trait,
                      trait_names,
                      ind) {
-  #trait: trait databaframe from which to extract the observed trait values
-  #trait_names: list of traits (plain names, no _e suffix) for which to calculate summary statistics. Used to call the related objsects and perform stats on them.
-  #ind: indeces of the variables which were used to start the optimisation with. Used for subsetting trait dataframe
-  
+
   nregress_opt=4 #Assume that there are 4 predictors for each of the 5 optimised traits (i.e. 5-1)
   nregress_other=5 #For the other traits (slope and WD) assume that all the optimised traits are predictors
   

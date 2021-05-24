@@ -1,5 +1,5 @@
 #-------------------------------------  
-# Original code form T.Pugh
+# Original code from T.Pugh main script
 # Enabling of more flexible handling of input and automatised file naming by Annemarie Eckes-Shephard May 2021
 
 # Stats defining the uncertainty range for each point
