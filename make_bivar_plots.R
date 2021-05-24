@@ -1,4 +1,4 @@
-trait_opt_bivar_start_LSTLP.R make_bivar_plots <- function(trait,nbtstrp) {
+make_bivar_plots <- function(trait,nbtstrp) {
   # Make the bivariate SMA regressions necessary to populate the hypothesis framework
   #
   # Dependencies: trait_functions.R
