@@ -402,7 +402,6 @@ slope_multivar_test <- function(trait) {
   return(return_vals)
 }
   
-
 Ks_multivar_test <- function(trait) {
   # not really a test, as the trait network is already established, but testing the thin lines in slide 10, too:
   
@@ -441,6 +440,65 @@ Ks_multivar_test <- function(trait) {
   
   return_vals <- list("all_Ks"=all_Ks,
                       "Ks_from_Ls"= Ks_from_LS)
+  
+  return(return_vals)
+}
+
+LS_multivar_test <- function(trait) {
+  # not really a test, as the trait network is already established, but testing the thin lines in slide 10, too:
+  
+  # LS from LMA TLP, KS, P50
+  LS_from_P50_TLP_Ks_LMA <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$Ks,trait$LMA,trait$LS),c("P50","TLP","Ks","LMA","LS"),nbtstrp)
+  plot(trait$LS[LS_from_P50_TLP_Ks_LMA$dataused], LS_from_P50_TLP_Ks_LMA$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
+  
+  # LS from P50, TLP and Ks
+  LS_from_P50_TLP_Ks <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$Ks,trait$LS),c("P50","TLP","Ks","LS"),nbtstrp)
+  plot(trait$LS[LS_from_P50_TLP_Ks$dataused],LS_from_P50_TLP_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
+  
+  # LS from TLP and Ks
+  LS_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$LS),c("TLP","Ks","LS"),nbtstrp)
+  plot(trait$LS[LS_from_TLP_Ks$dataused],LS_from_TLP_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
+  
+  # LS from P50, TLP
+  LS_from_P50_TLP <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$LS),c("P50","TLP","LS"),nbtstrp)
+  plot(trait$LS[LS_from_P50_TLP$dataused],LS_from_P50_TLP$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
+  
+  # LS from P50, Ks
+  LS_from_P50_Ks <- sma_plot_stats(data.frame(trait$P50,trait$Ks,trait$LS),c("P50","Ks","LS"),nbtstrp)
+  plot(trait$LS[LS_from_P50_Ks$dataused],LS_from_P50_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
+  
+  # LS from P50
+  LS_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$LS),c("P50","LS"),nbtstrp)
+  plot(trait$LS[LS_from_P50$dataused],LS_from_P50$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
+  
+  # LS from TLP
+  LS_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$LS),c("TLP","LS"),nbtstrp)
+  plot(trait$LS[LS_from_TLP$dataused],LS_from_TLP$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
+  
+  # LS from Ks
+  LS_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$LS),c("Ks","LS"),nbtstrp)
+  plot(trait$LS[LS_from_Ks$dataused],LS_from_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
+  
+
+  # Summarise statistics
+  all_testnames_LS <- c("LS_from_P50_TLP_Ks_LMA","LS_from_P50_TLP_Ks","LS_from_TLP_Ks","LS_from_P50_TLP","LS_from_P50_Ks","LS_from_P50","LS_from_TLP","LS_from_Ks")
+  all_R2_LS <- c(LS_from_P50_TLP_Ks_LMA$R,LS_from_P50_TLP_Ks$R,LS_from_TLP_Ks$R,LS_from_P50_TLP$R,LS_from_P50_Ks$R,LS_from_P50$R,LS_from_TLP$R,LS_from_Ks$R)
+  all_R2adj_LS <- c(LS_from_P50_TLP_Ks_LMA$R2adj,LS_from_P50_TLP_Ks$R2adj,LS_from_TLP_Ks$R2adj,LS_from_P50_TLP$R2adj,LS_from_P50_Ks$R2adj,LS_from_P50$R2adj,LS_from_TLP$R2adj,LS_from_Ks$R2adj)
+  all_rmse_LS <- c(LS_from_P50_TLP_Ks_LMA$rmse,LS_from_P50_TLP_Ks$rmse,LS_from_TLP_Ks$rmse,LS_from_P50_TLP$rmse,LS_from_P50_Ks$rmse,LS_from_P50$rmse,LS_from_TLP$rmse,LS_from_Ks$rmse)
+  all_ndata_LS <- c(LS_from_P50_TLP_Ks_LMA$ndata,LS_from_P50_TLP_Ks$ndata,LS_from_TLP_Ks$ndata,LS_from_P50_TLP$ndata,LS_from_P50_Ks$ndata,LS_from_P50$ndata,LS_from_TLP$ndata,LS_from_Ks$ndata)
+  
+  all_LS <- data.frame(all_testnames_LS,all_R2_LS,all_R2adj_LS,all_rmse_LS,all_ndata_LS)
+  View(all_LS)
+  
+  
+  # Test MAT and PPT coverage of species for chosen model
+  plot(trait$MAT[LS_from_TLP_Ks$dataused],trait$MAP[LS_from_TLP_Ks$dataused],main = "Climate coverage")
+  # WIDE CLIMATE COVERAGE
+  
+  # DECISION: Ks_from_LS
+  
+  return_vals <- list("all_LS"=all_LS,
+                      "LS_from_TLP_Ks"= LS_from_TLP_Ks)
   
   return(return_vals)
 }
