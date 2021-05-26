@@ -44,6 +44,12 @@ source('trait_optim.R')
 source('trait_optim_bivar_startLSTLP.R') #for testing multiple starting variables for the optimisation
 source('trait_opt_bivar_start_LSTLP.R')
 source('opt_test_plots_LSTLP.R')
+source('trait_optim_bivar_start_KsTLP')
+source('trait_opt_bivar_start_KsTLP.R')
+source('opt_test_plots_KsTLP.R')
+source('trait_optim_bivar_start_LSP50.R')
+source('trait_opt_bivar_start_LSP50.R')
+source('opt_test_plots_LSP50.R')
 
 #--- Read in the trait data ---
 
@@ -169,7 +175,7 @@ propagate_uncer=T
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 trait_sel= T 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
-n_trait_sel=28#-1
+n_trait_sel=-1#-1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel=3
@@ -206,7 +212,7 @@ opt_test_plots_LSTLP(trait_plot,
                      slope_e)
 
 # Calculate the RMSE (only if running with actual values of Ks and LS [i.e. trait_sel =F in function trait_optim])
-trait_sel = F
+
 
 if(trait_sel==F) {
   # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
@@ -224,7 +230,7 @@ if(trait_sel==F) {
 # Attempt to iteratively converge on the best fit values of LS, P50 and LMA, given known KS and TLP
 
 
-outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
+outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = limitdataranges, propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
 # not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
 # single objects
 list2env(outs_KsTLP$predictors , envir = .GlobalEnv) 
@@ -310,12 +316,12 @@ if(trait_sel==F) {
   
   # provide list of trait names which are the predicted traits
   trait_names = c('Ks','TLP','LMA','WD','slope')
-  RMSE_withKsLS_start <- opt_rmse(traits,trait_names,ind)
+  RMSE_withLSP50_start <- opt_rmse(traits,trait_names,ind)
 }
 
 
 # Optimisation with Ks and LS------------------------------------------------------------
-# No functional relationship between traits hypothethised (note: high observed correlation, R=0.4, probably via other traits), 
+# No functional relationship between traits hypothesised (note: high observed correlation, R=0.4, probably via other traits), 
 # so: good 'outer edges' to start the optimisation from.
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 

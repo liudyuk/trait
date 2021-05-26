@@ -54,8 +54,9 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
       set.seed(293)
       # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
       hv = hypervolume(data.frame(LS_comb,Ks_comb),method="gaussian",quantile.requested=0.95)
-      plot(hv)
-      
+      #plot(hv)
+   
+     
       # Set the number of points distributed systematically across LS and Ks space to test for inclusion in the hypervolume
       sampKs=8
       sampLS=8
@@ -78,6 +79,8 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
       length( LS_e )
       Ks_e <- LS_Ks_seq$Var2[in_hv]
       length( Ks_e )
+  
+      plot_Hypervolume(hv,LS_e,Ks_e)
     }
   } else {
     # Go through all observed combinations of KS and LS

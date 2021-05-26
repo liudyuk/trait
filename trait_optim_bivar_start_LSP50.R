@@ -52,10 +52,10 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
       set.seed(1)
       # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
       hv = hypervolume(data.frame(LS_comb,P50_comb),method="gaussian",quantile.requested=0.95)
-      plot(hv)
+      #plot(hv)
       
       # Set the number of points distributed systematically across LS and P50 space to test for inclusion in the hypervolume
-      sampP50=8
+      sampP50=7
       sampLS=8
       
       maxLS=max(LS_comb,na.rm=T)
@@ -76,6 +76,7 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
       length( LS_e )
       P50_e <- LS_P50_seq$Var2[in_hv]
       length( P50_e )
+      plot_Hypervolume(hv,LS_e,P50_e)
     }
   } else {
     # Go through all observed combinations of P50 and LS

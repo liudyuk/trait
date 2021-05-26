@@ -49,13 +49,13 @@ trait_optim_bivar_start_KsTLP <- function(limitdataranges=T, propagate_uncer=T, 
       # This stochasticity can sometimes lead to the hypervolume edges changing between code runs.
       # In order to reliably obtain a systematic sample 28 PFTs from the sampling space, set.seed is used
       # https://benjaminblonder.org/hypervolume_faq.html
-      set.seed(12)
+      set.seed(1)
       # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
       hv = hypervolume(data.frame(Ks_comb,TLP_comb),method="gaussian",quantile.requested=0.95)
-      plot(hv)
+      # plot(hv)
       
       # Set the number of points distributed systematically across LS and TLP space to test for inclusion in the hypervolume
-      sampKs=8
+      sampKs=7
       sampTLP=8
       
       maxKs=max(Ks_comb,na.rm=T)
@@ -76,6 +76,7 @@ trait_optim_bivar_start_KsTLP <- function(limitdataranges=T, propagate_uncer=T, 
       length( Ks_e )
       TLP_e <-  Ks_TLP_seq$Var2[in_hv]
       length( TLP_e )
+      plot_Hypervolume(hv,Ks_e,TLP_e)
     }
   } else {
     # Go through all observed combinations of TLP and LS

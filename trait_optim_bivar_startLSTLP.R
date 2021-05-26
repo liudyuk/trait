@@ -49,14 +49,14 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
       # This stochasticity can sometimes lead to the hypervolume edges changing between code runs.
       # In order to reliably obtain a systematic sample 28 PFTs from the sampling space, set.seed is used
       # https://benjaminblonder.org/hypervolume_faq.html
-      set.seed(1)
+      set.seed(12)
       # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
       hv = hypervolume(data.frame(LS_comb,TLP_comb),method="gaussian",quantile.requested=0.95)
-      plot(hv)
+      #plot(hv)
       
       # Set the number of points distributed systematically across LS and TLP space to test for inclusion in the hypervolume
       sampTLP=8
-      sampLS=8
+      sampLS=7
       
       maxLS=max(LS_comb,na.rm=T)
       minLS=min(LS_comb,na.rm=T)
@@ -76,6 +76,7 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
       length( LS_e )
       TLP_e <- LS_TLP_seq$Var2[in_hv]
       length( TLP_e )
+      plot_Hypervolume(hv,LS_e,TLP_e)
     }
   } else {
     # Go through all observed combinations of TLP and LS
@@ -105,7 +106,7 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
   LMA_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
   WD_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
   slope_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-  Ks_e <<- matrix(NA, nrow= ndata, ncol = n_uncer) 
+  Ks_e <- matrix(NA, nrow= ndata, ncol = n_uncer) 
   
   # Loop over all the combinations of TLP and LS
   # The new estimates of traits use the suffix "_e"
@@ -122,7 +123,7 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
       traits$slope[ind_spec_group],
       LMA_multivar_BDT$LMA_from_TLP,
       LMA_multivar_BE$LMA_from_TLP_LS,
-      Ks_multivar$Ks_from_Ls,
+      Ks_multivar$Ks_from_LS,
       P50_multivar$P50_from_TLP_Ks,
       slope_multivar$slope_from_P50_TLP_Ks,
       WD_multivar$WD_from_slope_P50slope,
