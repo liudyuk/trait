@@ -237,7 +237,7 @@ n_trait_sel = 28#-1
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel=3
 
-outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = T,propagate_uncer = T,trait_sel = F, n_trait_sel = 28, spec_group_sel = 4)
+outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = T,propagate_uncer = T,trait_sel = T, n_trait_sel = -1, spec_group_sel = 4)
 # not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
 # single objects
 list2env(outs_KsTLP$predictors , envir = .GlobalEnv) 
@@ -281,11 +281,62 @@ if(trait_sel==F) {
 }
 
 
+# Optimisation with Ks and P50 ------------------------------------------------------------
+# lowest bivariate relationship 0.23
+# Attempt to iteratively converge on the best fit values of Ks, TLP and LMA, given known LS and P50
+
+# Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
+limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
+
+# Decide whether to run the uncertainty propagation (T) or not (F)
+propagate_uncer=T
+
+# Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
+trait_sel= T 
+# Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
+n_trait_sel=28#-1
+
+# Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
+spec_group_sel=3
+
+outs_LSP50 <- trait_optim_bivar_start_LSP50(limitdataranges = T,propagate_uncer = T,trait_sel = T, n_trait_sel = -1, spec_group_sel = 4)
+# not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
+# single objects
+list2env(outs_LSP50$predictors , envir = .GlobalEnv) 
+list2env(outs_LSP50$predicted , envir = .GlobalEnv)
+
+# Stats defining the uncertainty range for each point
+create_uncertainty_range_stats(outs_LSP50)
+
+opt_test_plots_LSP50(trait_plot,
+                     Ks_e_mean,
+                     Ks_e_5perc,
+                     Ks_e_95perc,
+                     Ks_e,
+                     TLP_e_mean,
+                     TLP_e_5perc,
+                     TLP_e_95perc,
+                     TLP_e,
+                     LMA_e_mean,
+                     LMA_e_5perc,
+                     LMA_e_95perc,
+                     LMA_e,
+                     WD_e_mean,
+                     WD_e_5perc,
+                     WD_e_95perc,
+                     WD_e,
+                     slope_e_mean,
+                     slope_e_5perc,
+                     slope_e_95perc,
+                     slope_e) 
+
+
+
 
 # Optimisation with Ks and LS------------------------------------------------------------
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 
-outs_LSKs <- trait_optim(limitdataranges = T,propagate_uncer = T,trait_sel = F, n_trait_sel = 28, spec_group_sel = 4)
+outs_LSKs <- trait_optim(limitdataranges = T,propagate_uncer = T,trait_sel = T, n_trait_sel = -1, spec_group_sel = 4)
 list2env(outs_LSKs$predictors , envir = .GlobalEnv)
 list2env(outs_LSKs$predicted , envir = .GlobalEnv)
 
