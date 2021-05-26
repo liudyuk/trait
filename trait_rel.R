@@ -157,7 +157,7 @@ data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6),
 whittaker_biomes_plot(data_MATp_MAPp)
 
 # Optimisation with TLP and LS------------------------------------------------------------
-# lowest bivariate relationship 0.36 when all broadleaf data is considered
+# lowest bivariate functional relationship within the network (R= 0.36) when all broadleaf data is considered
 # Attempt to iteratively converge on the best fit values of Ks, P50 and LMA given known TLP and LS
 
 # Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
@@ -220,7 +220,7 @@ if(trait_sel==F) {
 
 
 # Optimisation with KS and TLP ------------------------------------------------------------
-# 
+# no hypothesised functional link, but bivariate correlation coeff 0.3
 # Attempt to iteratively converge on the best fit values of LS, P50 and LMA, given known KS and TLP
 
 
@@ -269,22 +269,9 @@ if(trait_sel==F) {
 
 
 # Optimisation with Ks and P50 ------------------------------------------------------------
-# lowest bivariate relationship 0.23
+# lowest functional bivariate relationship in the network: 0.23, that is not directly used in the optimisation framweork (orange lines)
 # Attempt to iteratively converge on the best fit values of Ks, TLP and LMA, given known LS and P50
 
-# Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
-limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
-
-# Decide whether to run the uncertainty propagation (T) or not (F)
-propagate_uncer=T
-
-# Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
-trait_sel= T 
-# Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
-n_trait_sel=28#-1
-
-# Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=3
 
 outs_LSP50 <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
 # not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
@@ -317,10 +304,19 @@ opt_test_plots_LSP50(trait_plot,
                      slope_e_95perc,
                      slope_e) 
 
-
+if(trait_sel==F) {
+  # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
+  ind = which(!is.na(traits$P50) & !is.na(traits$LS))
+  
+  # provide list of trait names which are the predicted traits
+  trait_names = c('Ks','TLP','LMA','WD','slope')
+  RMSE_withKsLS_start <- opt_rmse(traits,trait_names,ind)
+}
 
 
 # Optimisation with Ks and LS------------------------------------------------------------
+# No functional relationship between traits hypothethised (note: high observed correlation, R=0.4, probably via other traits), 
+# so: good 'outer edges' to start the optimisation from.
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 
 outs_LSKs <- trait_optim(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
