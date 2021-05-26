@@ -196,7 +196,7 @@ trait_opt_bivar_start_KsTLP<- function(P50,
     
     # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
     slope_e[ss]=mod_slope_intercept_sample + mod_slope_slope_y1_sample*P50_e[ss] + 
-      mod_slope_slope_y2_sample*TLP_e + mod_slope_slope_y3_sample*Ks_e[ss]
+      mod_slope_slope_y2_sample*TLP_e + mod_slope_slope_y3_sample*Ks_e
     WD_e[ss]=mod_WD_intercept_sample + mod_WD_slope_y1_sample*slope_e[ss] + 
       mod_WD_slope_y2_sample*slope_e[ss]*P50_e[ss]
     

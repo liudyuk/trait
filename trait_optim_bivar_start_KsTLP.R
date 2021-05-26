@@ -65,7 +65,7 @@ trait_optim_bivar_start_KsTLP <- function(limitdataranges=T, propagate_uncer=T, 
       intKs=(maxKs-minKs)/sampKs
       intTLP=(maxTLP-minTLP)/sampTLP
       
-      Ks_seq <- seq(minKs+intKs,maxLS-intKs,by=intKs)
+      Ks_seq <- seq(minKs+intKs,maxKs-intKs,by=intKs)
       TLP_seq <- seq(minTLP+intTLP,maxTLP-intTLP,by=intTLP)
       Ks_TLP_seq <- expand.grid(Ks_seq,TLP_seq)
       Ks_TLP_seq2<- expand.grid(Ks_seq,TLP_seq)

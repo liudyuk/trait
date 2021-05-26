@@ -27,7 +27,7 @@ opt_test_plots_LSTLP <- function(trait,
   # modified version:
   # Annemarie Eckes-Shephard May 2021 
   # Code heavily based on T. Pugh's function in opt_test_plots.R
-  # Small adaptations related to Ks and TLP variable and their summary stats.
+  # Small adaptations related to LS and TLP variable and their summary stats.
   
   par(mfrow=c(4,4))
   par(mar=c(2,2,2,2))

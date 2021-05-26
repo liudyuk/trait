@@ -439,7 +439,7 @@ Ks_multivar_test <- function(trait) {
   # DECISION: Ks_from_LS
   
   return_vals <- list("all_Ks"=all_Ks,
-                      "Ks_from_Ls"= Ks_from_LS)
+                      "Ks_from_LS"= Ks_from_LS)
   
   return(return_vals)
 }
