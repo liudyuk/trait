@@ -59,8 +59,8 @@ trait_BDT<-subset(traits,group=="BD" | group=="BT",drop = T)
 
 #--- Bivariate plots and statistics with SMA regression ---
 # These are used to fill out the hypothesis framework plot with R
-
-# Calculate for all broadleaf
+ 
+# Calculate for all broadleaf 
 bivar <- make_bivar_plots(trait_B,nbtstrp)
 View(bivar$all_sma_bivar)
 
@@ -115,10 +115,13 @@ WD_multivar <- WD_multivar_test(trait_B)
 slope_multivar <- slope_multivar_test(trait_B)
 
 
-# Ks fits --------------------------------------------------------------
+# Ks fits ----------------------------------------------------------------
 
 Ks_multivar <- Ks_multivar_test(trait_B)
 
+# LS fits -----------------------------------------------------------------
+
+LS_multivar <- LS_multivar_test(trait_B)
 
 
 # Make plots showing quality of fits and climate coverage -----------------
@@ -154,7 +157,7 @@ data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6),
 whittaker_biomes_plot(data_MATp_MAPp)
 
 # Optimisation with TLP and LS------------------------------------------------------------
-# lowest bivariate relationship 0.36
+# lowest bivariate relationship 0.36 when all broadleaf data is considered
 # Attempt to iteratively converge on the best fit values of Ks, P50 and LMA given known TLP and LS
 
 # Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
@@ -214,17 +217,82 @@ if(trait_sel==F) {
   RMSE_withTLPLS_start <- opt_rmse(traits,trait_names,ind)
 }
 
+
+
+# Optimisation with KS and TLP ------------------------------------------------------------
+# 
+# Attempt to iteratively converge on the best fit values of LS, P50 and LMA, given known KS and TLP
+
+# Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
+limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
+
+# Decide whether to run the uncertainty propagation (T) or not (F)
+propagate_uncer=T
+
+# Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
+trait_sel= T 
+# Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
+n_trait_sel = 28#-1
+
+# Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
+spec_group_sel=3
+
+outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = T,propagate_uncer = T,trait_sel = F, n_trait_sel = 28, spec_group_sel = 4)
+# not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
+# single objects
+list2env(outs_KsTLP$predictors , envir = .GlobalEnv) 
+list2env(outs_KsTLP$predicted , envir = .GlobalEnv)
+
+# Stats defining the uncertainty range for each point
+create_uncertainty_range_stats(outs_KsTLP)
+
+opt_test_plots_KsTLP(trait_plot,
+                                 LS_e_mean,
+                                 LS_e_5perc,
+                                 LS_e_95perc,
+                                 LS_e,
+                                 P50_e_mean,
+                                 P50_e_5perc,
+                                 P50_e_95perc,
+                                 P50_e,
+                                 LMA_e_mean,
+                                 LMA_e_5perc,
+                                 LMA_e_95perc,
+                                 LMA_e,
+                                 WD_e_mean,
+                                 WD_e_5perc,
+                                 WD_e_95perc,
+                                 WD_e,
+                                 slope_e_mean,
+                                 slope_e_5perc,
+                                 slope_e_95perc,
+                                 slope_e) 
+
+
+# Calculate the RMSE (only if running with actual values of Ks and LS [i.e. trait_sel =F in function trait_optim])
+
+if(trait_sel==F) {
+  # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
+  ind = which(!is.na(traits$Ks) & !is.na(traits$TLP))
+  
+  # provide list of trait names which are the predicted traits
+  trait_names = c('P50','LS','LMA','WD','slope')
+  RMSE_withKsTLP_start <- opt_rmse(traits,trait_names,ind)
+}
+
+
+
 # Optimisation with Ks and LS------------------------------------------------------------
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 
-outs_LsKS <- trait_optim(limitdataranges = T,propagate_uncer = T,trait_sel = F, n_trait_sel = 28, spec_group_sel = 4)
-list2env(outs_LsKS$predictors , envir = .GlobalEnv)
-list2env(outs_LsKS$predicted , envir = .GlobalEnv)
+outs_LSKs <- trait_optim(limitdataranges = T,propagate_uncer = T,trait_sel = F, n_trait_sel = 28, spec_group_sel = 4)
+list2env(outs_LSKs$predictors , envir = .GlobalEnv)
+list2env(outs_LSKs$predicted , envir = .GlobalEnv)
 
-#Stats defining the uncertainty range for each point
-create_uncertainty_range_stats(outs_LsKS)
+# Stats defining the uncertainty range for each point
+create_uncertainty_range_stats(outs_LSKs)
 
-#Make plots to compare with original data
+# Make plots to compare with original data
 
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
   trait_plot=trait_BDT
