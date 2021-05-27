@@ -51,6 +51,14 @@ source('trait_optim_bivar_start_LSP50.R')
 source('trait_opt_bivar_start_LSP50.R')
 source('opt_test_plots_LSP50.R')
 
+#---------------packages--------------------------
+# PCA plotting
+install_github("vqv/ggbiplot")
+library('ggbiplot')
+# systematic sampling for optimisation
+library('hypervolume')
+
+
 #--- Read in the trait data ---
 
 # Subset only the broadleaf species
@@ -223,6 +231,15 @@ if(trait_sel==F) {
   RMSE_withTLPLS_start <- opt_rmse(traits,trait_names,ind)
 }
 
+# Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
+#KSTLP
+traits_LPJG_TLPLS <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e,slope_e_mean,
+                                LS_e,WD_e_mean,Ks_e_mean,
+                                leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+
+# create data frame of traits for subsequent PCA below -------
+traits_TLPLS.df <- data.frame(matrix(unlist(traits_LPJG_TLPLS), ncol=length(traits_LPJG_TLPLS), byrow=FALSE))
+names(traits_TLPLS.df) <- names(traits_LPJG_TLPLS)
 
 
 # Optimisation with KS and TLP ------------------------------------------------------------
@@ -273,6 +290,17 @@ if(trait_sel==F) {
   RMSE_withKsTLP_start <- opt_rmse(traits,trait_names,ind)
 }
 
+# Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
+#KSTLP
+traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
+                                LS_e_mean,WD_e_mean,Ks_e,
+                                leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+
+# create data frame of traits for subsequent PCA below -------
+traits_KSTLP.df <- data.frame(matrix(unlist(traits_LPJG), ncol=length(traits_LPJG), byrow=FALSE))
+names(traits_KSTLP.df) <- names(traits_LPJG)
+
+
 
 # Optimisation with Ks and P50 ------------------------------------------------------------
 # lowest functional bivariate relationship in the network: 0.23, that is not directly used in the optimisation framweork (orange lines)
@@ -319,10 +347,20 @@ if(trait_sel==F) {
   RMSE_withLSP50_start <- opt_rmse(traits,trait_names,ind)
 }
 
+# Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
+#LSP50
+traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e,TLP_e_mean,slope_e_mean,
+                                LS_e,WD_e_mean,Ks_e_mean,
+                                leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
+# create data frame of traits for subsequent PCA below -------
+traits_KSP50.df <- data.frame(matrix(unlist(traits_LPJG), ncol=length(traits_LPJG), byrow=FALSE))
+names(traits_KSP50.df) <- names(traits_LPJG)
+
+# ---------------------------------------------------------------------------------------
 # Optimisation with Ks and LS------------------------------------------------------------
 # No functional relationship between traits hypothesised (note: high observed correlation, R=0.4, probably via other traits), 
-# so: good 'outer edges' to start the optimisation from.
+# so: traits are good 'outer edges' to start the optimisation from.
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 
 outs_LSKs <- trait_optim(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
@@ -382,8 +420,7 @@ traits_e_out <- data.frame(LS_e,Ks_e,
                            LMA_e_mean,LMA_e_5perc,LMA_e_95perc,
                            WD_e_mean,WD_e_5perc,WD_e_95perc,
                            slope_e_mean,slope_e_5perc,slope_e_95perc)
-write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_260820.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
-
+write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_KsLS.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
 
 
 
@@ -404,127 +441,75 @@ points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lowe
 points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
 
 
-# Convert to the values needed in LPJ-GUESS and write out -----------------
+# Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
 
-traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
+traits_LPJG_KSLS <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                                 LS_e,WD_e_mean,Ks_e,
                                 leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+
+# create data frame of traits for subsequent PCA below -------
+traits_LPJG_KSLS.df <- data.frame(matrix(unlist(traits_LPJG_KSLS), ncol=length(traits_LPJG_KSLS), byrow=FALSE))
+names(traits_LPJG_KSLS.df) <- names(traits_LPJG_KSLS)
+
+
+#------------------------------------------------------------------------------
+# write .ins file for LPJGuess based on the above optimised trait combinations for 28 PFT 'variants' per PFT.
 
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
 basePFT=5
 
 # Select output folder
 #output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
-output_fol="/Users/annemarie/Documents/1_TreeMort/2_Analysis/1_Inputs/"
-# Set the name for the output file
-if (basePFT==1) {
-  LPJG_outfile <- paste(output_fol,"/LPJG_PFT_insfile_TeBE.ins",sep="")
-  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_TeBE.csv",sep="")
-} else if (basePFT==2) {
-  LPJG_outfile <- paste(output_fol,"/LPJG_PFT_insfile_TeBS.ins",sep="")
-  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_TeBS.csv",sep="")
-} else if (basePFT==3) {
-  LPJG_outfile <- paste(output_fol,"LPJG_PFT_insfile_IBS.ins",sep="")
-  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_IBS.csv",sep="")
-} else if (basePFT==4) {
-  LPJG_outfile <- paste(output_fol,"/LPJG_PFT_insfile_TrBE.ins",sep="")
-  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_TrBE.csv",sep="")
-} else if (basePFT==5) {
-  LPJG_outfile <- paste(output_fol,"/LPJG_PFT_insfile_TrBR.ins",sep="")
-  LPJG_summaryfile <- paste(output_fol,"/LPJG_PFT_summary_TrBR.csv",sep="")
-} else {
-  stop("basePFT must be equal to 1, 2, 3, 4 or 5")
-}
+output_fol="/Users/annemarie/Documents/1_TreeMort/2_Analysis/1_Inputs"
 
-# Write out to LPJ-GUESS instruction file
-PFTfile <- file(LPJG_outfile)
-for (nn in 1:length(traits_LPJG$Ks)) {
-  if (nn>1) {
-    PFTfile <- file(LPJG_outfile,open="append")
-  }
-  
-  Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
-  if (basePFT==1) {
-    Line2 <- TeBE_header
-  } else if (basePFT==2) {
-    Line2 <- TeBS_header
-  } else if (basePFT==3) {
-    Line2 <- IBS_header
-  } else if (basePFT==4) {
-    Line2 <- TrBE_header
-  } else if (basePFT==5) {
-    Line2 <- TrBR_header
-  }
-  Line3 <- "\t !Hydraulics"
-  Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
-  Line5 <- paste("\t delta_psi_max ",traits_LPJG$DeltaPsiWW[nn],sep="")
-  Line6 <- paste("\t cav_slope ",traits_LPJG$polyslope[nn],sep="")
-  Line7 <- paste("\t psi50_xylem ",traits_LPJG$P50[nn],sep="")
-  Line8 <- paste("\t ks_max ",traits_LPJG$Ks[nn],sep="")
-  Line9 <- paste("\t kr_max ",11.2e-4,sep="") # LPJ-GUESS default from Hickler et al. (2006)
-  Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
-  Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
-  Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
-  Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
-  Line14 <- paste("\t cton_leaf_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
-  if (basePFT==1 | basePFT==4) {
-    Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
-    Line16 <- paste("\t turnover_leaf ",1/traits_LPJG$leaflong[nn],sep="")
-  } else {
-    #Use LPJ-GUESS standard values for deciduous
-    Line15 <- paste("\t leaflong 0.5")
-    Line16 <- paste("\t turnover_leaf 1.0")
-  } 
-  
-  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,Line15,Line16,"",")",""),PFTfile)
-  close(PFTfile)
-}
+# create .insfiles for  LPJ-GUESS_hydro
+#write_LPJG_ins.file(output_fol,basePFT = 1 ,traits_LPJG)
+#write_LPJG_ins.file(output_fol,basePFT = 2 ,traits_LPJG)
+#write_LPJG_ins.file(output_fol,basePFT = 3 ,traits_LPJG)
+write_LPJG_ins.file(output_fol,basePFT = 4 ,traits_LPJG)
+write_LPJG_ins.file(output_fol,basePFT = 5 ,traits_LPJG)
 
-# Write out to a set of LPJ-GUESS instruction files, 1 per PFT
-for (nn in 1:length(traits_LPJG$Ks)) {
-  LPJG_outfile_pft <- paste(LPJG_outfile,".PFT",nn,sep="")
-  file.copy("global_cf_base.ins",LPJG_outfile_pft,overwrite=T)
-  PFTfile <- file(LPJG_outfile_pft,open="append")
-  
-  Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
-  if (basePFT==1) {
-    Line2 <- TeBE_header
-  } else if (basePFT==2) {
-    Line2 <- TeBS_header
-  } else if (basePFT==3) {
-    Line2 <- IBS_header
-  } else if (basePFT==4) {
-    Line2 <- TrBE_header
-  } else if (basePFT==5) {
-    Line2 <- TrBR_header
-  }
-  Line3 <- "\t !Hydraulics"
-  Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
-  Line5 <- paste("\t delta_psi_max ",traits_LPJG$DeltaPsiWW[nn],sep="")
-  Line6 <- paste("\t cav_slope ",traits_LPJG$polyslope[nn],sep="")
-  Line7 <- paste("\t psi50_xylem ",traits_LPJG$P50[nn],sep="")
-  Line8 <- paste("\t ks_max ",traits_LPJG$Ks[nn],sep="")
-  Line9 <- paste("\t kr_max ",11.2e-4,sep="") # LPJ-GUESS default from Hickler et al. (2006)
-  Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
-  Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
-  Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
-  Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
-  Line14 <- paste("\t cton_leaf_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
-  if (basePFT==1 | basePFT==4) {
-    Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
-    Line16 <- paste("\t turnover_leaf ",1/traits_LPJG$leaflong[nn],sep="")
-  } else {
-    #Use LPJ-GUESS standard values for deciduous
-    Line15 <- paste("\t leaflong 0.5")
-    Line16 <- paste("\t turnover_leaf 1.0")
-  } 
-  
-  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,Line15,Line16,"",")",""),PFTfile)
-  close(PFTfile)
-}
 
-# Write out a trait values table by PFT to be used for post-processing of LPJ-GUESS output
-write.table(traits_LPJG,file=LPJG_summaryfile,sep=",",row.names = F)
+# perform PCA ------------------------------------------------------------
+# as test to see whether starting from different trait combinations
+# has an impact on the PFT-spread.
+opt_traits <-  c('traits_LPJG_KSLS.df', 'traits_TLPLS.df', 'traits_KSTLP.df', 'traits_KSP50.df')
+traits_BE  <- get(opt_traits[3])
+
+# transform some values:
+# T. Pugh
+# 25.10.20
+# original file: lpjg_strat_mapping_comb.m
+# translated into R Annemarie Eckes-Shephard May 2021
+
+## Convert SLA to LMA
+#traits_BS.LMA=1./traits_BS.SLA;
+traits_BE$LMA = 1./traits_BE$SLA
+
+## Log traits that are non-normal
+#traits_BS$P50 = log(-traits_BS$P50); 
+traits_BE$P50=log(-traits_BE$P50)
+#traits_BS$P88=log(-traits_BS$P88); 
+traits_BE$P88=log(-traits_BE$P88)
+#traits_BS$TLP=log(-traits_BS$TLP); 
+traits_BE$TLP=log(-traits_BE$TLP)
+#traits_BS$LS=log(traits_BS$LS); 
+traits_BE$LS=log(traits_BE$LS)
+#traits_BS$Ks=log(traits_BS$Ks); 
+traits_BE$Ks=log(traits_BE$Ks)
+#traits_BS$LMA=log(traits_BS$LMA); 
+traits_BE$LMA=log(traits_BE$LMA)
+
+
+#PCA on optimised trait values
+opt.pca <- prcomp(traits_BE[,c(1,3,4,6,10,12,17)], center = TRUE,scale. = TRUE)
+
+p_KsLS  <- ggbiplot(opt.pca,labels=row.names(traits_e_out))
+p_TLPLS <- ggbiplot(opt.pca,labels=row.names(traits_e_out))
+p_KSTLP <- ggbiplot(opt.pca,labels=row.names(traits_e_out))
+p_KSP50 <- ggbiplot(opt.pca,labels=row.names(traits_e_out))
+
+grid.arrange(p_KsLS , p_TLPLS,p_KSTLP, nrow = 1)
 
 
   
