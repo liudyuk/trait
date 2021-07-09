@@ -44,20 +44,23 @@ source('trait_optim.R')
 source('trait_optim_bivar_startLSTLP.R') #for testing multiple starting variables for the optimisation
 source('trait_opt_bivar_start_LSTLP.R')
 source('opt_test_plots_LSTLP.R')
-source('trait_optim_bivar_start_KsTLP')
+source('trait_optim_bivar_start_KsTLP.R')
 source('trait_opt_bivar_start_KsTLP.R')
 source('opt_test_plots_KsTLP.R')
 source('trait_optim_bivar_start_LSP50.R')
 source('trait_opt_bivar_start_LSP50.R')
 source('opt_test_plots_LSP50.R')
+source('plot_Hypervolume.R')
+source('opt_rmse.R')
 
 #---------------packages--------------------------
 # PCA plotting
-install_github("vqv/ggbiplot")
+#install_github("vqv/ggbiplot") # must have devtools installed to use install_github
 library('ggbiplot')
 # systematic sampling for optimisation
 library('hypervolume')
-
+# to plot PCA ggplots in grid
+library(gridExtra)
 
 #--- Read in the trait data ---
 
@@ -197,6 +200,13 @@ list2env(outs_LSTLP$predicted , envir = .GlobalEnv)
 #Stats defining the uncertainty range for each point
 create_uncertainty_range_stats(outs_LSTLP)
 
+#Determine trait dataset to use for plotting against optimised data
+if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
+  trait_plot=trait_BDT
+} else if (spec_group_sel==2) {
+  trait_plot=trait_BE
+}
+
 opt_test_plots_LSTLP(trait_plot,
                      Ks_e_mean,
                      Ks_e_5perc,
@@ -292,7 +302,7 @@ if(trait_sel==F) {
 
 # Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
 #KSTLP
-traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
+traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e,slope_e_mean,
                                 LS_e_mean,WD_e_mean,Ks_e,
                                 leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
@@ -354,8 +364,8 @@ traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e,TLP_e_mean,slope_e_mean,
                                 leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
 # create data frame of traits for subsequent PCA below -------
-traits_KSP50.df <- data.frame(matrix(unlist(traits_LPJG), ncol=length(traits_LPJG), byrow=FALSE))
-names(traits_KSP50.df) <- names(traits_LPJG)
+traits_LSP50.df <- data.frame(matrix(unlist(traits_LPJG), ncol=length(traits_LPJG), byrow=FALSE))
+names(traits_LSP50.df) <- names(traits_LPJG)
 
 # ---------------------------------------------------------------------------------------
 # Optimisation with Ks and LS------------------------------------------------------------
@@ -371,7 +381,6 @@ list2env(outs_LSKs$predicted , envir = .GlobalEnv)
 create_uncertainty_range_stats(outs_LSKs)
 
 # Make plots to compare with original data
-
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
   trait_plot=trait_BDT
 } else if (spec_group_sel==2) {
@@ -473,8 +482,17 @@ write_LPJG_ins.file(output_fol,basePFT = 5 ,traits_LPJG)
 # perform PCA ------------------------------------------------------------
 # as test to see whether starting from different trait combinations
 # has an impact on the PFT-spread.
+
+# save objects from analysis above, useful for quick jump to this section, if only PCA is of interest
+#traits_after_opt        <- c(traits_LPJG_KSLS.df, traits_TLPLS.df, traits_KSTLP.df, traits_KSP50.df)
+#names(traits_after_opt) <- c('traits_LPJG_KSLS.df', 'traits_TLPLS.df', 'traits_KSTLP.df', 'traits_KSP50.df')
+#save(traits_after_opt,file='traits_after_opt.RData')
+load('traits_after_opt.RData')
+
 opt_traits <-  c('traits_LPJG_KSLS.df', 'traits_TLPLS.df', 'traits_KSTLP.df', 'traits_KSP50.df')
-traits_BE  <- get(opt_traits[3])
+traits_KSP50.df<-traits_KSP50.df[-4,]# [TODO bug in WD calculations: NaN, must be backtraced]
+for(o in 1:4){
+traits_BE  <- get(opt_traits[o])
 
 # transform some values:
 # T. Pugh
@@ -504,12 +522,20 @@ traits_BE$LMA=log(traits_BE$LMA)
 #PCA on optimised trait values
 opt.pca <- prcomp(traits_BE[,c(1,3,4,6,10,12,17)], center = TRUE,scale. = TRUE)
 
-p_KsLS  <- ggbiplot(opt.pca,labels=row.names(traits_e_out))
-p_TLPLS <- ggbiplot(opt.pca,labels=row.names(traits_e_out))
-p_KSTLP <- ggbiplot(opt.pca,labels=row.names(traits_e_out))
-p_KSP50 <- ggbiplot(opt.pca,labels=row.names(traits_e_out))
-
-grid.arrange(p_KsLS , p_TLPLS,p_KSTLP, nrow = 1)
+if(o==1){
+p_KsLS  <- ggbiplot(opt.pca,labels=1:28)#row.names(traits_e_out))
+}
+if(o==2){
+p_TLPLS <- ggbiplot(opt.pca,labels=1:28)#labels=row.names(traits_e_out))
+}
+if(o==3){
+p_KSTLP <- ggbiplot(opt.pca,labels=1:28)#labels=row.names(traits_e_out))
+}
+if(o==4){
+p_KSP50 <- ggbiplot(opt.pca,labels=1:27)#labels=row.names(traits_e_out))
+}
+}
+grid.arrange(p_KsLS , p_TLPLS,p_KSTLP,p_KSP50, nrow = 1)
 
 
   
