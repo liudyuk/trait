@@ -27,7 +27,7 @@ nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samp
 #traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/woody_trait.0827.txt",sep="\t")
-traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/woody_trait.0827.txt",sep="\t")
+traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/mytrait-data/woody_trait.0827.txt",sep="\t")
 
 source('sma_multivar_regress.R')
 source('trait_functions.R')
@@ -173,6 +173,27 @@ data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6),
 
 whittaker_biomes_plot(data_MATp_MAPp)
 
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
+
+# Derive traits that are not subject optimisation--------------------------
+
+# Calculate regression of leafL from LMA ----------------------------------
+
+leafL_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T)
+
+
+# Calculate limits of leafN vs LMA to allow estimate of leaf C:N ----------
+
+leafN_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,trait_B$leafN),c("LMA","leafN"),nbtstrp,T)
+
+leafN_from_LMA_limit <- regress_limit_adjust(trait_B$leafN,trait_B$LMA,leafN_from_LMA,0.05)
+
+plot(trait_B$LMA,trait_B$leafN)
+points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lower,col="green")
+points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
+
+
 # Optimisation with TLP and LS------------------------------------------------------------
 # lowest bivariate functional relationship within the network (R= 0.36) when all broadleaf data is considered
 # Attempt to iteratively converge on the best fit values of Ks, P50 and LMA given known TLP and LS
@@ -186,7 +207,7 @@ propagate_uncer=T
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 trait_sel= T 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
-n_trait_sel=-1#-1
+n_trait_sel=-1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel=3
@@ -253,12 +274,12 @@ names(traits_TLPLS.df) <- names(traits_LPJG_TLPLS)
 
 
 # Optimisation with KS and TLP ------------------------------------------------------------
-# no hypothesised functional link, but bivariate correlation coeff 0.3
+# no hypothesised functional link, but low bivariate correlation coeff 0.3
 # Attempt to iteratively converge on the best fit values of LS, P50 and LMA, given known KS and TLP
 
 
 outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = limitdataranges, propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
-# not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
+# not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startKsTLP from a list of objects into single objects
 # single objects
 list2env(outs_KsTLP$predictors , envir = .GlobalEnv) 
 list2env(outs_KsTLP$predicted , envir = .GlobalEnv)
@@ -312,8 +333,9 @@ names(traits_KSTLP.df) <- names(traits_LPJG)
 
 
 
-# Optimisation with Ks and P50 ------------------------------------------------------------
-# lowest functional bivariate relationship in the network: 0.23, that is not directly used in the optimisation framweork (orange lines)
+# Optimisation with LS and P50 ------------------------------------------------------------
+# lowest bivariate relationship in the network: 0.23, that is not directly used in the optimisation framework (orange lines)
+# as it is thought not to have a functional relationship.
 # Attempt to iteratively converge on the best fit values of Ks, TLP and LMA, given known LS and P50
 
 
@@ -433,23 +455,6 @@ write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_KsLS.csv", 
 
 
 
-
-# Calculate regression of leafL from LMA ----------------------------------
-
-leafL_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T)
-
-
-# Calculate limits of leafN vs LMA to allow estimate of leaf C:N ----------
-
-leafN_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,trait_B$leafN),c("LMA","leafN"),nbtstrp,T)
-
-leafN_from_LMA_limit <- regress_limit_adjust(trait_B$leafN,trait_B$LMA,leafN_from_LMA,0.05)
-
-plot(trait_B$LMA,trait_B$leafN)
-points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lower,col="green")
-points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
-
-
 # Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
 
 traits_LPJG_KSLS <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
@@ -493,7 +498,7 @@ opt_traits <-  c('traits_LPJG_KSLS.df', 'traits_TLPLS.df', 'traits_KSTLP.df', 't
 traits_KSP50.df<-traits_KSP50.df[-4,]# [TODO bug in WD calculations: NaN, must be backtraced]
 for(o in 1:4){
 traits_BE  <- get(opt_traits[o])
-
+traits_BE <- traits_TLPLS.df
 # transform some values:
 # T. Pugh
 # 25.10.20
