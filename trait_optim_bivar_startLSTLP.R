@@ -28,7 +28,7 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
   
   if (trait_sel) {
     if (n_trait_sel>0) {
-      # Random selection of LS and Ks values to be tested
+      # Random selection of LS and TLP values to be tested
       set.seed(1234)
       index = 1:length(ind)
       trait_samp = sample(index, n_trait_sel, replace=F) 
@@ -123,12 +123,13 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
       traits$slope[ind_spec_group],
       LMA_multivar_BDT$LMA_from_TLP,
       LMA_multivar_BE$LMA_from_TLP_LS,
-      Ks_multivar$Ks_from_LS,
+      Ks_multivar$Ks_from_P50_LS,
       P50_multivar$P50_from_TLP_Ks,
       slope_multivar$slope_from_P50_TLP_Ks,
       WD_multivar$WD_from_slope_P50slope,
       bivar$LMA_from_TLP,
       bivar$P50_from_Ks,
+      bivar$Ks_fom_LS,
       TLP_e[dd],
       LS_e[dd],
       n_uncer,
