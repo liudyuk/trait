@@ -97,7 +97,7 @@ trait_opt_bivar_start_LSTLP <- function(
       }
       mod_Ks_intercept_sample <- Ks_from_P50_LS$mod$boot.intercept[ss] #Ks_from_P50_LS
       mod_Ks_slope_y1_sample <- Ks_from_P50_LS$mod$boot.y1[ss]
-      mod_Ks_slope_y2_sample <- Ks_from_P50_LS$mod$slope_R.y2[ss]
+      mod_Ks_slope_y2_sample <- Ks_from_P50_LS$mod$boot.y2[ss]
       mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$boot.intercept[ss] #P50_from_TLP_Ks
       mod_P50_slope_y1_sample <- P50_from_TLP_Ks$mod$boot.y1[ss]
       mod_P50_slope_y2_sample <- P50_from_TLP_Ks$mod$boot.y2[ss]
@@ -111,7 +111,7 @@ trait_opt_bivar_start_LSTLP <- function(
     }
     # These regression coefficients will now be used in the optimisation calculations
     
-    #TLP, P50, LMA need optimising
+    #Ks, P50, LMA need optimising
     
     #First set some initial based on simple bivariate relationship. This is just so that the iteration has somewhere to start from. Final result should not be sensitive to these.
     Ks_e_last = Ks_from_LS$mod$intercept_R + Ks_from_LS$mod$slope_R.y1*LS_e
