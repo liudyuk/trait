@@ -431,15 +431,18 @@ Ks_multivar_test <- function(trait) {
   all_Ks <- data.frame(all_testnames_Ks,all_R2_Ks,all_R2adj_Ks,all_rmse_Ks,all_ndata_Ks)
   View(all_Ks)
   
-  
+  #CHOICE: Ks_from_LS has more data points, but marginally worse fit. Check whether both trait combination options
+  # span the whole climate space. 
+    
+  plot(trait$MAT[Ks_from_LS$dataused],trait$MAP[Ks_from_LS$dataused],main = "Climate coverage")  
   # Test MAT and PPT coverage of species for chosen model
-  plot(trait$MAT[Ks_from_LS$dataused],trait$MAP[Ks_from_LS$dataused],main = "Climate coverage")
-  # WIDE CLIMATE COVERAGE
+  plot(trait$MAT[Ks_from_P50_LS$dataused],trait$MAP[Ks_from_P50_LS$dataused],main = "Climate coverage")
+  # WIDE CLIMATE COVERAGE: The climate coverage is similar for both, despite less data for Ks_from_P50_LS.
   
-  # DECISION: Ks_from_LS
+  # DECISION: Ks_from_P50_LS
   
   return_vals <- list("all_Ks"=all_Ks,
-                      "Ks_from_LS"= Ks_from_LS)
+                      "Ks_from_P50_LS"= Ks_from_P50_LS)
   
   return(return_vals)
 }

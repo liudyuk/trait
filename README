@@ -1,0 +1,42 @@
+# README
+
+This repository contains code related to exploring how to create hydrological trait-based PFTs, to subsequently assess their global distribution in LPJ-GUESS-HYD.
+
+# TO DO's
+
+### Trait relationships:
+- [X]  rewrite functions for better testing
+- [X]  test other trait relationships as starting points
+- [ ] trouble-shoot optimisations ( currently PCA shows very
+ different results)   :
+- [ ] *double-check PCA code ( probably just something related to logging and -)*
+- [ ] *Double-check analysis (sampling) code for new trait combinations *
+- [ ] *increase traits in PCA ( e.g. from 28 to 100)*
+- [ ] *LS-range is very dfferent between hypercube surfaces: Start by defining a supset of 28 starting values which all traits have in common, and which span the widest possible range ( use hypercube sampling?)*
+
+
+### Related to LPJ-GUESS-HYD
+- [X] fix daily LAI output
+(additional points after meeting:)
+- [X] Merge 'offline' version into most recent development branch ('Global') from Phillip
+- [X ] Check what makes TrBE's less successful in comparison to 'offline' version.
+	Established that the difference is due to random elements in fire routines
+(end additional point)
+#### trace phenology behaviour:
+- [x ] implement lpjguess as executable locally in Xcode
+- [X ] implement daily writeout of wscal in guess_hydraulics
+- [ ] check deciduousness benefit is correctly implemented: plot timeseries of leaf drop and death by cavitation.
+- [ ] check deciduousness cost: choose highest performing BE and BR, compare via LAI * SLA
+- [ X ] check transpiration is properly turned off after deciduous trees have lost their leaves.
+  It is not turned off, as phen=0 (lost leaves) can recover on a daily basis (i.e. grow leaves back daily)
+- [X ]  change rhum input in guess4_hudro ;
+        - [ ]file pull request
+### Other: 
+- [X ] review paper (by 3 June)
+
+
+
+Gdrive folder with trait descriptions
+
+https://drive.google.com/drive/folders/1-I1JKPQ7P8uDAnqwi7VToif0MgpE8x-R
+
