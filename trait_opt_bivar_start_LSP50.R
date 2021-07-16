@@ -8,19 +8,20 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
                                         LMA_from_TLP,
                                         LMA_from_TLP_LS,
                                         #TLP_from_LS_LMA_P50,
-                                        Ks_from_LS,
+                                        Ks_from_P50_LS,
                                         TLP_from_LS_LMA_P50,
                                         slope_from_P50_TLP_Ks,
                                         WD_from_slope_P50slope,
                                         LMA_from_LS,
                                         TLP_from_P50,
+                                        Ks_from_LS,
                                         P50_e,
                                         LS_e,
                                         n_uncer,
                                         use_LMA_from_TLP_LS){
   # Input
   # The following are just used for calculating maximum and minimum values of each trait, beyond which the optimisation should not extend:
-  # - P50,Ks,LMA,WD,slope
+  # - TLP,Ks,LMA,WD,slope
   # The following are the relationships on which the optimisation and associated trait estimates are based:
   # (note that if the relationships used are changed, these need to be updated)
   # - LMA_from_TLP or LMA_from_TLP_LS (choice of which is used is based on use_LMA_from_TLP_LS)
@@ -33,12 +34,12 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
   # - P50_from_Ks
   # - Ks_from_LS
   # The following are the traits from which the other traits are predicted:
-  # - TLP_e
+  # - P50_e
   # - LS_e
   
   # Set the tolerance level for the iteration
   tol = 0.00001
-  
+
   #Calculate minimum and maximum values
   maxTLP=max(TLP,na.rm=T)
   minTLP=min(TLP,na.rm=T)
@@ -71,8 +72,9 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
         mod_LMA_intercept_sample <- LMA_from_TLP$mod$intercept_R #LMA_from_TLP
         mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$slope_R.y1
       }
-      mod_Ks_intercept_sample <- Ks_from_LS$mod$intercept_R #Ks_from_LS 
-      mod_Ks_slope_y1_sample <- Ks_from_LS$mod$slope_R.y1
+      mod_Ks_intercept_sample <- Ks_from_P50_LS$mod$intercept_R #Ks_from_LS 
+      mod_Ks_slope_y1_sample <- Ks_from_P50_LS$mod$slope_R.y1
+      mod_Ks_slope_y2_sample <- Ks_from_P50_LS$mod$slope_R.y2
       mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$intercept_R #TLP_from_LS_LMA_P50
       mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y1
       mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y2
@@ -93,8 +95,9 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
         mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
         mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
       }
-      mod_Ks_intercept_sample <- Ks_from_LS$mod$boot.intercept[ss] #Ks_from_LS
-      mod_Ks_slope_y1_sample <- Ks_from_LS$mod$boot.y1[ss]
+      mod_Ks_intercept_sample <- Ks_from_P50_LS$mod$boot.intercept[ss] #Ks_from_LS
+      mod_Ks_slope_y1_sample <- Ks_from_P50_LS$mod$boot.y1[ss]
+      mod_Ks_slope_y2_sample <- Ks_from_P50_LS$mod$boot.y2[ss]
       mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$intercept_R #TLP_from_LS_LMA_P50
       mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y1
       mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$slope_R.y2
@@ -109,7 +112,7 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
     }
     # These regression coefficients will now be used in the optimisation calculations
     
-    #TLP, P50, LMA need optimising
+    #Ks, P50, LMA need optimising
     
     #First set some initial based on simple bivariate relationship. This is just so that the iteration has somewhere to start from. Final result should not be sensitive to these.
     Ks_e_last = Ks_from_LS$mod$intercept_R + Ks_from_LS$mod$slope_R.y1*LS_e
@@ -135,10 +138,10 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
     
     # Now we start the optimisation loop. Trait values are iterated until the difference between trait
     # values on successive iterations is less than "tol".
-    niter=0;
+    niter=0
+
     while (T) {
       niter=niter+1 # Number of iterations completed
-      
       # Make estimates of trait values based on the best SMA regressions (probably multivariate in most cases)
       # The estimates of traits in each iteration are based on the estimates of their predictor traits from the previous iteration
       if(use_LMA_from_TLP_LS) {
@@ -147,10 +150,10 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
       } else {
         LMA_e[ss] = mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last
       }
-      Ks_e[ss] = mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*LS_e 
+      Ks_e[ss] = mod_Ks_intercept_sample +mod_Ks_slope_y1_sample*P50_e_last +  mod_Ks_slope_y2_sample* LS_e
       TLP_e[ss] = mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*LS_e + 
         mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e
-      
+
       if (limitdataranges) {
         #Do not go beyond observed limits of data - if so, discard.
         if (TLP_e[ss]>maxTLP | is.na(TLP_e[ss])) {TLP_e[ss]=NA; break}
@@ -172,7 +175,7 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
       diff_Ks  = Ks_e[ss] -Ks_e_last
       
       # Now we test if the difference between trait estimates on this iteration and between trait estimates on
-      # the last iteration is less than "tol" for all traits. If it is we finish the iteration.
+      # the last iteration is less than "tol" for all traits. If it we finish the iteration.
       if (abs(diff_TLP-diff_TLP_last)<tol &&
           abs(diff_LMA-diff_LMA_last)<tol &&
           abs(diff_Ks-diff_Ks_last)<tol) {
@@ -188,6 +191,10 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
       TLP_e_last=TLP_e[ss]
       LMA_e_last=LMA_e[ss]
       Ks_e_last =Ks_e[ss]
+      
+      # If any predicted value is set to NA, this means the break was called, which terminates the loop. 
+      # The starting values for the iteration must be readjusted. This is here done rather randomly, let's see how efficient this is:
+ #     if(is.na(TLP_e[ss],LMA_e[ss],Ks_e[ss]))
     }
     
     # After the iteration has finished we can calculate any traits which did not need to be included in the optimisation (because they are not used in the input to calculate any other trait)
