@@ -1,7 +1,7 @@
 # this function subsets the data, chooses options for the type of sampling (random or strategic subset vs. use all Ks LS combinations)
 # it then carries out the optimisation. The number of outputs optimised values depends on the subset options parsed into the function
 # if propagate_uncer=T, must provide nbtsrp value
-trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trait_sel= T, n_trait_sel=28, spec_group_sel= 3){
+trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trait_sel= T, n_trait_sel=28, spec_group_sel= 3,est_lhs){
   # ---
   if (propagate_uncer) {
     n_uncer=nbtstrp
@@ -34,10 +34,18 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
       trait_samp = sample(index, n_trait_sel, replace=F) 
       LS_e = LS_comb[trait_samp] 
       P50_e = P50_comb[trait_samp] 
-      # Plot sample against all data as a check for sampling density
-      plot(LS_comb,P50_comb)
-      points(LS_e,P50_e,col="red")
       
+      # Plot sample against all data as a check for sampling density ( !=4 suppresses plot as this is now the lhcube option)
+      if(n_trait_sel != 4){
+        plot(LS_comb,P50_comb)
+        points(LS_e,P50_e,col="red")
+      }
+      
+      #accommodate latin hypercube sampling option:
+      if (n_trait_sel == 4){
+        LS_e  <- est_lhs$LS_e
+        P50_e <- est_lhs$P50_e  
+      }
     } else {
       # Systematic sample
       
@@ -136,16 +144,30 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
       use_LMA_from_TLP_LS)
     
     
-    TLP_e[dd,] <- opt_vals$TLP_e
-    Ks_e[dd,] <- opt_vals$Ks_e
-    LMA_e[dd,] <- opt_vals$LMA_e
-    WD_e[dd,] <- opt_vals$WD_e
+    TLP_e[dd,]   <- opt_vals$TLP_e
+    Ks_e[dd,]    <- opt_vals$Ks_e
+    LMA_e[dd,]   <- opt_vals$LMA_e
+    WD_e[dd,]    <- opt_vals$WD_e
     slope_e[dd,] <- opt_vals$slope_e
   }
   
-  predicted <- list("TLP_e"=TLP_e,"Ks_e"=Ks_e,"LMA_e"=LMA_e,"WD_e"=WD_e,"slope_e"=slope_e)
-  predictors <- list('P50_e' = P50_e,'LS_e'  = LS_e)
-  return_vals <- list('predictors'=predictors ,'predicted' =predicted )
+  # discard values across all trait lists where observed trait limits were surpassed (labelled as NA within function trait_opt_bivar_start_LSP50)
+  # this will reduce the number of predictor and predicted points in the lists
+  predicted.df <- data.frame("TLP_e"=TLP_e,"Ks_e"=Ks_e,"LMA_e"=LMA_e,"WD_e"=WD_e,"slope_e"=slope_e)
+  ind = complete.cases(predicted.df)
   
+  #re-define list elements as matrix after sub-setting ([ind]) so that subsequent functions in analysis still work:
+  predicted <- list("TLP_e"=as.matrix(TLP_e[ind]),"Ks_e"=as.matrix(Ks_e[ind]),"LMA_e"=as.matrix(LMA_e[ind]),"WD_e"=as.matrix(WD_e[ind]),"slope_e"=as.matrix(slope_e[ind]))
+  predictors <- list('P50_e' = as.matrix(P50_e[ind]),'LS_e' = as.matrix(LS_e[ind]))
+  return_vals <- list('predictors' = predictors ,'predicted' = predicted )
+  
+  #inform about the extend to which data was discarded during the optimisation:
+  nkeep <- count(ind)[which(count(ind)$x=='TRUE'),'freq']
+  ndiscard <- count(ind)[which(count(ind)$x=='FALSE'),'freq']
+  
+  if(length(ndiscard) != 0){
+    print(paste('The optimisation started with ',dim(predicted.df)[1],'predictor values and keept ',nkeep,'values and discarded ',ndiscard))
+    print('This means that predicted values could not converge, as some fell outside the range of observations')
+  }
   return(return_vals)
 }
