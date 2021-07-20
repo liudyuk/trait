@@ -25,7 +25,7 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
   # The following are the relationships on which the optimisation and associated trait estimates are based:
   # (note that if the relationships used are changed, these need to be updated)
   # - LMA_from_TLP or LMA_from_TLP_LS (choice of which is used is based on use_LMA_from_TLP_LS)
-  # - Ks_from_LS,
+  # - Ks_from_P50_LS,
   # - TLP_from_LS_LMA_P50,
   # - slope_from_P50_TLP_Ks
   # - WD_from_slope_P50slope,
@@ -72,7 +72,7 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
         mod_LMA_intercept_sample <- LMA_from_TLP$mod$intercept_R #LMA_from_TLP
         mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$slope_R.y1
       }
-      mod_Ks_intercept_sample <- Ks_from_P50_LS$mod$intercept_R #Ks_from_LS 
+      mod_Ks_intercept_sample <- Ks_from_P50_LS$mod$intercept_R #Ks_from_P50_LS 
       mod_Ks_slope_y1_sample <- Ks_from_P50_LS$mod$slope_R.y1
       mod_Ks_slope_y2_sample <- Ks_from_P50_LS$mod$slope_R.y2
       mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$intercept_R #TLP_from_LS_LMA_P50
@@ -95,7 +95,7 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
         mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
         mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
       }
-      mod_Ks_intercept_sample <- Ks_from_P50_LS$mod$boot.intercept[ss] #Ks_from_LS
+      mod_Ks_intercept_sample <- Ks_from_P50_LS$mod$boot.intercept[ss] #Ks_from_P50_LS
       mod_Ks_slope_y1_sample <- Ks_from_P50_LS$mod$boot.y1[ss]
       mod_Ks_slope_y2_sample <- Ks_from_P50_LS$mod$boot.y2[ss]
       mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$intercept_R #TLP_from_LS_LMA_P50
@@ -150,7 +150,7 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
       } else {
         LMA_e[ss] = mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last
       }
-      Ks_e[ss] = mod_Ks_intercept_sample +mod_Ks_slope_y1_sample*P50_e_last +  mod_Ks_slope_y2_sample* LS_e
+      Ks_e[ss] = mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*P50_e +  mod_Ks_slope_y2_sample* LS_e
       TLP_e[ss] = mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*LS_e + 
         mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e
 
@@ -163,7 +163,7 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
         if (LMA_e[ss]>maxLMA | is.na(LMA_e[ss])) {LMA_e[ss]=NA; break}
         if (LMA_e[ss]<minLMA | is.na(LMA_e[ss])) {LMA_e[ss]=NA; break}
       }
-      
+
       # Save the values for this iteration to the output array (only for debugging, can be commented out)
       TLP_c[niter] <- TLP_e[ss]
       LMA_c[niter] <- LMA_e[ss]
@@ -173,7 +173,7 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
       diff_TLP = TLP_e[ss]-TLP_e_last
       diff_LMA = LMA_e[ss]-LMA_e_last
       diff_Ks  = Ks_e[ss] -Ks_e_last
-      
+ 
       # Now we test if the difference between trait estimates on this iteration and between trait estimates on
       # the last iteration is less than "tol" for all traits. If it we finish the iteration.
       if (abs(diff_TLP-diff_TLP_last)<tol &&
@@ -210,9 +210,9 @@ trait_opt_bivar_start_LSP50 <- function(TLP,
     #  if (WD_e[dd,ss]>maxWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA}
     #  if (WD_e[dd,ss]<minWD | is.na(WD_e[dd,ss])) {WD_e[dd,ss]=NA}
     #}
-    TLP_e[ss]
+
   } #Finish nbtstrp loop
-  TLP_e
+
   return_vals <- list("TLP_e"=TLP_e,"Ks_e"=Ks_e,"LMA_e"=LMA_e,"WD_e"=WD_e,"slope_e"=slope_e)
   
   return(return_vals)
