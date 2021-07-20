@@ -52,6 +52,7 @@ source('trait_opt_bivar_start_LSP50.R')
 source('opt_test_plots_LSP50.R')
 source('plot_Hypervolume.R')
 source('opt_rmse.R')
+source('check_lhs_sampling.R')
 
 #---------------packages--------------------------
 # PCA plotting
@@ -59,6 +60,14 @@ source('opt_rmse.R')
 library('ggbiplot')
 # systematic sampling for optimisation
 library('hypervolume')
+# efficient sampling of multiple parameter combinations using hypercube sampling
+library('lhs')
+# used to create samples by transforming latin hypercube sampling space
+library('QRM')
+#for plotting of hypercube sampling results:
+library(grid)
+library(ggplot2)
+library("ggpubr")
 # to plot PCA ggplots in grid
 library(gridExtra)
 
@@ -194,6 +203,64 @@ points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lowe
 points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
 
 
+
+### latin hypercube sampling for traits from which to start from.
+# Identify all combinations of Ks and LS, P50 and TLP(do this across full range of broadleaf species)
+ind=which(!is.na(traits$Ks) & !is.na(traits$LS) & !is.na(traits$P50) & !is.na(traits$TLP))
+
+#create 28 latin (hyper)cube samples for the 4 traits.
+#lc_sample <- create_oalhs(28,4,bChooseLargerDesign = TRUE,bverbose = FALSE)
+set.seed(1400)
+lc_sample <- optimumLHS(100,k = 4, maxSweeps = 2, eps = 0.1, verbose = FALSE)
+
+
+#sample from trait space assuming it is uniformly distributed. This is not correct and may need transformation
+# transform sampled marginal distributions to uniform distributions:
+# that way we get stratified sample values that span the whole min-max range of the trait distribution
+LS_e  <- qunif(lc_sample[,1],  min(traits$LS[ind]), max(traits$LS[ind])) 
+Ks_e  <- qunif(lc_sample[,2], min(traits$Ks[ind]),  max(traits$Ks[ind])) 
+TLP_e <- qunif(lc_sample[,3], min(traits$TLP[ind]), max(traits$TLP[ind])) 
+P50_e <- qunif(lc_sample[,4], min(traits$P50[ind]), max(traits$P50[ind])) 
+
+# transform sampled marginal distributions to normal distributions:
+# this way we get stratified sample values that span the more commonly observed trait distribution
+LS_e  <- qnorm(lc_sample[,1], mean = mean(traits$LS[ind]), sd = sd(traits$LS[ind])) 
+Ks_e  <- qnorm(lc_sample[,2], mean = mean(traits$Ks[ind]),  sd = sd(traits$Ks[ind])) 
+TLP_e <- qnorm(lc_sample[,3], mean = mean(traits$TLP[ind]), sd = sd(traits$TLP[ind])) 
+P50_e <- qnorm(lc_sample[,4], mean = meanmin(traits$P50[ind]), sd = sd(traits$P50[ind])) 
+
+# for student t distributions
+# this way we get stratified sample values that span the more commonly observed trait distribution, 
+# allowing for the outer edges to be sampled more frequently
+estimate_trait_distr(traits)
+LS_e  <- LaplacesDemon::qst(lc_sample[,1],  mu=fitLS$par.ests[2]-1, sigma=fitLS$par.ests[3], nu=fitLS$par.ests[1], lower.tail=TRUE, log.p=FALSE)
+Ks_e  <- LaplacesDemon::qst(lc_sample[,2],  mu=fitKs$par.ests[2], sigma=fitKs$par.ests[3], nu=fitKs$par.ests[1],lower.tail=TRUE, log.p=FALSE)
+TLP_e <- LaplacesDemon::qst(lc_sample[,3],mu=fitTLP$par.ests[2], sigma=fitTLP$par.ests[3], nu=fitTLP$par.ests[1],lower.tail=TRUE, log.p=FALSE)
+P50_e <- LaplacesDemon::qst(lc_sample[,4],mu=fitP50$par.ests[2], sigma=fitP50$par.ests[3], nu=fitP50$par.ests[1],lower.tail=TRUE, log.p=FALSE)
+
+#enable using starting values from lhcube sampling
+est_lhsLSP50 <- list(LS_e,P50_e)
+names(est_lhsLSP50) <- c('LS_e','P50_e')
+#enable using starting values from lhcube sampling
+est_lhsLSTLP <- list(LS_e,TLP_e)
+names(est_lhsLSTLP) <- c('LS_e','TLP_e')
+#enable using starting values from lhcube sampling
+est_lhsKsLS <- list(LS_e,Ks_e)
+names(est_lhsKsLS) <- c('LS_e','Ks_e')
+est_lhsKsTLP <- list(Ks_e,TLP_e)
+names(est_lhsKsTLP) <- c('Ks_e','TLP_e')
+
+# Check the distribution of the sample in relation to the observations
+LSKsplot <- check_lhs_sampling(traits$LS[ind],traits$Ks[ind],LS_e,Ks_e,'LS','Ks')
+LSP50plot <- check_lhs_sampling(traits$LS[ind],traits$P50[ind],LS_e,P50_e,'LS','P50')
+LSTLPplot <- check_lhs_sampling(traits$LS[ind],traits$TLP[ind],LS_e,TLP_e,'LS','TLP')
+
+#plot the above
+ggarrange(LSKsplot , LSP50plot , LSTLPplot  + rremove("x.text"), 
+          labels = c("A", "B", "C"),
+          ncol = 2, nrow = 2)
+
+###
 # Optimisation with TLP and LS------------------------------------------------------------
 # lowest bivariate functional relationship within the network (R= 0.36) when all broadleaf data is considered
 # Attempt to iteratively converge on the best fit values of Ks, P50 and LMA given known TLP and LS
@@ -202,17 +269,19 @@ points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_uppe
 limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
 
 # Decide whether to run the uncertainty propagation (T) or not (F)
-propagate_uncer=T
+propagate_uncer=F
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 trait_sel= T 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
-n_trait_sel=-1
+n_trait_sel= 4#-1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel=3
 
-outs_LSTLP <- trait_optim_bivar_startLSTLP(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
+
+
+outs_LSTLP <- trait_optim_bivar_startLSTLP(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs= est_lhsLSTLP)
 # not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
 # single objects
 list2env(outs_LSTLP$predictors , envir = .GlobalEnv) 
@@ -264,13 +333,13 @@ if(trait_sel==F) {
 
 # Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
 #KSTLP
-traits_LPJG_TLPLS <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e,slope_e_mean,
+traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e,slope_e_mean,
                                 LS_e,WD_e_mean,Ks_e_mean,
                                 leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
 # create data frame of traits for subsequent PCA below -------
-traits_TLPLS.df <- data.frame(matrix(unlist(traits_LPJG_TLPLS), ncol=length(traits_LPJG_TLPLS), byrow=FALSE))
-names(traits_TLPLS.df) <- names(traits_LPJG_TLPLS)
+traits_LSTLP.df <- data.frame(matrix(unlist(traits_LPJG), ncol=length(traits_LPJG), byrow=FALSE))
+names(traits_LSTLP.df) <- names(traits_LPJG)
 
 
 # Optimisation with KS and TLP ------------------------------------------------------------
@@ -278,7 +347,7 @@ names(traits_TLPLS.df) <- names(traits_LPJG_TLPLS)
 # Attempt to iteratively converge on the best fit values of LS, P50 and LMA, given known KS and TLP
 
 
-outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = limitdataranges, propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
+outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = limitdataranges, propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs= est_lhsKsTLP)
 # not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startKsTLP from a list of objects into single objects
 # single objects
 list2env(outs_KsTLP$predictors , envir = .GlobalEnv) 
@@ -337,9 +406,8 @@ names(traits_KSTLP.df) <- names(traits_LPJG)
 # lowest bivariate relationship in the network: 0.23, that is not directly used in the optimisation framework (orange lines)
 # as it is thought not to have a functional relationship.
 # Attempt to iteratively converge on the best fit values of Ks, TLP and LMA, given known LS and P50
+outs_LSP50 <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
 
-
-outs_LSP50 <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
 # not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
 # single objects
 list2env(outs_LSP50$predictors , envir = .GlobalEnv) 
@@ -395,7 +463,8 @@ names(traits_LSP50.df) <- names(traits_LPJG)
 # so: traits are good 'outer edges' to start the optimisation from.
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
 
-outs_LSKs <- trait_optim(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel)
+
+outs_LSKs <- trait_optim(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsKsLS)
 list2env(outs_LSKs$predictors , envir = .GlobalEnv)
 list2env(outs_LSKs$predicted , envir = .GlobalEnv)
 
@@ -451,7 +520,7 @@ traits_e_out <- data.frame(LS_e,Ks_e,
                            LMA_e_mean,LMA_e_5perc,LMA_e_95perc,
                            WD_e_mean,WD_e_5perc,WD_e_95perc,
                            slope_e_mean,slope_e_5perc,slope_e_95perc)
-write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_KsLS.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
+#write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_KsLS.csv", append = FALSE, sep = ",", dec = ".",row.names = F, col.names = T)
 
 
 
@@ -474,7 +543,8 @@ basePFT=5
 
 # Select output folder
 #output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
-output_fol="/Users/annemarie/Documents/1_TreeMort/2_Analysis/1_Inputs"
+#AHES commented out for now during testing
+#output_fol="/Users/annemarie/Documents/1_TreeMort/2_Analysis/1_Inputs"
 
 # create .insfiles for  LPJ-GUESS_hydro
 #write_LPJG_ins.file(output_fol,basePFT = 1 ,traits_LPJG)
@@ -494,11 +564,14 @@ write_LPJG_ins.file(output_fol,basePFT = 5 ,traits_LPJG)
 #save(traits_after_opt,file='traits_after_opt.RData')
 load('traits_after_opt.RData')
 
-opt_traits <-  c('traits_LPJG_KSLS.df', 'traits_TLPLS.df', 'traits_KSTLP.df', 'traits_KSP50.df')
-traits_KSP50.df<-traits_KSP50.df[-4,]# [TODO bug in WD calculations: NaN, must be backtraced]
+opt_traits <-  c('traits_LPJG_KSLS.df', 'traits_LSTLP.df', 'traits_KSTLP.df', 'traits_KSP50.df')
+#traits_KSP50.df<-traits_KSP50.df# [TODO bug in WD calculations: NaN, must be backtraced]
 for(o in 1:4){
 traits_BE  <- get(opt_traits[o])
-traits_BE <- traits_TLPLS.df
+#traits_BE <- traits_LPJG_KSLS.df
+#traits_BE <- traits_LSP50.df
+#traits_BE <- traits_KSTLP.df
+#traits_BE <-traits_LSTLP.df
 # transform some values:
 # T. Pugh
 # 25.10.20
@@ -511,10 +584,10 @@ traits_BE$LMA = 1./traits_BE$SLA
 
 ## Log traits that are non-normal
 #traits_BS$P50 = log(-traits_BS$P50); 
-traits_BE$P50=log(-traits_BE$P50)
-#traits_BS$P88=log(-traits_BS$P88); 
-traits_BE$P88=log(-traits_BE$P88)
-#traits_BS$TLP=log(-traits_BS$TLP); 
+traits_BE$P50  = log(-traits_BE$P50)
+#traits_BS$P88 = log(-traits_BS$P88); 
+traits_BE$P88  = log(-traits_BE$P88)
+#traits_BS$TLP = log(-traits_BS$TLP); 
 traits_BE$TLP=log(-traits_BE$TLP)
 #traits_BS$LS=log(traits_BS$LS); 
 traits_BE$LS=log(traits_BE$LS)
@@ -528,19 +601,19 @@ traits_BE$LMA=log(traits_BE$LMA)
 opt.pca <- prcomp(traits_BE[,c(1,3,4,6,10,12,17)], center = TRUE,scale. = TRUE)
 
 if(o==1){
-p_KsLS  <- ggbiplot(opt.pca,labels=1:28)#row.names(traits_e_out))
+p_KsLS  <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1])#row.names(traits_e_out))
 }
 if(o==2){
-p_TLPLS <- ggbiplot(opt.pca,labels=1:28)#labels=row.names(traits_e_out))
+p_LSTLP <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1])#labels=row.names(traits_e_out))
 }
 if(o==3){
-p_KSTLP <- ggbiplot(opt.pca,labels=1:28)#labels=row.names(traits_e_out))
+p_KSTLP <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1])#labels=row.names(traits_e_out))
 }
 if(o==4){
-p_KSP50 <- ggbiplot(opt.pca,labels=1:27)#labels=row.names(traits_e_out))
+p_LSP50 <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1])#labels=row.names(traits_e_out))
 }
 }
-grid.arrange(p_KsLS , p_TLPLS,p_KSTLP,p_KSP50, nrow = 1)
+grid.arrange(p_KsLS , p_LSTLP,p_KSTLP,p_LSP50, nrow = 1)
 
 
   
