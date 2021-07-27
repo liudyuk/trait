@@ -94,7 +94,7 @@ trait_opt_bivar_start_KsTLP<- function(P50,
         mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
         mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
       }
-      mod_LS_intercept_sample <- LS_from_TLP_Ks$mod$boot.intercept[ss] #LS_from
+      mod_LS_intercept_sample <- LS_from_TLP_Ks$mod$boot.intercept[ss] #LS_from TLP Ks
       mod_LS_slope_y1_sample <- LS_from_TLP_Ks$mod$boot.y1[ss]
       mod_LS_slope_y2_sample <- LS_from_TLP_Ks$mod$boot.y1[ss]
       mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$boot.intercept[ss] #P50_from_TLP_Ks

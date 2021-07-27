@@ -11,16 +11,28 @@
 # - opt_test_plots.R
 # - lpjg_traits_conv.R
 # - hypervolume package (if taking a systematic sample)
+# - lhs, and QRM packages (if taking a latin hypercube sample)
 #
 # T. Pugh
 # 15.06.20
 #
 # Annemarie Eckes-Shephard
-# May 2021
-# *Minor changes to make output reproducible.
+# May + June 2021
+# *Minor changes to make output reproducible (set.seed in hypervolume sampling)
 # *outsource some code bits into separate functions
-# *modify existing functions to test optimisation efficacy when starting with other variable combinations (not Ks LS)
-
+# *modify existing functions to test optimisation efficacy when starting with 
+#  other variable combinations (not Ks LS)
+# July 2021
+# *PCA (previously a matlab script from Tom) now part of this script and applied
+#  to all starting variable combinations ('predictors')
+# *additional sampling method (latin hypercube sampling) implemented to exclude
+#  a possible predictor range impact on final predictions 
+# *reliably remove predicted trait combinations where one variable fell output 
+#  the min max bounds of observations (marked with NA in trait_opt functions)
+# *hard-wired (non-flexible) selection for 30 PFTs based on LS-P50 as starting
+#  variables ('predictors') in the optimisation. Used for next step to check 
+#  whether the emergent PFTs perform similarly to the PFTs derived through the
+#  Ks-Ls trait optimisation
 
 nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
@@ -29,30 +41,48 @@ nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samp
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/woody_trait.0827.txt",sep="\t")
 traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/mytrait-data/woody_trait.0827.txt",sep="\t")
 
+# related to trait network construction
 source('sma_multivar_regress.R')
 source('trait_functions.R')
 source('make_bivar_plots.R')
 source('multivar_model_selection.R')
 source("whittaker_biomes_plot.R")
+
+# optimisation starting with KsLS and subsequent diagnostic plots 
 source("trait_opt.R")
-source("opt_test_plots.R")
-source('lpjg_traits_conv.R')
-
-
-source('create_uncertainty_range_stats.R')
 source('trait_optim.R')
-source('trait_optim_bivar_startLSTLP.R') #for testing multiple starting variables for the optimisation
+source("opt_test_plots.R")
+
+# for testing multiple starting variables for the optimisation
+# optimisation starting with LSTLP and subsequent diagnostic plots  
+source('trait_optim_bivar_startLSTLP.R') 
 source('trait_opt_bivar_start_LSTLP.R')
 source('opt_test_plots_LSTLP.R')
+
+# optimisation starting with KsTLP and subsequent diagnostic plots 
 source('trait_optim_bivar_start_KsTLP.R')
 source('trait_opt_bivar_start_KsTLP.R')
 source('opt_test_plots_KsTLP.R')
+
+# optimisation starting with LSP50 and subsequent diagnostic plots 
 source('trait_optim_bivar_start_LSP50.R')
 source('trait_opt_bivar_start_LSP50.R')
 source('opt_test_plots_LSP50.R')
-source('plot_Hypervolume.R')
+
+# to create optimisation statistics
 source('opt_rmse.R')
+source('create_uncertainty_range_stats.R')
+
+#functions related to latin hypercube sampling
+source('estimate_trait_distr.R')
 source('check_lhs_sampling.R')
+
+# to visualise samples for optimisation
+source('plot_Hypervolume.R')
+
+# to create PFT input files for LPJGuess
+source('lpjg_traits_conv.R')
+source('write_LPJG_ins.file.R')
 
 #---------------packages--------------------------
 # PCA plotting
@@ -98,6 +128,10 @@ View(bivar_BE$all_sma_bivar)
 bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp)
 View(bivar_BDT$all_sma_bivar)
 
+
+#----------------------------------------------------------------------------------------------------------------------
+# Test single and multivariate correlation models
+#----------------------------------------------------------------------------------------------------------------------
 
 #--- Experiment with different plausible multivariate SMA models, based on our theory ---
 
@@ -183,6 +217,7 @@ data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6),
 whittaker_biomes_plot(data_MATp_MAPp)
 
 #----------------------------------------------------------------------------------------------------------------------
+#Latin Hypercube sampling
 #----------------------------------------------------------------------------------------------------------------------
 
 # Derive traits that are not subject optimisation--------------------------
@@ -204,54 +239,63 @@ points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_uppe
 
 
 
-### latin hypercube sampling for traits from which to start from.
-# Identify all combinations of Ks and LS, P50 and TLP(do this across full range of broadleaf species)
-ind=which(!is.na(traits$Ks) & !is.na(traits$LS) & !is.na(traits$P50) & !is.na(traits$TLP))
+### latin hypercube sampling of predictor traits from which to start the optimisation from.
+# Identify all combinations of Ks and LS, P50 and TLP (do this across full range of broadleaf species)
+ind = which(!is.na(traits$Ks) & !is.na(traits$LS) & !is.na(traits$P50) & !is.na(traits$TLP))
 
-#create 28 latin (hyper)cube samples for the 4 traits.
+#create latin (hyper)cube samples for the 4 traits.
 #lc_sample <- create_oalhs(28,4,bChooseLargerDesign = TRUE,bverbose = FALSE)
 set.seed(1400)
-lc_sample <- optimumLHS(100,k = 4, maxSweeps = 2, eps = 0.1, verbose = FALSE)
+# Number of samples
+n = 200
+lc_sample <- optimumLHS(n,k = 4, maxSweeps = 2, eps = 0.1, verbose = FALSE)
+# the drawn lc_samples from the sampling space are normally distributed and between 0 and 1
 
+# The trait observations are not strictly normally distributed (according towilcoxon sum rank test) 
+# and therefore may need transformation.
+# At the very least lhc- sampled value ranges need to be adapted to reflect the trait values. 
+# Below are three options that were tested:
+# Option 1) transform sampled marginal distributions to uniform distributions:
+# that way we get stratified sample values that span the whole min-max range of the trait distribution and
+# therefore the potential hydraulic strategy space.
+#LS_e  <- qunif(lc_sample[,1], min(traits$LS[ind]),  max(traits$LS[ind])) 
+#Ks_e  <- qunif(lc_sample[,2], min(traits$Ks[ind]),  max(traits$Ks[ind])) 
+#TLP_e <- qunif(lc_sample[,3], min(traits$TLP[ind]), max(traits$TLP[ind])) 
+#P50_e <- qunif(lc_sample[,4], min(traits$P50[ind]), max(traits$P50[ind])) 
 
-#sample from trait space assuming it is uniformly distributed. This is not correct and may need transformation
-# transform sampled marginal distributions to uniform distributions:
-# that way we get stratified sample values that span the whole min-max range of the trait distribution
-LS_e  <- qunif(lc_sample[,1],  min(traits$LS[ind]), max(traits$LS[ind])) 
-Ks_e  <- qunif(lc_sample[,2], min(traits$Ks[ind]),  max(traits$Ks[ind])) 
-TLP_e <- qunif(lc_sample[,3], min(traits$TLP[ind]), max(traits$TLP[ind])) 
-P50_e <- qunif(lc_sample[,4], min(traits$P50[ind]), max(traits$P50[ind])) 
-
-# transform sampled marginal distributions to normal distributions:
+# Option 2) adjust sampled marginal distributions to the variables' normal distributions ranges:
 # this way we get stratified sample values that span the more commonly observed trait distribution
 LS_e  <- qnorm(lc_sample[,1], mean = mean(traits$LS[ind]), sd = sd(traits$LS[ind])) 
 Ks_e  <- qnorm(lc_sample[,2], mean = mean(traits$Ks[ind]),  sd = sd(traits$Ks[ind])) 
 TLP_e <- qnorm(lc_sample[,3], mean = mean(traits$TLP[ind]), sd = sd(traits$TLP[ind])) 
-P50_e <- qnorm(lc_sample[,4], mean = meanmin(traits$P50[ind]), sd = sd(traits$P50[ind])) 
+P50_e <- qnorm(lc_sample[,4], mean = mean(traits$P50[ind]), sd = sd(traits$P50[ind])) 
 
-# for student t distributions
+# Option 3) for student t distributions
 # this way we get stratified sample values that span the more commonly observed trait distribution, 
-# allowing for the outer edges to be sampled more frequently
-estimate_trait_distr(traits)
-LS_e  <- LaplacesDemon::qst(lc_sample[,1],  mu=fitLS$par.ests[2]-1, sigma=fitLS$par.ests[3], nu=fitLS$par.ests[1], lower.tail=TRUE, log.p=FALSE)
-Ks_e  <- LaplacesDemon::qst(lc_sample[,2],  mu=fitKs$par.ests[2], sigma=fitKs$par.ests[3], nu=fitKs$par.ests[1],lower.tail=TRUE, log.p=FALSE)
-TLP_e <- LaplacesDemon::qst(lc_sample[,3],mu=fitTLP$par.ests[2], sigma=fitTLP$par.ests[3], nu=fitTLP$par.ests[1],lower.tail=TRUE, log.p=FALSE)
-P50_e <- LaplacesDemon::qst(lc_sample[,4],mu=fitP50$par.ests[2], sigma=fitP50$par.ests[3], nu=fitP50$par.ests[1],lower.tail=TRUE, log.p=FALSE)
+# allowing for the outer edges to have been sampled more frequently
+# first, estimate the parameters for each t-distribution
+#estimate_trait_distr(traits)
+# then use these parameters to transform the lh_sample normal distribution into t-distr.
+#LS_e  <- LaplacesDemon::qst(lc_sample[,1], mu=fitLS$par.ests[2]-1, sigma=fitLS$par.ests[3], nu=fitLS$par.ests[1], lower.tail=TRUE, log.p=FALSE)
+#Ks_e  <- LaplacesDemon::qst(lc_sample[,2], mu=fitKs$par.ests[2],  sigma=fitKs$par.ests[3], nu=fitKs$par.ests[1],lower.tail=TRUE, log.p=FALSE)
+#TLP_e <- LaplacesDemon::qst(lc_sample[,3], mu=fitTLP$par.ests[2], sigma=fitTLP$par.ests[3], nu=fitTLP$par.ests[1],lower.tail=TRUE, log.p=FALSE)
+#P50_e <- LaplacesDemon::qst(lc_sample[,4], mu=fitP50$par.ests[2], sigma=fitP50$par.ests[3], nu=fitP50$par.ests[1],lower.tail=TRUE, log.p=FALSE)
 
-#enable using starting values from lhcube sampling
+#create objects with transformed values from above, which will act as starting values (= predictors) for the optimisation below
 est_lhsLSP50 <- list(LS_e,P50_e)
 names(est_lhsLSP50) <- c('LS_e','P50_e')
-#enable using starting values from lhcube sampling
+
 est_lhsLSTLP <- list(LS_e,TLP_e)
 names(est_lhsLSTLP) <- c('LS_e','TLP_e')
-#enable using starting values from lhcube sampling
+
 est_lhsKsLS <- list(LS_e,Ks_e)
 names(est_lhsKsLS) <- c('LS_e','Ks_e')
+
 est_lhsKsTLP <- list(Ks_e,TLP_e)
 names(est_lhsKsTLP) <- c('Ks_e','TLP_e')
 
 # Check the distribution of the sample in relation to the observations
-LSKsplot <- check_lhs_sampling(traits$LS[ind],traits$Ks[ind],LS_e,Ks_e,'LS','Ks')
+LSKsplot  <- check_lhs_sampling(traits$LS[ind],traits$Ks[ind],LS_e,Ks_e,'LS','Ks')
 LSP50plot <- check_lhs_sampling(traits$LS[ind],traits$P50[ind],LS_e,P50_e,'LS','P50')
 LSTLPplot <- check_lhs_sampling(traits$LS[ind],traits$TLP[ind],LS_e,TLP_e,'LS','TLP')
 
@@ -260,10 +304,13 @@ ggarrange(LSKsplot , LSP50plot , LSTLPplot  + rremove("x.text"),
           labels = c("A", "B", "C"),
           ncol = 2, nrow = 2)
 
+#----------------------------------------------------------------------------------------------------------------------
+# Optimisation
+#----------------------------------------------------------------------------------------------------------------------
+
 ###
-# Optimisation with TLP and LS------------------------------------------------------------
-# lowest bivariate functional relationship within the network (R= 0.36) when all broadleaf data is considered
-# Attempt to iteratively converge on the best fit values of Ks, P50 and LMA given known TLP and LS
+# Optimisation setup
+# select options that will be used in all optimisations below
 
 # Decide whether to limit the possible ranges of predicted traits to the observed values (T) or not (F)
 limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
@@ -272,16 +319,32 @@ limitdataranges=T # Currently does not converge in uncertainty propagation if no
 propagate_uncer=F
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
+# and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
 trait_sel= T 
+
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
+# or set = 4 for a predefined (above) hypercube sample.
 n_trait_sel= 4#-1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel=3
+spec_group_sel = 3
+
+#Based on the above decision, determine trait dataset to use for plotting against optimised data
+if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
+  trait_plot=trait_BDT
+} else if (spec_group_sel==2) {
+  trait_plot=trait_BE
+}
 
 
+
+#Optimisation with TLP and LS------------------------------------------------------------
+# one of the lowest bivariate functional relationship within the network (R= 0.36) 
+# when all broadleaf data is considered
+# Attempt to iteratively converge on the best fit values of Ks, P50 and LMA given known TLP and LS
 
 outs_LSTLP <- trait_optim_bivar_startLSTLP(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs= est_lhsLSTLP)
+
 # not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
 # single objects
 list2env(outs_LSTLP$predictors , envir = .GlobalEnv) 
@@ -290,12 +353,6 @@ list2env(outs_LSTLP$predicted , envir = .GlobalEnv)
 #Stats defining the uncertainty range for each point
 create_uncertainty_range_stats(outs_LSTLP)
 
-#Determine trait dataset to use for plotting against optimised data
-if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
-  trait_plot=trait_BDT
-} else if (spec_group_sel==2) {
-  trait_plot=trait_BE
-}
 
 opt_test_plots_LSTLP(trait_plot,
                      Ks_e_mean,
@@ -323,7 +380,7 @@ opt_test_plots_LSTLP(trait_plot,
 
 
 if(trait_sel==F) {
-  # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
+  # Identify all combinations of TLP and LS (do this across full range of broadleaf species)
   ind = which(!is.na(traits$TLP) & !is.na(traits$LS))
   
   # provide list of trait names which are the predicted traits
@@ -331,25 +388,25 @@ if(trait_sel==F) {
   RMSE_withTLPLS_start <- opt_rmse(traits,trait_names,ind)
 }
 
-# Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
-#KSTLP
-traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e,slope_e_mean,
-                                LS_e,WD_e_mean,Ks_e_mean,
+# Convert to the values needed in LPJ-GUESS-----------------
+#LSTLP
+traits_LPJG_LSTLP <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,as.vector(TLP_e),slope_e_mean,
+                                      as.vector(LS_e),WD_e_mean,Ks_e_mean,
                                 leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
 # create data frame of traits for subsequent PCA below -------
-traits_LSTLP.df <- data.frame(matrix(unlist(traits_LPJG), ncol=length(traits_LPJG), byrow=FALSE))
-names(traits_LSTLP.df) <- names(traits_LPJG)
+traits_LSTLP.df <- data.frame(matrix(unlist(traits_LPJG_LSTLP), ncol=length(traits_LPJG_LSTLP), byrow=FALSE))
+names(traits_LSTLP.df) <- names(traits_LPJG_LSTLP)
 
 
-# Optimisation with KS and TLP ------------------------------------------------------------
-# no hypothesised functional link, but low bivariate correlation coeff 0.3
-# Attempt to iteratively converge on the best fit values of LS, P50 and LMA, given known KS and TLP
+# Optimisation with Ks and TLP ------------------------------------------------------------
+# no hypothesised functional link, bivariate correlation coeff: 0.3
+# Attempt to iteratively converge on the best fit values of LS, P50 and LMA, given known Ks and TLP
 
 
 outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = limitdataranges, propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs= est_lhsKsTLP)
-# not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startKsTLP from a list of objects into single objects
-# single objects
+# 'release' the output from function trait_optim_bivar_startKsTLP from a list of objects into single objects
+# single objects into the global environment
 list2env(outs_KsTLP$predictors , envir = .GlobalEnv) 
 list2env(outs_KsTLP$predicted , envir = .GlobalEnv)
 
@@ -390,25 +447,25 @@ if(trait_sel==F) {
   RMSE_withKsTLP_start <- opt_rmse(traits,trait_names,ind)
 }
 
-# Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
-#KSTLP
-traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e,slope_e_mean,
-                                LS_e_mean,WD_e_mean,Ks_e,
+# Convert to the values needed in LPJ-GUESS -----------------
+traits_LPJG_KSTLP <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,as.vector(TLP_e),slope_e_mean,
+                                LS_e_mean,WD_e_mean,as.vector(Ks_e),
                                 leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
 # create data frame of traits for subsequent PCA below -------
-traits_KSTLP.df <- data.frame(matrix(unlist(traits_LPJG), ncol=length(traits_LPJG), byrow=FALSE))
-names(traits_KSTLP.df) <- names(traits_LPJG)
+traits_KSTLP.df <- data.frame(matrix(unlist(traits_LPJG_KSTLP), ncol=length(traits_LPJG_KSTLP), byrow=FALSE))
+names(traits_KSTLP.df) <- names(traits_LPJG_KSTLP)
 
 
 
 # Optimisation with LS and P50 ------------------------------------------------------------
-# lowest bivariate relationship in the network: 0.23, that is not directly used in the optimisation framework (orange lines)
+# lowest bivariate relationship in the trait network for evergreen subset: 0.23.
+# It is not directly used in the optimisation framework (orange lines)
 # as it is thought not to have a functional relationship.
 # Attempt to iteratively converge on the best fit values of Ks, TLP and LMA, given known LS and P50
 outs_LSP50 <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
 
-# not very elegant.. but: this is to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
+# to 'release' the output from function trait_optim_bivar_startLSTLP from a list of objects into single objects
 # single objects
 list2env(outs_LSP50$predictors , envir = .GlobalEnv) 
 list2env(outs_LSP50$predicted , envir = .GlobalEnv)
@@ -447,24 +504,22 @@ if(trait_sel==F) {
   RMSE_withLSP50_start <- opt_rmse(traits,trait_names,ind)
 }
 
-# Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
-#LSP50
-traits_LPJG <- lpjg_traits_conv(LMA_e_mean,P50_e,TLP_e_mean,slope_e_mean,
-                                LS_e,WD_e_mean,Ks_e_mean,
+# Convert to the values needed in LPJ-GUESS -----------------
+traits_LPJG_LSP50 <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e),TLP_e_mean,slope_e_mean,
+                                      as.vector(LS_e),WD_e_mean,Ks_e_mean,
                                 leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
 # create data frame of traits for subsequent PCA below -------
-traits_LSP50.df <- data.frame(matrix(unlist(traits_LPJG), ncol=length(traits_LPJG), byrow=FALSE))
-names(traits_LSP50.df) <- names(traits_LPJG)
+traits_LSP50.df <- data.frame(matrix(unlist(traits_LPJG_LSP50), ncol=length(traits_LPJG_LSP50), byrow=FALSE))
+names(traits_LSP50.df) <- names(traits_LPJG_LSP50)
 
-# ---------------------------------------------------------------------------------------
+
 # Optimisation with Ks and LS------------------------------------------------------------
 # No functional relationship between traits hypothesised (note: high observed correlation, R=0.4, probably via other traits), 
 # so: traits are good 'outer edges' to start the optimisation from.
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
-
-
 outs_LSKs <- trait_optim(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsKsLS)
+
 list2env(outs_LSKs$predictors , envir = .GlobalEnv)
 list2env(outs_LSKs$predicted , envir = .GlobalEnv)
 
@@ -527,32 +582,17 @@ traits_e_out <- data.frame(LS_e,Ks_e,
 # Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
 
 traits_LPJG_KSLS <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
-                                LS_e,WD_e_mean,Ks_e,
+                                as.vector(LS_e),WD_e_mean,as.vector(Ks_e),
                                 leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
 # create data frame of traits for subsequent PCA below -------
-traits_LPJG_KSLS.df <- data.frame(matrix(unlist(traits_LPJG_KSLS), ncol=length(traits_LPJG_KSLS), byrow=FALSE))
-names(traits_LPJG_KSLS.df) <- names(traits_LPJG_KSLS)
+traits_KSLS.df <- data.frame(matrix(unlist(traits_LPJG_KSLS), ncol=length(traits_LPJG_KSLS), byrow=FALSE))
+names(traits_KSLS.df) <- names(traits_LPJG_KSLS)
 
 
-#------------------------------------------------------------------------------
-# write .ins file for LPJGuess based on the above optimised trait combinations for 28 PFT 'variants' per PFT.
-
-# Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
-basePFT=5
-
-# Select output folder
-#output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
-#AHES commented out for now during testing
-#output_fol="/Users/annemarie/Documents/1_TreeMort/2_Analysis/1_Inputs"
-
-# create .insfiles for  LPJ-GUESS_hydro
-#write_LPJG_ins.file(output_fol,basePFT = 1 ,traits_LPJG)
-#write_LPJG_ins.file(output_fol,basePFT = 2 ,traits_LPJG)
-#write_LPJG_ins.file(output_fol,basePFT = 3 ,traits_LPJG)
-write_LPJG_ins.file(output_fol,basePFT = 4 ,traits_LPJG)
-write_LPJG_ins.file(output_fol,basePFT = 5 ,traits_LPJG)
-
+#----------------------------------------------------------------------------------------------------------------------
+# PCA
+#----------------------------------------------------------------------------------------------------------------------
 
 # perform PCA ------------------------------------------------------------
 # as test to see whether starting from different trait combinations
@@ -562,17 +602,16 @@ write_LPJG_ins.file(output_fol,basePFT = 5 ,traits_LPJG)
 #traits_after_opt        <- c(traits_LPJG_KSLS.df, traits_TLPLS.df, traits_KSTLP.df, traits_KSP50.df)
 #names(traits_after_opt) <- c('traits_LPJG_KSLS.df', 'traits_TLPLS.df', 'traits_KSTLP.df', 'traits_KSP50.df')
 #save(traits_after_opt,file='traits_after_opt.RData')
-load('traits_after_opt.RData')
+#load('traits_after_opt.RData')
 
-opt_traits <-  c('traits_LPJG_KSLS.df', 'traits_LSTLP.df', 'traits_KSTLP.df', 'traits_KSP50.df')
-#traits_KSP50.df<-traits_KSP50.df# [TODO bug in WD calculations: NaN, must be backtraced]
+opt_traits <-  c('traits_KSLS.df', 'traits_LSTLP.df', 'traits_KSTLP.df', 'traits_LSP50.df')
 for(o in 1:4){
 traits_BE  <- get(opt_traits[o])
 #traits_BE <- traits_LPJG_KSLS.df
 #traits_BE <- traits_LSP50.df
 #traits_BE <- traits_KSTLP.df
-#traits_BE <-traits_LSTLP.df
-# transform some values:
+#traits_BE <- traits_LSTLP.df
+
 # T. Pugh
 # 25.10.20
 # original file: lpjg_strat_mapping_comb.m
@@ -582,6 +621,7 @@ traits_BE  <- get(opt_traits[o])
 #traits_BS.LMA=1./traits_BS.SLA;
 traits_BE$LMA = 1./traits_BE$SLA
 
+# transform some values:
 ## Log traits that are non-normal
 #traits_BS$P50 = log(-traits_BS$P50); 
 traits_BE$P50  = log(-traits_BE$P50)
@@ -601,19 +641,85 @@ traits_BE$LMA=log(traits_BE$LMA)
 opt.pca <- prcomp(traits_BE[,c(1,3,4,6,10,12,17)], center = TRUE,scale. = TRUE)
 
 if(o==1){
-p_KsLS  <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1])#row.names(traits_e_out))
+p_KsLS  <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1],labels.size = 2) +
+  #labs(y= "y axis name", x = "x axis name") +
+  ggtitle('KsLS')
 }
 if(o==2){
-p_LSTLP <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1])#labels=row.names(traits_e_out))
+p_LSTLP <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1],labels.size = 2) +
+  #labs(y= "y axis name", x = "x axis name") +
+  ggtitle('LSTLP')
 }
 if(o==3){
-p_KSTLP <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1])#labels=row.names(traits_e_out))
+p_KSTLP <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1],labels.size = 2) +
+  #labs(y= "y axis name", x = "x axis name") +
+  ggtitle('KsTLP')
 }
 if(o==4){
-p_LSP50 <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1])#labels=row.names(traits_e_out))
+p_LSP50 <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1],labels.size = 2) +
+  #labs(y= "y axis name", x = "x axis name") +
+  ggtitle('LSP50')
 }
 }
-grid.arrange(p_KsLS , p_LSTLP,p_KSTLP,p_LSP50, nrow = 1)
+# plot standardised, scaled PCA outputs
+# [TO DO] optimisation starting with LSTLP still not reflecting the general PCA space 
+# [TO DO] shorten axis labels
+dev.new()
+grid.arrange(p_KsLS,p_LSTLP,p_KSTLP,p_LSP50, nrow = 2)
 
 
-  
+#----------------------------------------------------------------------------------------------------------------------
+# Write out LPJGuess .ins files
+#----------------------------------------------------------------------------------------------------------------------
+
+#Create LPJGuess insfiles-----------------------------------------------------------------------------
+###old: write .ins file for LPJGuess based on the above optimised trait combinations for 28 PFT 'variants' per PFT.
+# write .ins file for LPJGuess based on the above optimised trait combinations for 28 PFT 'variants' per PFT.
+
+# Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
+basePFT = 4
+
+#NOT IN USE (yet) Select trait combination from which to write output using their location in the list traits_LPJG:
+# traits_LPJG_KSLS (1) , traits_LPJG_LSTLP (2), etc
+#traits_LPJG = c(traits_LPJG_KSLS, traits_LPJG_LSTLP, traits_LPJG_KSTLP, traits_LPJG_LSP50)
+#tc = 4
+
+# Selected traits from latin hypercube sampling with n=200 starting values in the predictors.
+# each optimisation (KSLSstart or LSP50start) removed some predicted values. The PCA plots were used to manually select
+# a PFT-subset for each predictor starting combination.
+# The locations for the loadings in the PCA can shift depending on the computer and R version used,
+# so this selection may not reflect the local selection. The subset selected here is saved as .RData 
+# I selected traits relative to the loading-variables' locations and not based on their position along the PC1 and PC2
+# axis. Not sure that was correct..
+
+# for traits_LPJG_KSLS
+ind = c(1,2,4,5,45,155,81,11,29,142,156,63,102,110,18,50,67,72,130,160,101,74,80,58,95,64,133,44,124,147)
+traits_LPJG_KSLS_subs <- lapply(seq_along(traits_LPJG_KSLS), function(x) traits_LPJG_KSLS[[x]][ind])
+names(traits_LPJG_KSLS_subs) <- names(traits_LPJG_KSLS)
+
+
+# for traits_LPJG_LSP50
+ind =  c(180,13,26,80,143,71,107,56,28,133,113,66,114,96,49,54,105,126,92,3,12,86,24,112,44,172,83,41,110,59)
+traits_LPJG_LSP50_subs <- lapply(seq_along(traits_LPJG_LSP50), function(x) traits_LPJG_LSP50[[x]][ind])
+names(traits_LPJG_LSP50_subs) <- names(traits_LPJG_LSP50)
+
+#save new PFT subset or load existing one: 
+#save(traits_LPJG_KSLS_subs, traits_LPJG_LSP50_subs, file = 'LPJGuessPFTS.RData')
+#load('LPJGuessPFTS.RData')
+
+# Select output folder
+#output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
+#AHES commented out for now during testing
+#output_fol="/Users/annemarie/Documents/1_TreeMort/2_Analysis/1_Inputs"
+
+
+# create .ins files for  LPJ-GUESS_hydro
+#started with KSLS
+write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_subs)
+#started with LSP50
+write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_subs)
+
+#write_LPJG_ins.file(output_fol,basePFT = 2 ,traits_LPJG)
+#write_LPJG_ins.file(output_fol,basePFT = 3 ,traits_LPJG)
+#write_LPJG_ins.file(output_fol,basePFT = 4 ,traits_LPJG)
+#write_LPJG_ins.file(output_fol,basePFT = 5 ,traits_LPJG)

@@ -3,7 +3,7 @@
 # convenience function that contains all code bits to create .ins files for LPJ-Guess4_hydro
 # output_fol : specify output folder location as string
 # basePFT: number between 1 and 5, to reflect PFTs:  'TeBE'(1),'TeBS'(2),'IBS'(3),'TrBE'(4),'TrBR'(5)
-# traits_LPJG list objsect of traits derived from function  lpjg_traits_conv()
+# traits_LPJG: list object of traits derived from function  lpjg_traits_conv()
 write_LPJG_ins.file <- function(output_fol,basePFT,traits_LPJG){
   basePFT_names <- c('TeBE','TeBS','IBS','TrBE','TrBR')
 # Set the name for the output file  
