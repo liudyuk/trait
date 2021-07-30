@@ -3,7 +3,7 @@
 # T. Pugh
 # 12.12.20
 
-P50_multivar_test <- function(trait) {
+P50_multivar_test <- function(trait,view_stats=FALSE) {
   
   # P50 from TLP, Ks and WD
   P50_from_TLP_Ks_WD <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp)
@@ -54,7 +54,7 @@ P50_multivar_test <- function(trait) {
   all_ndata_P50 <- c(P50_from_TLP_Ks_WD$ndata,P50_from_TLP_Ks$ndata,P50_from_TLP$ndata,P50_from_Ks$ndata,P50_from_TLP_limitTLPLS$ndata,P50_from_Ks_limitTLPKs$ndata,P50_from_TLP_LS_Ks$ndata,P50_from_TLP_LS$ndata,P50_from_Ks_LS$ndata,P50_from_LS_limitTLPLS$ndata,P50_from_LS$ndata)
   
   all_P50 <- data.frame(all_testnames_P50,all_R2_P50,all_R2adj_P50,all_rmse_P50,all_ndata_P50)
-  View(all_P50)
+   if(view_stats==TRUE)View(all_P50)
   
   # BEST MODEL: P50_from_TLP_Ks
   # Test MAT and PPT coverage of species for best model
@@ -69,7 +69,7 @@ P50_multivar_test <- function(trait) {
   return(return_vals)
 }
 
-TLP_multivar_test <- function(trait) {
+TLP_multivar_test <- function(trait,view_stats=FALSE) {
   
   # TLP from LS, LMA, P50 and WD
   TLP_from_LS_LMA_P50_WD <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$P50,trait$WD,trait$TLP),c("LS","LMA","P50","WD","TLP"),nbtstrp)
@@ -120,7 +120,7 @@ TLP_multivar_test <- function(trait) {
   all_ndata_TLP <- c(TLP_from_LS_LMA_P50_WD$ndata,TLP_from_LS_LMA_P50_slope$ndata,TLP_from_LS_LMA_P50$ndata,TLP_from_LS_LMA$ndata,TLP_from_P50_LMA$ndata,TLP_from_P50_LMA_limitLALMAP50$ndata,TLP_from_P50_LS$ndata,TLP_from_LS$ndata,TLP_from_P50$ndata,TLP_from_LMA$ndata,TLP_from_P50_limitLSLMAP50$ndata)
   
   all_TLP <- data.frame(all_testnames_TLP,all_R2_TLP,all_R2adj_TLP,all_rmse_TLP,all_ndata_TLP)
-  View(all_TLP)
+   if(view_stats==TRUE)View(all_TLP)
   
   # CHOICE: Although WD improves the fit, do not use it as our hypothesis framework does not posit a direct link between TLP and WD (only indirect via P50 and slope)
   
@@ -146,7 +146,7 @@ TLP_multivar_test <- function(trait) {
   return(return_vals)
 }
 
-LMA_multivar_test_BDT <- function(trait_BDT) {
+LMA_multivar_test_BDT <- function(trait_BDT,view_stats=FALSE) {
   # This version for BD and BT only.
   
   # LMA from TLP, LS and WD
@@ -183,7 +183,7 @@ LMA_multivar_test_BDT <- function(trait_BDT) {
   all_ndata_LMA <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata)
   
   all_LMA <- data.frame(all_testnames_LMA,all_R2_LMA,all_R2adj_LMA,all_rmse_LMA,all_ndata_LMA)
-  View(all_LMA)
+   if(view_stats==TRUE)View(all_LMA)
   
   # CHOICE: best model is LMA_from_TLP
   
@@ -198,7 +198,7 @@ LMA_multivar_test_BDT <- function(trait_BDT) {
   return(return_vals)
 }
 
-LMA_multivar_test_BE <- function(trait_BE) {
+LMA_multivar_test_BE <- function(trait_BE,view_stats=FALSE) {
   # This version for BE only.
   
   # LMA from TLP, LS and WD
@@ -245,7 +245,7 @@ LMA_multivar_test_BE <- function(trait_BE) {
   all_ndata_LMA <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata,LMA_from_LS_WD_limitTLPLSWD$ndata,LMA_from_TLP_WD_limitTLPLSWD$ndata)
   
   all_LMA <- data.frame(all_testnames_LMA,all_R2_LMA,all_R2adj_LMA,all_rmse_LMA,all_ndata_LMA)
-  View(all_LMA)
+   if(view_stats==TRUE)View(all_LMA)
   
   # CHOICE: best model in R2 terms is LMA_from_TLP_LS, but in RMSE is (marginally) LMA_from_TLP_LS_WD
   # Choose to go with LMA_from_TLP_LS on the basis that it is more parsimonious.
@@ -261,7 +261,7 @@ LMA_multivar_test_BE <- function(trait_BE) {
   return(return_vals)
 }
 
-WD_multivar_test <- function(trait) {
+WD_multivar_test <- function(trait,view_stats=FALSE) {
   
   # WD from P50 and slope
   WD_from_P50_slope <- sma_plot_stats(data.frame(trait$P50,trait$slope,trait$WD),c("P50","slope","WD"),nbtstrp)
@@ -291,7 +291,7 @@ WD_multivar_test <- function(trait) {
   all_ndata_WD <- c(WD_from_P50_slope$ndata,WD_from_slope_P50slope$ndata,WD_from_P50_P50slope$ndata,WD_from_P50$ndata,WD_from_slope$ndata)
   
   all_WD <- data.frame(all_testnames_WD,all_R2_WD,all_R2adj_WD,all_rmse_WD,all_ndata_WD)
-  View(all_WD)
+   if(view_stats==TRUE)View(all_WD)
   
   # CHOICE: WD_from_slope_P50slope has the best combination of R2adj and RMSE
   
@@ -306,7 +306,7 @@ WD_multivar_test <- function(trait) {
   return(return_vals)
 }
 
-slope_multivar_test <- function(trait) {
+slope_multivar_test <- function(trait,view_stats=FALSE) {
   
   # slope from P50, TLP, WD and Ks
   slope_from_P50_TLP_WD_Ks <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$WD,trait$Ks,trait$slope),c("P50","TLP","WD","Ks","slope"),nbtstrp)
@@ -386,7 +386,7 @@ slope_multivar_test <- function(trait) {
   all_ndata_slope <- c(slope_from_P50_TLP_WD_Ks$ndata,slope_from_P50_TLP_WD$ndata,slope_from_P50_TLP_Ks$ndata,slope_from_P50_WD_Ks$ndata,slope_from_TLP_WD_Ks$ndata,slope_from_P50_TLP$ndata,slope_from_P50_TLPP50$ndata,slope_from_TLP_TLPP50$ndata,slope_from_TLP_Ks$ndata,slope_from_TLP_WD$ndata,slope_from_TLP$ndata,slope_from_P50$ndata,slope_from_WD$ndata,slope_from_Ks$ndata,slope_from_P50_WD_Ks_limitP50TLPWDKs$ndata,slope_from_P50_TLP_Ks_limitP50TLPWDKs$ndata,slope_from_P50_limitP50TLPWDKs$ndata)
   
   all_slope <- data.frame(all_testnames_slope,all_R2_slope,all_R2adj_slope,all_rmse_slope,all_ndata_slope)
-  View(all_slope)
+   if(view_stats==TRUE)View(all_slope)
   
   # CHOICE: slope_from_P50_TLP_Ks
   
@@ -402,7 +402,7 @@ slope_multivar_test <- function(trait) {
   return(return_vals)
 }
   
-Ks_multivar_test <- function(trait) {
+Ks_multivar_test <- function(trait,view_stats=FALSE) {
   # not really a test, as the trait network is already established, but testing the thin lines in slide 10, too:
   
   # Ks from P50, TLP, LS
@@ -434,7 +434,7 @@ Ks_multivar_test <- function(trait) {
   all_ndata_Ks <- c(Ks_from_P50_TLP_LS$ndata, Ks_from_P50_LS_LMA$ndata,   Ks_from_P50_LS$ndata,Ks_from_LS$ndata,Ks_from_P50$ndata)
   
   all_Ks <- data.frame(all_testnames_Ks,all_R2_Ks,all_R2adj_Ks,all_rmse_Ks,all_ndata_Ks)
-  View(all_Ks)
+   if(view_stats==TRUE)View(all_Ks)
   
   #CHOICE: Ks_from_LS has more data points, but marginally worse fit. Check whether both trait combination options
   # span the whole climate space. 
@@ -452,7 +452,7 @@ Ks_multivar_test <- function(trait) {
   return(return_vals)
 }
 
-LS_multivar_test <- function(trait) {
+LS_multivar_test <- function(trait,view_stats=FALSE) {
   # not really a test, as the trait network is already established, but testing the thin lines in slide 10, too:
   
   # LS from LMA TLP, KS, P50
@@ -496,7 +496,7 @@ LS_multivar_test <- function(trait) {
   all_ndata_LS <- c(LS_from_P50_TLP_Ks_LMA$ndata,LS_from_P50_TLP_Ks$ndata,LS_from_TLP_Ks$ndata,LS_from_P50_TLP$ndata,LS_from_P50_Ks$ndata,LS_from_P50$ndata,LS_from_TLP$ndata,LS_from_Ks$ndata)
   
   all_LS <- data.frame(all_testnames_LS,all_R2_LS,all_R2adj_LS,all_rmse_LS,all_ndata_LS)
-  View(all_LS)
+  if(view_stats==TRUE)View(all_LS)
   
   
   # Test MAT and PPT coverage of species for chosen model
