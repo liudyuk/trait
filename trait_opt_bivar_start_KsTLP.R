@@ -145,7 +145,7 @@ trait_opt_bivar_start_KsTLP<- function(P50,
       # When choosing TLP_e and Ks as starting values, it 'slices' through the network and determines P50 and LS. Not sure we are challenging the network's plausibility much here:
       if(use_LMA_from_TLP_LS) {
         LMA_e[ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e +
-          mod_LMA_slope_y2_sample*LS_e
+          mod_LMA_slope_y2_sample*LS_e_last
       } else {
         LMA_e[ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e
       }
