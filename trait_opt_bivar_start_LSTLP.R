@@ -151,7 +151,7 @@ trait_opt_bivar_start_LSTLP <- function(
       } else {
         LMA_e[ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e
       }
-      Ks_e[ss]  = mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*P50_e_last +  mod_Ks_slope_y2_sample* LS_e + mod_Ks_slope_y3_sample * LMA_e#LMA_e_last
+      Ks_e[ss]  = mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*P50_e_last +  mod_Ks_slope_y2_sample* LS_e + mod_Ks_slope_y3_sample * LMA_e_last
       P50_e[ss] = mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e + 
         mod_P50_slope_y2_sample*Ks_e_last 
      
