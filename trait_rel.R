@@ -1,6 +1,9 @@
 # Script to read in the processed trait data, make bivariate and multivariate SMA regressions and then
 # carry out an optimisation procedure to unify inter-trait relationships across the whole trait dataset.
 #
+# [TO DO] optimisation starting with LSTLP still does not the general PCA space 
+# [TO DO] shorten axis labels in PCA plots
+
 # Dependencies: 
 # - sma_multivar_regress.R
 # - trait_functions.R
@@ -118,15 +121,15 @@ trait_BDT<-subset(traits,group=="BD" | group=="BT",drop = T)
  
 # Calculate for all broadleaf 
 bivar <- make_bivar_plots(trait_B,nbtstrp)
-View(bivar$all_sma_bivar)
+#View(bivar$all_sma_bivar)
 
 # Calculate for all evergreen broadleaf
 bivar_BE <- make_bivar_plots(trait_BE,nbtstrp)
-View(bivar_BE$all_sma_bivar)
+#View(bivar_BE$all_sma_bivar)
 
 # Calculate for all deciduous broadleaf
 bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp)
-View(bivar_BDT$all_sma_bivar)
+#View(bivar_BDT$all_sma_bivar)
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -146,7 +149,7 @@ y1_P50_from_TLP_Ks <- c(P50_multivar$P50_from_TLP_Ks$mod$slope_R.y1,P50_multivar
 y2_P50_from_TLP_Ks <- c(P50_multivar$P50_from_TLP_Ks$mod$slope_R.y2,P50_multivar$P50_from_TLP_Ks$mod$L95_R.y2,P50_multivar$P50_from_TLP_Ks$mod$U95_R.y2)
 
 coeff_P50_from_TLP_Ks <- data.frame(coeffnames_P50_from_TLP_Ks,intercept_P50_from_TLP_Ks,y1_P50_from_TLP_Ks,y2_P50_from_TLP_Ks)
-View(coeff_P50_from_TLP_Ks)
+#View(coeff_P50_from_TLP_Ks)
 
 # NOTE: These coefficients are all over the place, almost certainly because we have high multicolinearity in the predictors, BUT, this is not a problem as we are not interpreting the coefficients, just using them for the prediction.
 
@@ -177,12 +180,19 @@ slope_multivar <- slope_multivar_test(trait_B)
 
 # Ks fits ----------------------------------------------------------------
 
-Ks_multivar <- Ks_multivar_test(trait_B)
+#Ks_multivar_BDT <- Ks_multivar_test(trait_BDT)
+Ks_multivar      <- Ks_multivar_test(trait_B)
+# AHES: there is actually quite a difference in the regression model that scores highest:
+#Ks_multivar_BE   <- Ks_multivar_test_BE(trait_B)
+#Ks_multivar_BDT  <- Ks_multivar_test(trait_BDT)
 
 # LS fits -----------------------------------------------------------------
 
 LS_multivar <- LS_multivar_test(trait_B)
-
+# AHES: not so much, but still also difference for LS
+# so maybe the networks starting with LS don't work well because of that..?
+#LS_multivar_BE <- LS_multivar_test_BE(trait_BE)
+#LS_multivar_BDT <- LS_multivar_test_BDT(trait_BDT)
 
 # Make plots showing quality of fits and climate coverage -----------------
 
@@ -217,7 +227,7 @@ data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6),
 whittaker_biomes_plot(data_MATp_MAPp)
 
 #----------------------------------------------------------------------------------------------------------------------
-#Latin Hypercube sampling
+#Optimisation preparations: Latin Hypercube sampling
 #----------------------------------------------------------------------------------------------------------------------
 
 # Derive traits that are not subject optimisation--------------------------
@@ -238,7 +248,8 @@ points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lowe
 points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
 
 
-
+### latin hypercube sampling -------------------------------------------
+traits <- trait_B # subset for broadleaf traits only
 ### latin hypercube sampling of predictor traits from which to start the optimisation from.
 # Identify all combinations of Ks and LS, P50 and TLP (do this across full range of broadleaf species)
 ind = which(!is.na(traits$Ks) & !is.na(traits$LS) & !is.na(traits$P50) & !is.na(traits$TLP))
@@ -320,18 +331,18 @@ propagate_uncer=F
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
-trait_sel= T 
+trait_sel= T
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or set = 4 for a predefined (above) hypercube sample.
 n_trait_sel= 4#-1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 3
+spec_group_sel = 2
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
-  trait_plot=trait_BDT
+  trait_plot = trait_BDT
 } else if (spec_group_sel==2) {
   trait_plot=trait_BE
 }
@@ -526,12 +537,6 @@ list2env(outs_LSKs$predicted , envir = .GlobalEnv)
 # Stats defining the uncertainty range for each point
 create_uncertainty_range_stats(outs_LSKs)
 
-# Make plots to compare with original data
-if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
-  trait_plot=trait_BDT
-} else if (spec_group_sel==2) {
-  trait_plot=trait_BE
-}
 
 opt_test_plots(trait_plot,
                TLP_e_mean,
@@ -607,7 +612,7 @@ names(traits_KSLS.df) <- names(traits_LPJG_KSLS)
 opt_traits <-  c('traits_KSLS.df', 'traits_LSTLP.df', 'traits_KSTLP.df', 'traits_LSP50.df')
 for(o in 1:4){
 traits_BE  <- get(opt_traits[o])
-#traits_BE <- traits_LPJG_KSLS.df
+#traits_BE <- traits_KSLS.df
 #traits_BE <- traits_LSP50.df
 #traits_BE <- traits_KSTLP.df
 #traits_BE <- traits_LSTLP.df
@@ -662,10 +667,10 @@ p_LSP50 <- ggbiplot(opt.pca,labels=1:dim(traits_BE)[1],labels.size = 2) +
 }
 }
 # plot standardised, scaled PCA outputs
-# [TO DO] optimisation starting with LSTLP still not reflecting the general PCA space 
-# [TO DO] shorten axis labels
 dev.new()
 grid.arrange(p_KsLS,p_LSTLP,p_KSTLP,p_LSP50, nrow = 2)
+#grid.arrange(p_LSTLP_old,p_LSP50_old, nrow = 1)
+grid.arrange(p_KsLS,p_LSP50, nrow = 1)
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -692,20 +697,38 @@ basePFT = 4
 # I selected traits relative to the loading-variables' locations and not based on their position along the PC1 and PC2
 # axis. Not sure that was correct..
 
-# for traits_LPJG_KSLS
-ind = c(1,2,4,5,45,155,81,11,29,142,156,63,102,110,18,50,67,72,130,160,101,74,80,58,95,64,133,44,124,147)
-traits_LPJG_KSLS_subs <- lapply(seq_along(traits_LPJG_KSLS), function(x) traits_LPJG_KSLS[[x]][ind])
-names(traits_LPJG_KSLS_subs) <- names(traits_LPJG_KSLS)
 
+if(spec_group_sel==2){# evergreen
+# for traits_LPJG_KSLS
+ind = c(1,115,79,33,118,151,101,34,153,63,23,22,179,145,192,131,148,185,132,25,123,119,15,43,71,177,50,190,26,157)
+traits_LPJG_KSLS_BE <- lapply(seq_along(traits_LPJG_KSLS), function(x) traits_LPJG_KSLS[[x]][ind])
+names(traits_LPJG_KSLS_BE) <- names(traits_LPJG_KSLS)
 
 # for traits_LPJG_LSP50
-ind =  c(180,13,26,80,143,71,107,56,28,133,113,66,114,96,49,54,105,126,92,3,12,86,24,112,44,172,83,41,110,59)
-traits_LPJG_LSP50_subs <- lapply(seq_along(traits_LPJG_LSP50), function(x) traits_LPJG_LSP50[[x]][ind])
-names(traits_LPJG_LSP50_subs) <- names(traits_LPJG_LSP50)
+ind =  c(1,115,119,31,123,104,182,34,106,102,23,143,153,47,85,185,29,59,2,184,177,81,186,187,126,171,63,192,125,49)
+traits_LPJG_LSP50_BE <- lapply(seq_along(traits_LPJG_LSP50), function(x) traits_LPJG_LSP50[[x]][ind])
+names(traits_LPJG_LSP50_BE) <- names(traits_LPJG_LSP50)
 
 #save new PFT subset or load existing one: 
-#save(traits_LPJG_KSLS_subs, traits_LPJG_LSP50_subs, file = 'LPJGuessPFTS.RData')
-#load('LPJGuessPFTS.RData')
+#save(traits_LPJG_KSLS_BE, traits_LPJG_LSP50_BE, file = 'LPJGuessPFTS_BE.RData')
+#load('LPJGuessPFTS_BE.RData')
+}
+
+if(spec_group_sel==4){# deciduous
+  # for traits_LPJG_KSLS
+  ind = c(1,115,79,33,118,151,101,34,153,63,23,22,179,145,192,131,148,185,132,25,123,119,15,43,71,177,50,190,26,157)
+  traits_LPJG_KSLS_BDT <- lapply(seq_along(traits_LPJG_KSLS), function(x) traits_LPJG_KSLS[[x]][ind])
+  names(traits_LPJG_KSLS_BDT) <- names(traits_LPJG_KSLS)
+  
+  # for traits_LPJG_LSP50
+  ind =  c(1,115,119,31,123,104,182,34,106,102,23,143,153,47,85,185,29,59,2,184,177,81,186,187,126,171,63,192,125,49)
+  traits_LPJG_LSP50_BDT <- lapply(seq_along(traits_LPJG_LSP50), function(x) traits_LPJG_LSP50[[x]][ind])
+  names(traits_LPJG_LSP50_BDT) <- names(traits_LPJG_LSP50)
+  
+  #save new PFT subset or load existing one: 
+  #save(traits_LPJG_KSLS_BDT, traits_LPJG_LSP50_BDT, file = 'LPJGuessPFTS_BDT.RData')
+  #load('LPJGuessPFTS_BE.RData')
+}
 
 # Select output folder
 #output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
@@ -715,11 +738,12 @@ names(traits_LPJG_LSP50_subs) <- names(traits_LPJG_LSP50)
 
 # create .ins files for  LPJ-GUESS_hydro
 #started with KSLS
-write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_subs)
+#write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_subs)
 #started with LSP50
-write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_subs)
+#write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_subs)
 
 #write_LPJG_ins.file(output_fol,basePFT = 2 ,traits_LPJG)
 #write_LPJG_ins.file(output_fol,basePFT = 3 ,traits_LPJG)
 #write_LPJG_ins.file(output_fol,basePFT = 4 ,traits_LPJG)
 #write_LPJG_ins.file(output_fol,basePFT = 5 ,traits_LPJG)
+
