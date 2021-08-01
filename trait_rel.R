@@ -338,7 +338,7 @@ trait_sel= T
 n_trait_sel= 4#-1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 2
+spec_group_sel = 4
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
@@ -716,19 +716,21 @@ names(traits_LPJG_LSP50_BE) <- names(traits_LPJG_LSP50)
 
 if(spec_group_sel==4){# deciduous
   # for traits_LPJG_KSLS
-  ind = c(1,115,79,33,118,151,101,34,153,63,23,22,179,145,192,131,148,185,132,25,123,119,15,43,71,177,50,190,26,157)
+  ind = c(150,52,116,1,48,11,99,93,122,46,80,164,161,65,97,166,128,67,149,123,119,88,89,127,96,136,105,17,23,16,19)
   traits_LPJG_KSLS_BDT <- lapply(seq_along(traits_LPJG_KSLS), function(x) traits_LPJG_KSLS[[x]][ind])
   names(traits_LPJG_KSLS_BDT) <- names(traits_LPJG_KSLS)
   
   # for traits_LPJG_LSP50
-  ind =  c(1,115,119,31,123,104,182,34,106,102,23,143,153,47,85,185,29,59,2,184,177,81,186,187,126,171,63,192,125,49)
+  ind =  c(117,69,140,176,53,55,113,5,115,26,15,146,149,45,111,17,97,67,159,27,75,89,163,38,132,126,152,41,123,184,19)
   traits_LPJG_LSP50_BDT <- lapply(seq_along(traits_LPJG_LSP50), function(x) traits_LPJG_LSP50[[x]][ind])
   names(traits_LPJG_LSP50_BDT) <- names(traits_LPJG_LSP50)
   
   #save new PFT subset or load existing one: 
-  #save(traits_LPJG_KSLS_BDT, traits_LPJG_LSP50_BDT, file = 'LPJGuessPFTS_BDT.RData')
+  save(traits_LPJG_KSLS_BDT, traits_LPJG_LSP50_BDT, file = 'LPJGuessPFTS_BDT.RData')
   #load('LPJGuessPFTS_BE.RData')
 }
+
+
 
 # Select output folder
 #output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
