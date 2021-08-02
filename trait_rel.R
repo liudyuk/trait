@@ -263,7 +263,7 @@ n = 200
 lc_sample <- optimumLHS(n,k = 4, maxSweeps = 2, eps = 0.1, verbose = FALSE)
 # the drawn lc_samples from the sampling space are normally distributed and between 0 and 1
 
-# The trait observations are not strictly normally distributed (according towilcoxon sum rank test) 
+# The trait observations are not strictly normally distributed (according to shapiro- wilk test) 
 # and therefore may need transformation.
 # At the very least lhc- sampled value ranges need to be adapted to reflect the trait values. 
 # Below are three options that were tested:
