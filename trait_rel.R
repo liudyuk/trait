@@ -338,7 +338,7 @@ trait_sel= T
 n_trait_sel= 4#-1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 4
+spec_group_sel = 2
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
@@ -682,7 +682,7 @@ grid.arrange(p_KsLS,p_LSP50, nrow = 1)
 # write .ins file for LPJGuess based on the above optimised trait combinations for 28 PFT 'variants' per PFT.
 
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
-basePFT = 4
+#basePFT = 4
 
 #NOT IN USE (yet) Select trait combination from which to write output using their location in the list traits_LPJG:
 # traits_LPJG_KSLS (1) , traits_LPJG_LSTLP (2), etc
@@ -736,13 +736,24 @@ if(spec_group_sel==4){# deciduous
 #output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
 #AHES commented out for now during testing
 #output_fol="/Users/annemarie/Documents/1_TreeMort/2_Analysis/1_Inputs"
-
-
-# create .ins files for  LPJ-GUESS_hydro
-#started with KSLS
-#write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_subs)
-#started with LSP50
-#write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_subs)
+output_fol="/Users/annemarie/Desktop"
+if(spec_group_sel==2){# broadleaf evergreen in TRY
+  # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
+  basePFT = 4  # tropical broadleaf evergreen PFT for LPJGuess
+  # create .ins files for  LPJ-GUESS_hydro
+  #started with KSLS
+  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_BE)
+  #started with LSP50
+  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_BE)
+}
+if(spec_group_sel==4){# 4 = TBD tropical broadleaf deciduous in TRY
+  basePFT= 5 # tropical raingreen PFT for LPJGuess
+  # create .ins files for  LPJ-GUESS_hydro
+  #started with KSLS
+  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_BDT)
+  #started with LSP50
+  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_BDT)
+}
 
 #write_LPJG_ins.file(output_fol,basePFT = 2 ,traits_LPJG)
 #write_LPJG_ins.file(output_fol,basePFT = 3 ,traits_LPJG)
