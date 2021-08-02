@@ -1,8 +1,9 @@
 # Script to read in the processed trait data, make bivariate and multivariate SMA regressions and then
 # carry out an optimisation procedure to unify inter-trait relationships across the whole trait dataset.
 #
-# [TO DO] optimisation starting with LSTLP still does not the general PCA space 
+# [TO DO] optimisation starting with LSTLP still does not correspond to the other starting predictors' final PCA space 
 # [TO DO] shorten axis labels in PCA plots
+# [TO DO] Improve .ins writeout section
 
 # Dependencies: 
 # - sma_multivar_regress.R
