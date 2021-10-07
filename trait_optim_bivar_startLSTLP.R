@@ -1,8 +1,9 @@
 # this function subsets the data, chooses options for the type of sampling (random or strategic subset vs. use all Ks LS combinations)
 # it then carries out the optimisation. The number of outputs optimised values depends on the subset options parsed into the function
 # if propagate_uncer=T, must provide nbtsrp value
-trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trait_sel= T, n_trait_sel=28, spec_group_sel= 3,est_lhs){
+trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trait_sel= T, n_trait_sel=28, spec_group_sel= 3,est_lhs =NULL){
   # ---
+  
   if (propagate_uncer) {
     n_uncer=nbtstrp
   } else {
@@ -129,7 +130,7 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
       traits$slope[ind_spec_group],
       LMA_multivar_BDT$LMA_from_TLP,
       LMA_multivar_BE$LMA_from_TLP_LS,
-      Ks_multivar$Ks_from_P50_LS_LMA,
+      Ks_multivar$Ks_from_P50_LS,
       #Ks_multivar$Ks_from_P50_TLP_LS,
       P50_multivar$P50_from_TLP_Ks,
       slope_multivar$slope_from_P50_TLP_Ks,
@@ -173,3 +174,4 @@ trait_optim_bivar_startLSTLP <- function(limitdataranges=T, propagate_uncer=T, n
   
   return(return_vals)
 }
+
