@@ -92,15 +92,19 @@ trait_optim_bivar_start_KsTLP <- function(limitdataranges=T, propagate_uncer=T, 
   }
   
   # ---
-  # Select the LMA relationship to use
+  # Select the LMA and LS relationship to use
   if (spec_group_sel==1) {
     use_LMA_from_TLP_LS=F
+    LS_from_TLP_Ks = F
   } else if (spec_group_sel==2) {
     use_LMA_from_TLP_LS=T
+    LS_from_TLP_Ks = T
   } else if (spec_group_sel==3) {
     use_LMA_from_TLP_LS=F
+    LS_from_TLP_Ks = F
   } else if (spec_group_sel==4) {
     use_LMA_from_TLP_LS=F
+    LS_from_TLP_Ks = F
   }
   
   # ---
@@ -130,7 +134,8 @@ trait_optim_bivar_start_KsTLP <- function(limitdataranges=T, propagate_uncer=T, 
       traits$slope[ind_spec_group],
       LMA_multivar_BDT$LMA_from_TLP,
       LMA_multivar_BE$LMA_from_TLP_LS,
-      LS_multivar$LS_from_TLP_Ks,
+      LS_multivar_BE$LS_from_TLP_Ks,
+      LS_multivar_BDT$LS_from_LMA_TLP_Ks,
       P50_multivar$P50_from_TLP_Ks,
       slope_multivar$slope_from_P50_TLP_Ks,
       WD_multivar$WD_from_slope_P50slope,

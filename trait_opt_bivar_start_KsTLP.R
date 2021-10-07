@@ -7,8 +7,8 @@ trait_opt_bivar_start_KsTLP<- function(P50,
                                         slope,
                                         LMA_from_TLP,
                                         LMA_from_TLP_LS,
-                                        #TLP_from_LS_LMA_P50,
                                         LS_from_TLP_Ks,
+                                        LS_from_LMA_TLP_Ks,
                                         P50_from_TLP_Ks,
                                         slope_from_P50_TLP_Ks,
                                         WD_from_slope_P50slope,
@@ -25,7 +25,7 @@ trait_opt_bivar_start_KsTLP<- function(P50,
   # The following are the relationships on which the optimisation and associated trait estimates are based:
   # (note that if the relationships used are changed, these need to be updated)
   # - LMA_from_TLP or LMA_from_TLP_LS (choice of which is used is based on use_LMA_from_TLP_LS)
-  # - LS_from_TLP_Ks,
+  # - LS_from_TLP_Ks or LS_from_LMA_TLP_Ks (choice of which is used is based on use_LMA_from_TLP_LS)
   # - P50_from_TLP_Ks,
   # - slope_from_P50_TLP_Ks
   # - WD_from_slope_P50slope,
@@ -68,13 +68,21 @@ trait_opt_bivar_start_KsTLP<- function(P50,
         mod_LMA_intercept_sample <- LMA_from_TLP_LS$mod$intercept_R #LMA_from_TLP_LS
         mod_LMA_slope_y1_sample <- LMA_from_TLP_LS$mod$slope_R.y1
         mod_LMA_slope_y2_sample <- LMA_from_TLP_LS$mod$slope_R.y2
+        
+        mod_LS_intercept_sample  <- LS_from_TLP_Ks$mod$intercept_R #LS_from_TLP_Ks
+        mod_LS_slope_y1_sample   <- LS_from_TLP_Ks$mod$slope_R.y1 
+        mod_LS_slope_y2_sample   <- LS_from_TLP_Ks$mod$slope_R.y2 
+        
       } else {
         mod_LMA_intercept_sample <- LMA_from_TLP$mod$intercept_R #LMA_from_TLP
         mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$slope_R.y1
+        
+        mod_LS_intercept_sample  <- LS_from_LMA_TLP_Ks$mod$intercept_R #LS_from_LMA TLP_Ks
+        mod_LS_slope_y1_sample   <- LS_from_LMA_TLP_Ks$mod$slope_R.y1 
+        mod_LS_slope_y2_sample   <- LS_from_LMA_TLP_Ks$mod$slope_R.y2 
+        mod_LS_slope_y3_sample   <- LS_from_LMA_TLP_Ks$mod$slope_R.y3 
       }
-      mod_LS_intercept_sample  <- LS_from_TLP_Ks$mod$intercept_R #LS_from_TLP_Ks
-      mod_LS_slope_y1_sample   <- LS_from_TLP_Ks$mod$slope_R.y1 
-      mod_LS_slope_y2_sample   <- LS_from_TLP_Ks$mod$slope_R.y2 
+
       mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$intercept_R #P50_from_TLP_Ks
       mod_P50_slope_y1_sample  <- P50_from_TLP_Ks$mod$slope_R.y1
       mod_P50_slope_y2_sample  <- P50_from_TLP_Ks$mod$slope_R.y2
@@ -90,13 +98,20 @@ trait_opt_bivar_start_KsTLP<- function(P50,
         mod_LMA_intercept_sample <- LMA_from_TLP_LS$mod$boot.intercept[ss] #LMA_from_TLP_LS
         mod_LMA_slope_y1_sample  <- LMA_from_TLP_LS$mod$boot.y1[ss]
         mod_LMA_slope_y2_sample  <- LMA_from_TLP_LS$mod$boot.y2[ss]
+        
+        mod_LS_intercept_sample <- LS_from_TLP_Ks$mod$boot.intercept[ss] #LS_from TLP Ks
+        mod_LS_slope_y1_sample <- LS_from_TLP_Ks$mod$boot.y1[ss]
+        mod_LS_slope_y2_sample <- LS_from_TLP_Ks$mod$boot.y2[ss]
       } else {
         mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
         mod_LMA_slope_y1_sample <- LMA_from_TLP$mod$boot.y1[ss]
+        
+        mod_LS_intercept_sample <- LS_from_LMA_TLP_Ks$mod$boot.intercept[ss] #LS_from LMA TLP Ks
+        mod_LS_slope_y1_sample <- LS_from_LMA_TLP_Ks$mod$boot.y1[ss]
+        mod_LS_slope_y2_sample <- LS_from_LMA_TLP_Ks$mod$boot.y2[ss]
+        mod_LS_slope_y3_sample <- LS_from_LMA_TLP_Ks$mod$boot.y3[ss]
       }
-      mod_LS_intercept_sample <- LS_from_TLP_Ks$mod$boot.intercept[ss] #LS_from TLP Ks
-      mod_LS_slope_y1_sample <- LS_from_TLP_Ks$mod$boot.y1[ss]
-      mod_LS_slope_y2_sample <- LS_from_TLP_Ks$mod$boot.y2[ss]
+
       mod_P50_intercept_sample <- P50_from_TLP_Ks$mod$boot.intercept[ss] #P50_from_TLP_Ks
       mod_P50_slope_y1_sample <- P50_from_TLP_Ks$mod$boot.y1[ss]
       mod_P50_slope_y2_sample <- P50_from_TLP_Ks$mod$boot.y2[ss]
@@ -146,11 +161,16 @@ trait_opt_bivar_start_KsTLP<- function(P50,
       if(use_LMA_from_TLP_LS) {
         LMA_e[ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e +
           mod_LMA_slope_y2_sample*LS_e_last
+        
+        LS_e[ss] = mod_LS_intercept_sample + mod_LS_slope_y1_sample*TLP_e +
+          mod_LS_slope_y2_sample * Ks_e 
       } else {
         LMA_e[ss]=mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e
+        
+        LS_e[ss] = mod_LS_intercept_sample + mod_LS_slope_y1_sample*LMA_e +  mod_LS_slope_y2_sample*TLP_e +
+          mod_LS_slope_y3_sample * Ks_e 
       }
-      LS_e[ss] = mod_LS_intercept_sample + mod_LS_slope_y1_sample*TLP_e +
-        mod_LS_slope_y2_sample * Ks_e 
+
       
       P50_e[ss]=mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e + 
         mod_P50_slope_y2_sample*Ks_e
