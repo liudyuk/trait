@@ -1,5 +1,5 @@
-sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL) {
-  # Call the sma_regress_multivar function, make plots (if required) and calculate stats
+sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_type = 'lm') {
+  # Call the sma_regress_multivar or lm_regress_multivar function, make plots (if required) and calculate stats
   #
   # Last column in the data.frame is the one being predicted
   #
@@ -12,6 +12,14 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL) {
   #
   # T. Pugh
   # 23.07.20
+  
+  #testing AHES
+  #vars = data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$LMA)
+  #labels = c("TLP","LS","LMA")
+  #vars =data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$WD,trait_BE$LMA)
+  #labels = c("TLP","LS","WD","LMA")
+  ## remove above later AHES
+  
   
   nvars=ncol(vars)
   nlabels=length(labels)
@@ -26,7 +34,12 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL) {
   }
   ndata=length(ind[ind])
   
+  if(regression_type =='lm'){
+  mod <- lm_regress_multivar(vars[ind,],nbtrstrp,T)
+  }
+  if(regression_type == 'sma'){
   mod <- sma_regress_multivar(vars[ind,],nbtstrp,T)
+  }
   
   var_est_boot <- matrix(NA, nrow = ndata, ncol = nbtstrp)
   if (nvars==2) {
@@ -56,6 +69,7 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL) {
   } else {
     stop('sma_plot_stats can only handle a maximum of 5 variables')
   }
+  
   var_est_L95=unname(apply(var_est_boot, 1, quantile,0.05))
   var_est_U95=unname(apply(var_est_boot, 1, quantile,0.95))
   
