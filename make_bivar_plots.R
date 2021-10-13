@@ -1,4 +1,4 @@
-make_bivar_plots <- function(trait,nbtstrp) {
+make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
   # Make the bivariate SMA regressions necessary to populate the hypothesis framework
   #
   # Dependencies: trait_functions.R
@@ -13,48 +13,49 @@ make_bivar_plots <- function(trait,nbtstrp) {
   par(mfrow=c(4,4))
   par(mar=c(2,2,2,2))
   
-  TLP_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP),c("P50","TLP"),nbtstrp,T)
+  TLP_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP),c("P50","TLP"),nbtstrp,T,regression_type =regr_type)
   
-  slope_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$slope),c("TLP","slope"),nbtstrp,T)
+  slope_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$slope),c("TLP","slope"),nbtstrp,T,regression_type =regr_type)
   
-  slope_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$slope),c("P50","slope"),nbtstrp,T)
+  slope_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$slope),c("P50","slope"),nbtstrp,T,regression_type =regr_type)
   
-  TLP_from_WD <- sma_plot_stats(data.frame(trait$WD,trait$TLP),c("WD","TLP"),nbtstrp,T)
+  TLP_from_WD <- sma_plot_stats(data.frame(trait$WD,trait$TLP),c("WD","TLP"),nbtstrp,T,regression_type =regr_type)
   
-  WD_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$WD),c("P50","WD"),nbtstrp,T)
+  WD_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$WD),c("P50","WD"),nbtstrp,T,regression_type =regr_type)
   
-  WD_from_slope <- sma_plot_stats(data.frame(trait$slope,trait$WD),c("slope","WD"),nbtstrp,T)
+  WD_from_slope <- sma_plot_stats(data.frame(trait$slope,trait$WD),c("slope","WD"),nbtstrp,T,regression_type =regr_type)
   
-  LMA_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$LMA),c("TLP","LMA"),nbtstrp,T)
+  LMA_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$LMA),c("TLP","LMA"),nbtstrp,T,regression_type =regr_type)
   
-  LS_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$LS),c("LMA","LS"),nbtstrp,T)
+  LS_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$LS),c("LMA","LS"),nbtstrp,T,regression_type =regr_type)
   
-  P50_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$P50),c("Ks","P50"),nbtstrp,T)
+  P50_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$P50),c("Ks","P50"),nbtstrp,T,regression_type =regr_type)
   
-  P50_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$P50),c("LS","P50"),nbtstrp,T)
+  P50_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$P50),c("LS","P50"),nbtstrp,T,regression_type =regr_type)
   
-  LS_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$LS),c("TLP","LS"),nbtstrp,T)
+  LS_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$LS),c("TLP","LS"),nbtstrp,T,regression_type =regr_type)
   
-  WD_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$WD),c("LMA","WD"),nbtstrp,T)
+  WD_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$WD),c("LMA","WD"),nbtstrp,T,regression_type =regr_type)
   
-  slope_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$slope),c("Ks","slope"),nbtstrp,T)
+  slope_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$slope),c("Ks","slope"),nbtstrp,T,regression_type =regr_type)
   
-  WD_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$WD),c("Ks","WD"),nbtstrp,T)
+  WD_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$WD),c("Ks","WD"),nbtstrp,T,regression_type =regr_type)
   
-  Ks_fom_LS  <- sma_plot_stats(data.frame(trait$LS,trait$Ks),c("LS","Ks"),nbtstrp,T)
+  Ks_fom_LS  <- sma_plot_stats(data.frame(trait$LS,trait$Ks),c("LS","Ks"),nbtstrp,T,regression_type =regr_type)
   
-  Ks_fom_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$Ks),c("TLP","Ks"),nbtstrp,T)
+  Ks_fom_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$Ks),c("TLP","Ks"),nbtstrp,T,regression_type =regr_type)
   
-  Ks_fom_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$Ks),c("TLP","Ks"),nbtstrp,T)
+  Ks_fom_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$Ks),c("TLP","Ks"),nbtstrp,T,regression_type =regr_type)
   
-  LMA_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$LMA),c("P50","LMA"),nbtstrp,T)
+  LMA_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$LMA),c("P50","LMA"),nbtstrp,T,regression_type =regr_type)
   
-  LMA_from_KS <- sma_plot_stats(data.frame(trait$Ks,trait$LMA),c("Ks","LMA"),nbtstrp,T)
+  LMA_from_KS <- sma_plot_stats(data.frame(trait$Ks,trait$LMA),c("Ks","LMA"),nbtstrp,T,regression_type =regr_type)
  
   # Set back to single plot
   par(mfrow=c(1,1))
   par(mar=c(5.1,4.1,4.1,2.1))
   
+
   # Make a data frame summarising the fits of the regressions
   all_label1 <- c("P50","TLP",   "P50", "WD", "P50","slope","LMA","LMA","Ks", "LS", "TLP","LMA","Ks","Ks", "LS", "TLP",'P50','Ks')
   all_label2 <- c("TLP","slope","slope","TLP","WD", "WD", "TLP","LS", "P50","P50","LS", "WD", "slope","WD","Ks","Ks",'LMA','LMA')
@@ -130,8 +131,26 @@ make_bivar_plots <- function(trait,nbtstrp) {
                 Ks_fom_TLP$rmse,
                 LMA_from_P50$rmse,
                 LMA_from_KS$rmse)
+  pearson_cor = c(TLP_from_P50$pearson_cor,
+                  slope_from_TLP$pearson_cor,
+                  slope_from_P50$pearson_cor,
+                  TLP_from_WD$pearson_cor,
+                  WD_from_P50$pearson_cor,
+                  WD_from_slope$pearson_cor,
+                  LMA_from_TLP$pearson_cor,
+                  LS_from_LMA$pearson_cor,
+                  P50_from_Ks$pearson_cor,
+                  P50_from_LS$pearson_cor,
+                  LS_from_TLP$pearson_cor,
+                  WD_from_LMA$pearson_cor,
+                  slope_from_Ks$pearson_cor,
+                  WD_from_Ks$pearson_cor,
+                  Ks_fom_LS$pearson_cor,
+                  Ks_fom_TLP$pearson_cor,
+                  LMA_from_P50$pearson_cor,
+                  LMA_from_KS$pearson_cor)
   
-  all_sma_bivar <- data.frame(all_label1,all_label2,all_R,all_R2,all_R2adj,all_rmse)
+  all_sma_bivar <- data.frame(all_label1,all_label2,all_R,all_R2,all_R2adj,all_rmse,pearson_cor)
   
   return_vals <- list("TLP_from_P50"=TLP_from_P50,
                       "slope_from_TLP"=slope_from_TLP,
@@ -152,6 +171,7 @@ make_bivar_plots <- function(trait,nbtstrp) {
                       "LMA_from_P50" =LMA_from_P50,
                       "LMA_from_KS" = LMA_from_KS,
                       "all_sma_bivar" = all_sma_bivar)
+
   
   return(return_vals)
 }

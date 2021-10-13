@@ -37,6 +37,10 @@
 #  variables ('predictors') in the optimisation. Used for next step to check 
 #  whether the emergent PFTs perform similarly to the PFTs derived through the
 #  Ks-Ls trait optimisation
+# October 2021
+# Switch for LS predictions for BDT and BE data. 
+# added linear regression model to determine trait network relations, compare against sma
+
 
 nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samples later used to calculated uncertainty in the optimisation). Was previously 10 000, using a lower number for testing, Will need to check sensitivity to this value.
 
@@ -108,6 +112,13 @@ library("ggpubr")
 # to plot PCA ggplots in grid
 library(gridExtra)
 
+# convenience package for ols normality checks, required in function lm_regress_multivar
+library(olsrr)
+
+#--- Experiment with different plausible multivariate SMA models, based on our theory ---
+# multivariate lm and sma regression ppossible. change option here:
+regr_type = 'lm'
+
 #--- Read in the trait data ---
 
 # Subset only the broadleaf species
@@ -131,11 +142,11 @@ trait_BT<-subset(traits,group=="BT",drop = T)
 # These are used to fill out the hypothesis framework plot with R
  
 # Calculate for all broadleaf 
-bivar <- make_bivar_plots(trait_B,nbtstrp)
+bivar <- make_bivar_plots(trait_B,nbtstrp,regr_type = regr_type)
 #View(bivar$all_sma_bivar)
 
 # Calculate for all evergreen broadleaf
-bivar_BE <- make_bivar_plots(trait_BE,nbtstrp)
+bivar_BE <- make_bivar_plots(trait_BE,nbtstrp,regr_type = regr_type)
 # AHES: negative bivatiate correlation in data, but sma shows positive correlation 
 subs <- na.omit(trait_BE[,c("P50","Ks")])
 cor(subs$P50,subs$Ks)
@@ -145,7 +156,7 @@ cor(subs$LS,subs$P50)
 #View(bivar_BE$all_sma_bivar)
 
 # Calculate for all deciduous broadleaf
-bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp)
+bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp, regr_type = regr_type)
 # View(bivar_BDT$all_sma_bivar)
 # AHES: negative bivatiate correlation in data, but sma shows positive correlation 
 subs <- na.omit(trait_BD[,c("P50","LS")])
@@ -156,9 +167,7 @@ cor.test(subs$LS,subs$P50)
 # Test single and multivariate correlation models
 #----------------------------------------------------------------------------------------------------------------------
 
-#--- Experiment with different plausible multivariate SMA models, based on our theory ---
-# multivariate lm and sma regression ppossible. change option here:
-regr_type = 'sma'
+
 
 # P50 fits ----------------------------------------------------------------
 
@@ -198,21 +207,23 @@ WD_multivar <- WD_multivar_test(trait_B,regr_type = regr_type)
 # slope fits --------------------------------------------------------------
 
 slope_multivar <- slope_multivar_test(trait_B,regr_type = regr_type)
-
+hist(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est,xlab ="slope-slope_est", main=paste(" distribution of residuals; model: ", Ks_multivar$Ks_from_P50_L$`regression_type (lm or sma)` ))
+shapiro.test(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est)
+mtext()
 
 # Ks fits ----------------------------------------------------------------
 
 Ks_multivar     <- Ks_multivar_test(trait_B,regr_type = regr_type)
-
+hist(trait_B$Ks[Ks_multivar$Ks_from_P50_LS_LMA$dataused]-Ks_multivar$Ks_from_P50_LS_LMA$var_est,xlab ="Ks-Ks_est", main=paste(" distribution of residuals; model: ", Ks_multivar$Ks_from_P50_L$`regression_type (lm or sma)` ))
 
 # LS fits -----------------------------------------------------------------
 # Separate for BE and BDT (BD + BT) on the basis that LS has a very different range and set of bivariate relationships for these
 # two different groups, unlike the other traits here.
 
-LS_multivar_BE <- LS_multivar_test(trait_BE, leaf_type ='BE',regr_type = regr_type) # returns LS_from_TLP_Ks
+LS_multivar_BE <- LS_multivar_test(trait_BE, leaf_type ='BE',regr_type = regr_type) # returns LS_from_LMA_TLP_Ks
 
 
-LS_multivar_BDT <- LS_multivar_test(trait_BDT, leaf_type ='BDT',regr_type = regr_type) # returns LS_from_LMA_TLP_Ks
+LS_multivar_BDT <- LS_multivar_test(trait_BDT, leaf_type ='BDT',regr_type = regr_type) # returns LS_from_TLP_Ks
 
 
 
@@ -367,14 +378,14 @@ propagate_uncer=F
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
-trait_sel= T
+trait_sel= F
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or set = 4 for a predefined (above) hypercube sample.
-n_trait_sel= -1
+n_trait_sel= 80
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 1
+spec_group_sel = 2
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
@@ -629,7 +640,7 @@ traits_KSLS.df <- data.frame(matrix(unlist(traits_LPJG_KSLS), ncol=length(traits
 names(traits_KSLS.df) <- names(traits_LPJG_KSLS)
 
 ## sanity checking parameter results plausibility:
-# P50 should always be lower than TLP
+# P50 should always be lower than TLP ?
 regr_type
 traits_KSLS.df$TLP > traits_KSLS.df$P50
 traits_KSTLP.df$TLP > traits_KSTLP.df$P50
@@ -638,18 +649,40 @@ traits_LSTLP.df$TLP > traits_LSTLP.df$P50
 
 
 
+### collect rmse 
+if(spec_group_sel==2){
+rmse_be <- t(data.frame(trait_pair=c('Ks-LS','Ks-TLP','LSP-50','TLP-LS'), 
+                        RMSE_BE = c(sum(RMSE_withKsLS_start$all_e_rmse),
+                                 sum(RMSE_withKsTLP_start$all_e_rmse),
+                                 sum(RMSE_withLSP50_start$all_e_rmse),
+                                 sum(RMSE_withTLPLS_start$all_e_rmse))
+                        ))
+}
+if(spec_group_sel==1){
+  rmse_DBT <- t(data.frame(trait_pair=c('Ks-LS','Ks-TLP','LSP-50','TLP-LS'), 
+                          RMSE_BDT = c(sum(RMSE_withKsLS_start$all_e_rmse),
+                                      sum(RMSE_withKsTLP_start$all_e_rmse),
+                                      sum(RMSE_withLSP50_start$all_e_rmse),
+                                      sum(RMSE_withTLPLS_start$all_e_rmse))
+  ))
+}
+
+
+
+
 #----------------------------------------------------------------------------------------------------------------------
 # PCA
 #----------------------------------------------------------------------------------------------------------------------
-trait_BE
+#trait_BE
 # perform PCA ------------------------------------------------------------
 # used as test to see whether starting from different trait combinations has an impact on the PFT-spread.
 
 # save objects from analysis above, useful for quick jump to this section, if only PCA is of interest
-#traits_after_opt        <- c(traits_LPJG_KSLS.df, traits_TLPLS.df, traits_KSTLP.df, traits_KSP50.df)
-#names(traits_after_opt) <- c('traits_LPJG_KSLS.df', 'traits_TLPLS.df', 'traits_KSTLP.df', 'traits_KSP50.df')
-#save(traits_after_opt,file='traits_after_opt.RData')
-#load('traits_after_opt.RData')
+traits_after_opt        <- c(traits_KSLS.df, traits_LSTLP.df, traits_LSP50.df, traits_KSTLP.df)
+names(traits_after_opt) <- c('traits_KSLS.df', 'traits_LSTLP.df', 'traits_LSP50.df', 'traits_KSTLP.df')
+#save(traits_after_opt,file='traits_after_opt_BE_sma.RData')
+#load('traits_after_opt_BE_sma.RData')
+#list2env(traits_after_opt , envir = .GlobalEnv)
 
 # perform PCA with observed data:
 traits_obs_BE <- transform_obs_for_PCA(trait_BE)
@@ -657,9 +690,10 @@ traits_obs_BDT <-  transform_obs_for_PCA(trait_BDT)
 traits_obs_B  <-  transform_obs_for_PCA(trait_B)
 
 
-
+par(mfrow=c(2,2))
 opt_traits <-  c('traits_KSLS.df', 'traits_LSTLP.df', 'traits_KSTLP.df', 'traits_LSP50.df', 'traits_obs_BE','traits_obs_BDT','traits_obs_B')
-for(o in c(1,2,3,4,5,6,7)){
+#opt_traits_BE_sma <- 
+for(o in c(1,2,3,4)){
 traits_PCA  <- get(opt_traits[o])
 #traits_BE <- traits_KSLS.df
 #traits_BE <- traits_LSP50.df
@@ -696,24 +730,138 @@ opt.pca <- prcomp(traits_PCA[,c(1,3,4,6,10,12,17)], center = TRUE,scale. = TRUE)
 
 
 if(o==1){
+  
+  s <- summary(opt.pca)
+  plot(opt.pca$x[,1],opt.pca$x[,2],
+       xlab=paste("PCA 1 (", round(s$importance[2]*100, 1), "%)", sep = ""),
+       ylab=paste("PCA 2 (", round(s$importance[5]*100, 1), "%)", sep = ""), pch=16, col='grey', cex=0.5, las=1, asp=1,ylim =c(-6,6),xlim=c(-8,8),
+       main= 'Ks-LS start')
+  # Benjaminbell.co.uk
+  # Add grid lines
+  abline(v=0, lty=2, col="grey50")
+  abline(h=0, lty=2, col="grey50")
+  # Add labels
+  text(opt.pca$x[,1], opt.pca$x[,2], labels=row.names(opt.pca$x), pos=c(1,3,4,2), font=2)
+  
+  #rotation
+  l.x <- opt.pca$rotation[,1]*10
+  l.y <- opt.pca$rotation[,2]*10
+  # Draw arrows
+  arrows(x0=0, x1=l.x, y0=0, y1=l.y, col="red", length=0.15, lwd=1.5)
+  
+  # Label position
+  l.pos <- l.y # Create a vector of y axis coordinates
+  lo <- which(l.y < 0) # Get the variables on the bottom half of the plot
+  hi <- which(l.y > 0) # Get variables on the top half
+  # Replace values in the vector
+  l.pos <- replace(l.pos, lo, "1")
+  l.pos <- replace(l.pos, hi, "3")
+  # Variable labels
+  text(l.x, l.y, labels=row.names(opt.pca$rotation), col="red", pos=l.pos)
 p_KsLS  <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
   #labs(y= "y axis name", x = "x axis name") +
   ggtitle('KsLS')
 }
 if(o==2){
+  
+  s <- summary(opt.pca)
+  plot(opt.pca$x[,1],opt.pca$x[,2],
+       xlab=paste("PCA 1 (", round(s$importance[2]*100, 1), "%)", sep = ""),
+       ylab=paste("PCA 2 (", round(s$importance[5]*100, 1), "%)", sep = ""), pch=16, col='grey', cex=0.5, las=1, asp=1,ylim =c(-6,6),xlim=c(-8,8),
+       main= 'LS - TLP start')
+  # Benjaminbell.co.uk
+  # Add grid lines
+  abline(v=0, lty=2, col="grey50")
+  abline(h=0, lty=2, col="grey50")
+  # Add labels
+  text(opt.pca$x[,1], opt.pca$x[,2], labels=row.names(opt.pca$x), pos=c(1,3,4,2), font=2)
+  
+  #rotation
+  l.x <- opt.pca$rotation[,1]*10
+  l.y <- opt.pca$rotation[,2]*10
+  # Draw arrows
+  arrows(x0=0, x1=l.x, y0=0, y1=l.y, col="red", length=0.15, lwd=1.5)
+
+  
+  # Label position
+  l.pos <- l.y # Create a vector of y axis coordinates
+  lo <- which(l.y < 0) # Get the variables on the bottom half of the plot
+  hi <- which(l.y > 0) # Get variables on the top half
+  # Replace values in the vector
+  l.pos <- replace(l.pos, lo, "1")
+  l.pos <- replace(l.pos, hi, "3")
+  # Variable labels
+  text(l.x, l.y, labels=row.names(opt.pca$rotation), col="red", pos=l.pos)
 p_LSTLP <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
   #labs(y= "y axis name", x = "x axis name") +
   ggtitle('LSTLP')
 }
 if(o==3){
+  
+  s <- summary(opt.pca)
+  plot(opt.pca$x[,1],opt.pca$x[,2],
+       xlab=paste("PCA 1 (", round(s$importance[2]*100, 1), "%)", sep = ""),
+       ylab=paste("PCA 2 (", round(s$importance[5]*100, 1), "%)", sep = ""), pch=16, col='grey', cex=0.5, las=1, asp=1,ylim =c(-6,6),xlim=c(-8,8),
+       main= 'Ks - TLP start')
+  # Benjaminbell.co.uk
+  # Add grid lines
+  abline(v=0, lty=2, col="grey50")
+  abline(h=0, lty=2, col="grey50")
+  # Add labels
+  text(opt.pca$x[,1], opt.pca$x[,2], labels=row.names(opt.pca$x), pos=c(1,3,4,2), font=2)
+  
+  #rotation
+  l.x <- opt.pca$rotation[,1]*10
+  l.y <- opt.pca$rotation[,2]*10
+  # Draw arrows
+  arrows(x0=0, x1=l.x, y0=0, y1=l.y, col="red", length=0.15, lwd=1.5)
+  
+  # Label position
+  l.pos <- l.y # Create a vector of y axis coordinates
+  lo <- which(l.y < 0) # Get the variables on the bottom half of the plot
+  hi <- which(l.y > 0) # Get variables on the top half
+  # Replace values in the vector
+  l.pos <- replace(l.pos, lo, "1")
+  l.pos <- replace(l.pos, hi, "3")
+  # Variable labels
+  text(l.x, l.y, labels=row.names(opt.pca$rotation), col="red", pos=l.pos)
 p_KSTLP <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
   #labs(y= "y axis name", x = "x axis name") +
   ggtitle('KsTLP')
 }
 if(o==4){
-p_LSP50 <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
+  
+  s <- summary(opt.pca)
+  plot(opt.pca$x[,1],opt.pca$x[,2],
+       xlab=paste("PCA 1 (", round(s$importance[2]*100, 1), "%)", sep = ""),
+       ylab=paste("PCA 2 (", round(s$importance[5]*100, 1), "%)", sep = ""), pch=16, col='grey', cex=0.5, las=1, asp=1,ylim =c(-6,6),xlim=c(-8,8),
+       main= 'LS - P50 start')
+  # Benjaminbell.co.uk
+  # Add grid lines
+  abline(v=0, lty=2, col="grey50")
+  abline(h=0, lty=2, col="grey50")
+  # Add labels
+  text(opt.pca$x[,1], opt.pca$x[,2], labels=row.names(opt.pca$x), pos=c(1,3,4,2), font=2)
+  
+  #rotation
+  l.x <- opt.pca$rotation[,1]*10
+  l.y <- opt.pca$rotation[,2]*10
+  # Draw arrows
+  arrows(x0=0, x1=l.x, y0=0, y1=l.y, col="red", length=0.15, lwd=1.5)
+  
+  # Label position
+  l.pos <- l.y # Create a vector of y axis coordinates
+  lo <- which(l.y < 0) # Get the variables on the bottom half of the plot
+  hi <- which(l.y > 0) # Get variables on the top half
+  # Replace values in the vector
+  l.pos <- replace(l.pos, lo, "1")
+  l.pos <- replace(l.pos, hi, "3")
+  # Variable labels
+  text(l.x, l.y, labels=row.names(opt.pca$rotation), col="red", pos=l.pos)
+  
+#p_LSP50 <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
   #labs(y= "y axis name", x = "x axis name") +
-  ggtitle('LSP50')
+ # ggtitle('LSP50')
 }
 if(o==5){
   p_obs_BE <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
@@ -731,12 +879,52 @@ if(o==7){
     ggtitle('obs_B')
 }
 }
+if(spec_group_sel==1){
+  mtext(outer=TRUE, 'Broadleaf deciduous', line = -1.5)
+}
+if(spec_group_sel ==2){
+  mtext(outer=TRUE, 'Broadleaf evergreen', line = -1.5)
+}
 # plot standardised, scaled PCA outputs
 dev.new()
 grid.arrange(p_KsLS, p_LSTLP, p_KSTLP, p_LSP50, nrow = 2)
 #grid.arrange(p_LSTLP_old,p_LSP50_old, nrow = 1)
 grid.arrange(p_KsLS, p_LSP50, nrow = 1)
 
+
+ggplot(opt.pca,aes(x=PC1,y=PC2 ))
+plot(opt.pca$x[,1],opt.pca$x[,2],pch=16,cex=0.5,col='grey',ylim =c(-6,6),xlim=c(-8,8))
+
+s <- summary(opt.pca)
+plot(opt.pca$x[,1],opt.pca$x[,2],
+     xlab=paste("PCA 1 (", round(s$importance[2]*100, 1), "%)", sep = ""),
+     ylab=paste("PCA 2 (", round(s$importance[5]*100, 1), "%)", sep = ""), pch=16, col='grey', cex=0.5, las=1, asp=1,ylim =c(-6,6),xlim=c(-8,8),
+     main= opt_traits[o])
+# Benjaminbell.co.uk
+# Add grid lines
+abline(v=0, lty=2, col="grey50")
+abline(h=0, lty=2, col="grey50")
+# Add labels
+text(opt.pca$x[,1], opt.pca$x[,2], labels=row.names(opt.pca$x), pos=c(1,3,4,2), font=2)
+
+#rotation
+l.x <- opt.pca$rotation[,1]*10
+l.y <- opt.pca$rotation[,2]*10
+# Draw arrows
+arrows(x0=0, x1=l.x, y0=0, y1=l.y, col="red", length=0.15, lwd=1.5)
+lines(opt.pca)
+
+# Label position
+l.pos <- l.y # Create a vector of y axis coordinates
+lo <- which(l.y < 0) # Get the variables on the bottom half of the plot
+hi <- which(l.y > 0) # Get variables on the top half
+# Replace values in the vector
+l.pos <- replace(l.pos, lo, "1")
+l.pos <- replace(l.pos, hi, "3")
+# Variable labels
+text(l.x, l.y, labels=row.names(opt.pca$rotation), col="red", pos=l.pos)
+
+# screeplot(opt.pca)
 
 # PCA on observed data
 # not enough data points
