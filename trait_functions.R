@@ -40,7 +40,9 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_
   if(regression_type == 'sma'){
   mod <- sma_regress_multivar(vars[ind,],nbtstrp,T)
   }
-  
+
+  pearson_cor <- cor(vars[ind,])[1,2]
+
   var_est_boot <- matrix(NA, nrow = ndata, ncol = nbtstrp)
   if (nvars==2) {
     var_est <- mod$intercept_R + mod$slope_R.y1*vars[ind,1]
@@ -90,8 +92,8 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_
   R2 <- R^2
   R2adj <- 1 - ( ((1-R2)*(ndata-1))/(ndata-nregress-1) )
   
-  return_vals <- list("mod"=mod,"rmse"=rmse,"R"=R,"R2"=R2,"R2adj"=R2adj,"var_est"=var_est,
-                      "var_est_L95"=var_est_L95,"var_est_U95"=var_est_U95,"ndata"=ndata,"dataused"=ind)
+  return_vals <- list("regression_type (lm or sma)" = regression_type,"mod"=mod,"rmse"=rmse,"R"=R,"R2"=R2,"R2adj"=R2adj,"var_est"=var_est,
+                      "var_est_L95"=var_est_L95,"var_est_U95"=var_est_U95,"ndata"=ndata,"dataused"=ind,'pearson_cor'=  pearson_cor)
   
   return(return_vals)
 }
