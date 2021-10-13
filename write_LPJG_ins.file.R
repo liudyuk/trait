@@ -1,6 +1,6 @@
 # Tom Pugh
 # outsourced from main code by Annemarie Eckes-Shephard May 2021
-# convenience function that contains all code bits to create .ins files for LPJ-Guess4_hydro
+# convenience function that contains all code bits to create .ins files for LPJ-GUESS-HYD
 # output_fol : specify output folder location as string
 # basePFT: number between 1 and 5, to reflect PFTs:  'TeBE'(1),'TeBS'(2),'IBS'(3),'TrBE'(4),'TrBR'(5)
 # traits_LPJG: list object of traits derived from function  lpjg_traits_conv()

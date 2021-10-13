@@ -6,7 +6,7 @@
 # input is the output from trait_optim. 
 # The function will use the optimised (predicted) values and creates summary statistics (sum_stat) on their
 # mean, median and upper and lower 5% of the uncertainty range.
-# the output ( <variable>_e_<sum_stat>) is made a available to the global environment.
+# the output ( <variable>_e_<sum_stat>) is made available to the global environment.
 create_uncertainty_range_stats <- function(ins){
   
   predicted_names <- names(ins$predicted)
