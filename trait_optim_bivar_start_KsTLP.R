@@ -34,6 +34,7 @@ trait_optim_bivar_start_KsTLP <- function(limitdataranges=T, propagate_uncer=T, 
       trait_samp = sample(index, n_trait_sel, replace=F) 
       Ks_e = Ks_comb[trait_samp] 
       TLP_e = TLP_comb[trait_samp] 
+      
       # Plot sample against all data as a check for sampling density
       if (n_trait_sel != 4){
         plot(Ks_comb,TLP_comb)
@@ -134,8 +135,8 @@ trait_optim_bivar_start_KsTLP <- function(limitdataranges=T, propagate_uncer=T, 
       traits$slope[ind_spec_group],
       LMA_multivar_BDT$LMA_from_TLP,
       LMA_multivar_BE$LMA_from_TLP_LS,
-      LS_multivar_BE$LS_from_TLP_Ks,
-      LS_multivar_BDT$LS_from_LMA_TLP_Ks,
+      LS_multivar_BE$LS_from_LMA_TLP_Ks,
+      LS_multivar_BDT$LS_from_TLP_Ks,
       P50_multivar$P50_from_TLP_Ks,
       slope_multivar$slope_from_P50_TLP_Ks,
       WD_multivar$WD_from_slope_P50slope,
@@ -162,7 +163,7 @@ trait_optim_bivar_start_KsTLP <- function(limitdataranges=T, propagate_uncer=T, 
   ind = complete.cases(predicted.df)
   
   #re-define list elements as matrix after sub-setting ([ind]) so that subsequent functions in analysis still work:
-  predicted <- list("P50_e"=as.matrix(P50_e[ind]),"LS_e"=as.matrix(LS_e[ind]),"LMA_e"=as.matrix(LMA_e[ind]),"WD_e"=as.matrix(WD_e[ind]),"slope_e"=as.matrix(slope_e[ind]))
+  predicted <- list("P50_e"=as.matrix(P50_e[ind,]),"LS_e"=as.matrix(LS_e[ind,]),"LMA_e"=as.matrix(LMA_e[ind,]),"WD_e"=as.matrix(WD_e[ind,]),"slope_e"=as.matrix(slope_e[ind,]))
   predictors <- list('TLP_e' = as.matrix(TLP_e[ind]),'Ks_e'  = as.matrix(Ks_e[ind]))
   return_vals <- list('predictors'=predictors ,'predicted' =predicted )
   

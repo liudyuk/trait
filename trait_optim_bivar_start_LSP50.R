@@ -131,8 +131,8 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
       traits$slope[ind_spec_group],
       LMA_multivar_BDT$LMA_from_TLP,
       LMA_multivar_BE$LMA_from_TLP_LS,
-      #Ks_multivar$Ks_from_P50_LS_LMA,
       Ks_multivar$Ks_from_P50_LS,
+      #Ks_multivar$Ks_from_P50_LS,
       TLP_multivar$TLP_from_LS_LMA_P50,
       slope_multivar$slope_from_P50_TLP_Ks,
       WD_multivar$WD_from_slope_P50slope,
@@ -158,7 +158,7 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
   ind = complete.cases(predicted.df)
   
   #re-define list elements as matrix after sub-setting ([ind]) so that subsequent functions in analysis still work:
-  predicted <- list("TLP_e"=as.matrix(TLP_e[ind]),"Ks_e"=as.matrix(Ks_e[ind]),"LMA_e"=as.matrix(LMA_e[ind]),"WD_e"=as.matrix(WD_e[ind]),"slope_e"=as.matrix(slope_e[ind]))
+  predicted <- list("TLP_e"=as.matrix(TLP_e[ind,]),"Ks_e"=as.matrix(Ks_e[ind,]),"LMA_e"=as.matrix(LMA_e[ind,]),"WD_e"=as.matrix(WD_e[ind,]),"slope_e"=as.matrix(slope_e[ind,]))
   predictors <- list('P50_e' = as.matrix(P50_e[ind]),'LS_e' = as.matrix(LS_e[ind]))
   return_vals <- list('predictors' = predictors ,'predicted' = predicted )
   

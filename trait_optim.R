@@ -160,7 +160,7 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
   ind = complete.cases(predicted.df)
   
   #re-define list elements as matrix after sub-setting ([ind]) so that subsequent functions in analysis still work:
-  predicted <- list("TLP_e"=as.matrix(TLP_e[ind]),"P50_e"=as.matrix(P50_e[ind]),"LMA_e"=as.matrix(LMA_e[ind]),"WD_e"=as.matrix(WD_e[ind]),"slope_e"=as.matrix(slope_e[ind]))
+  predicted <- list("TLP_e"=as.matrix(TLP_e[ind,]),"P50_e"=as.matrix(P50_e[ind,]),"LMA_e"=as.matrix(LMA_e[ind,]),"WD_e"=as.matrix(WD_e[ind,]),"slope_e"=as.matrix(slope_e[ind,]))
   predictors <- list('Ks_e' = as.matrix(Ks_e[ind]),'LS_e'  = as.matrix(LS_e[ind]))
   return_vals <- list('predictors'=predictors ,'predicted' =predicted )
   
