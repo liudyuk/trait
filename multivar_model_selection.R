@@ -3,48 +3,117 @@
 # T. Pugh
 # 12.12.20
 
+
 P50_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
   
+    # P50 from TLP, Ks and WD
+    P50_from_TLP_Ks_WD <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp, regression_type = regr_type )
+    plot(trait$P50[P50_from_TLP_Ks_WD$dataused],P50_from_TLP_Ks_WD$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+    
+    # P50 from TLP, LS and Ks
+    P50_from_TLP_LS_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$Ks,trait$P50),c("TLP","LS","Ks","P50"),nbtstrp,regression_type = regr_type)
+    plot(trait$P50[P50_from_TLP_LS_Ks$dataused],P50_from_TLP_LS_Ks$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+    
+    # P50 from TLP and Ks
+    P50_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$P50),c("TLP","Ks","P50"),nbtstrp,regression_type = regr_type)
+    plot(trait$P50[P50_from_TLP_Ks$dataused],P50_from_TLP_Ks$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+    
+    # P50 from TLP and LS
+    P50_from_TLP_LS <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$P50),c("TLP","LS","P50"),nbtstrp,regression_type = regr_type)
+    plot(trait$P50[P50_from_TLP_LS$dataused],P50_from_TLP_LS$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+    
+    # P50 from Ks and LS
+    P50_from_Ks_LS <- sma_plot_stats(data.frame(trait$Ks,trait$LS,trait$P50),c("Ks","LS","P50"),nbtstrp,regression_type = regr_type)
+    plot(trait$P50[P50_from_Ks_LS$dataused],P50_from_Ks_LS$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+    
+    # P50 from TLP
+    P50_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$P50),c("TLP","P50"),nbtstrp,regression_type = regr_type)
+    plot(trait$P50[P50_from_TLP$dataused],P50_from_TLP$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+    
+    # P50 from Ks
+    P50_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$P50),c("Ks","P50"),nbtstrp,regression_type = regr_type)
+    
+    # P50 from LS
+    P50_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$P50),c("LS","P50"),nbtstrp,regression_type = regr_type)
+    
+    # Some of the above combinations have relatively high R2adj, but very reduced data points. Therefore test if the worse-performing combinations are only worse performing because they include a greater diversity of data.
+    
+    # P50 from TLP (same species as for TLP and LS)
+    P50_from_TLP_limitTLPLS <- sma_plot_stats(data.frame(trait$TLP,trait$P50),c("TLP","P50"),nbtstrp,F,indin = P50_from_TLP_LS$dataused,regression_type = regr_type)
+    
+    # P50 from Ks (same species as for TLP and Ks)
+    P50_from_Ks_limitTLPKs <- sma_plot_stats(data.frame(trait$Ks,trait$P50),c("Ks","P50"),nbtstrp,F,indin = P50_from_TLP_Ks$dataused,regression_type = regr_type)
+    
+    # P50 from LS (same species as for TLP and LS)
+    P50_from_LS_limitTLPLS <- sma_plot_stats(data.frame(trait$LS,trait$P50),c("LS","P50"),nbtstrp,F,indin = P50_from_TLP_LS$dataused,regression_type = regr_type)
+    
+    # Summarise statistics
+    all_testnames_P50 <- c("P50_from_TLP_Ks_WD","P50_from_TLP_Ks","P50_from_TLP","P50_from_Ks","P50_from_TLP_limitTLPLS","P50_from_Ks_limitTLPKs","P50_from_TLP_LS_Ks","P50_from_TLP_LS","P50_from_Ks_LS","P50_from_LS_limitTLPLS","P50_from_LS")
+    all_R2_P50 <- c(P50_from_TLP_Ks_WD$R2,P50_from_TLP_Ks$R2,P50_from_TLP$R2,P50_from_Ks$R2,P50_from_TLP_limitTLPLS$R2,P50_from_Ks_limitTLPKs$R2,P50_from_TLP_LS_Ks$R2,P50_from_TLP_LS$R2,P50_from_Ks_LS$R2,P50_from_LS_limitTLPLS$R2,P50_from_LS$R2)
+    all_R2adj_P50 <- c(P50_from_TLP_Ks_WD$R2adj,P50_from_TLP_Ks$R2adj,P50_from_TLP$R2adj,P50_from_Ks$R2adj,P50_from_TLP_limitTLPLS$R2adj,P50_from_Ks_limitTLPKs$R2adj,P50_from_TLP_LS_Ks$R2adj,P50_from_TLP_LS$R2adj,P50_from_Ks_LS$R2adj,P50_from_LS_limitTLPLS$R2adj,P50_from_LS$R2adj)
+    all_rmse_P50 <- c(P50_from_TLP_Ks_WD$rmse,P50_from_TLP_Ks$rmse,P50_from_TLP$rmse,P50_from_Ks$rmse,P50_from_TLP_limitTLPLS$rmse,P50_from_Ks_limitTLPKs$rmse,P50_from_TLP_LS_Ks$rmse,P50_from_TLP_LS$rmse,P50_from_Ks_LS$rmse,P50_from_LS_limitTLPLS$rmse,P50_from_LS$rmse)
+    all_ndata_P50 <- c(P50_from_TLP_Ks_WD$ndata,P50_from_TLP_Ks$ndata,P50_from_TLP$ndata,P50_from_Ks$ndata,P50_from_TLP_limitTLPLS$ndata,P50_from_Ks_limitTLPKs$ndata,P50_from_TLP_LS_Ks$ndata,P50_from_TLP_LS$ndata,P50_from_Ks_LS$ndata,P50_from_LS_limitTLPLS$ndata,P50_from_LS$ndata)
+    
+    all_P50 <- data.frame(all_testnames_P50,all_R2_P50,all_R2adj_P50,all_rmse_P50,all_ndata_P50)
+    if(view_stats==TRUE)View(all_P50)
+    
+    # BEST MODEL: P50_from_TLP_Ks
+    # Test MAT and PPT coverage of species for best model
+    plot(trait$MAT[P50_from_TLP_Ks$dataused],trait$MAP[P50_from_TLP_Ks$dataused])
+    # RESULT: WIDE CLIMATE COVERAGE
+    
+    # DECISION: P50_from_TLP_Ks
+    
+    return_vals <- list("all_P50"=all_P50,
+                        "P50_from_TLP_Ks"=P50_from_TLP_Ks)
+ 
+  return(return_vals)
+  
+}
+
+P50_multivar_test_save <- function(trait,view_stats=FALSE, regr_type = 'lm' ,test=T)  {
+  
+  if(test==T){
   # P50 from TLP, Ks and WD
-  P50_from_TLP_Ks_WD <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp)
+  P50_from_TLP_Ks_WD <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp, regression_type = regr_type )
   plot(trait$P50[P50_from_TLP_Ks_WD$dataused],P50_from_TLP_Ks_WD$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
   
   # P50 from TLP, LS and Ks
-  P50_from_TLP_LS_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$Ks,trait$P50),c("TLP","LS","Ks","P50"),nbtstrp)
+  P50_from_TLP_LS_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$Ks,trait$P50),c("TLP","LS","Ks","P50"),nbtstrp,regression_type = regr_type)
   plot(trait$P50[P50_from_TLP_LS_Ks$dataused],P50_from_TLP_LS_Ks$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
   
   # P50 from TLP and Ks
-  P50_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$P50),c("TLP","Ks","P50"),nbtstrp)
+  P50_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$P50),c("TLP","Ks","P50"),nbtstrp,regression_type = regr_type)
   plot(trait$P50[P50_from_TLP_Ks$dataused],P50_from_TLP_Ks$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
   
   # P50 from TLP and LS
-  P50_from_TLP_LS <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$P50),c("TLP","LS","P50"),nbtstrp)
+  P50_from_TLP_LS <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$P50),c("TLP","LS","P50"),nbtstrp,regression_type = regr_type)
   plot(trait$P50[P50_from_TLP_LS$dataused],P50_from_TLP_LS$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
   
   # P50 from Ks and LS
-  P50_from_Ks_LS <- sma_plot_stats(data.frame(trait$Ks,trait$LS,trait$P50),c("Ks","LS","P50"),nbtstrp)
+  P50_from_Ks_LS <- sma_plot_stats(data.frame(trait$Ks,trait$LS,trait$P50),c("Ks","LS","P50"),nbtstrp,regression_type = regr_type)
   plot(trait$P50[P50_from_Ks_LS$dataused],P50_from_Ks_LS$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
   
   # P50 from TLP
-  P50_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$P50),c("TLP","P50"),nbtstrp)
+  P50_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$P50),c("TLP","P50"),nbtstrp,regression_type = regr_type)
   plot(trait$P50[P50_from_TLP$dataused],P50_from_TLP$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
   
   # P50 from Ks
-  P50_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$P50),c("Ks","P50"),nbtstrp)
+  P50_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$P50),c("Ks","P50"),nbtstrp,regression_type = regr_type)
   
   # P50 from LS
-  P50_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$P50),c("LS","P50"),nbtstrp)
+  P50_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$P50),c("LS","P50"),nbtstrp,regression_type = regr_type)
   
   # Some of the above combinations have relatively high R2adj, but very reduced data points. Therefore test if the worse-performing combinations are only worse performing because they include a greater diversity of data.
   
   # P50 from TLP (same species as for TLP and LS)
-  P50_from_TLP_limitTLPLS <- sma_plot_stats(data.frame(trait$TLP,trait$P50),c("TLP","P50"),nbtstrp,F,P50_from_TLP_LS$dataused)
+  P50_from_TLP_limitTLPLS <- sma_plot_stats(data.frame(trait$TLP,trait$P50),c("TLP","P50"),nbtstrp,F,indin = P50_from_TLP_LS$dataused,regression_type = regr_type)
   
   # P50 from Ks (same species as for TLP and Ks)
-  P50_from_Ks_limitTLPKs <- sma_plot_stats(data.frame(trait$Ks,trait$P50),c("Ks","P50"),nbtstrp,F,P50_from_TLP_Ks$dataused)
+  P50_from_Ks_limitTLPKs <- sma_plot_stats(data.frame(trait$Ks,trait$P50),c("Ks","P50"),nbtstrp,F,indin = P50_from_TLP_Ks$dataused,regression_type = regr_type)
   
   # P50 from LS (same species as for TLP and LS)
-  P50_from_LS_limitTLPLS <- sma_plot_stats(data.frame(trait$LS,trait$P50),c("LS","P50"),nbtstrp,F,P50_from_TLP_LS$dataused)
+  P50_from_LS_limitTLPLS <- sma_plot_stats(data.frame(trait$LS,trait$P50),c("LS","P50"),nbtstrp,F,indin = P50_from_TLP_LS$dataused,regression_type = regr_type)
   
   # Summarise statistics
   all_testnames_P50 <- c("P50_from_TLP_Ks_WD","P50_from_TLP_Ks","P50_from_TLP","P50_from_Ks","P50_from_TLP_limitTLPLS","P50_from_Ks_limitTLPKs","P50_from_TLP_LS_Ks","P50_from_TLP_LS","P50_from_Ks_LS","P50_from_LS_limitTLPLS","P50_from_LS")
@@ -65,52 +134,66 @@ P50_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
   
    return_vals <- list("all_P50"=all_P50,
                       "P50_from_TLP_Ks"=P50_from_TLP_Ks)
-  
+   save(all_P50, file= 'data/all_P50.RData')
+  }
+  else{
+    load('data/all_P50.RData')
+    
+    # P50 from TLP and Ks
+    P50_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$P50),c("TLP","Ks","P50"),nbtstrp,regression_type = regr_type)
+    plot(trait$P50[P50_from_TLP_Ks$dataused],P50_from_TLP_Ks$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
+    
+    
+    return_vals <- list("all_P50"=all_P50,
+                        "P50_from_TLP_Ks"=P50_from_TLP_Ks)
+                        
+  }
   return(return_vals)
+   
 }
 
 TLP_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
   
   # TLP from LS, LMA, P50 and WD
-  TLP_from_LS_LMA_P50_WD <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$P50,trait$WD,trait$TLP),c("LS","LMA","P50","WD","TLP"),nbtstrp)
+  TLP_from_LS_LMA_P50_WD <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$P50,trait$WD,trait$TLP),c("LS","LMA","P50","WD","TLP"),nbtstrp,regression_type = regr_type)
   plot(trait$TLP[TLP_from_LS_LMA_P50_WD$dataused],TLP_from_LS_LMA_P50_WD$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
   
   # TLP from LS, LMA, P50 and slope
-  TLP_from_LS_LMA_P50_slope <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$P50,trait$slope,trait$TLP),c("LS","LMA","P50","slope","TLP"),nbtstrp)
+  TLP_from_LS_LMA_P50_slope <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$P50,trait$slope,trait$TLP),c("LS","LMA","P50","slope","TLP"),nbtstrp,regression_type = regr_type)
   plot(trait$TLP[TLP_from_LS_LMA_P50_slope$dataused],TLP_from_LS_LMA_P50_slope$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
   
   # TLP from LS, LMA and P50
-  TLP_from_LS_LMA_P50 <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$P50,trait$TLP),c("LS","LMA","P50","TLP"),nbtstrp)
+  TLP_from_LS_LMA_P50 <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$P50,trait$TLP),c("LS","LMA","P50","TLP"),nbtstrp,regression_type = regr_type)
   plot(trait$TLP[TLP_from_LS_LMA_P50$dataused],TLP_from_LS_LMA_P50$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
   
   # TLP from LS and LMA
-  TLP_from_LS_LMA <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$TLP),c("LS","LMA","TLP"),nbtstrp)
+  TLP_from_LS_LMA <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$TLP),c("LS","LMA","TLP"),nbtstrp,regression_type = regr_type)
   plot(trait$TLP[TLP_from_LS_LMA$dataused],TLP_from_LS_LMA$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
   
   # TLP from P50 and LMA
-  TLP_from_P50_LMA <- sma_plot_stats(data.frame(trait$P50,trait$LMA,trait$TLP),c("P50","LMA","TLP"),nbtstrp)
+  TLP_from_P50_LMA <- sma_plot_stats(data.frame(trait$P50,trait$LMA,trait$TLP),c("P50","LMA","TLP"),nbtstrp,regression_type = regr_type)
   plot(trait$TLP[TLP_from_P50_LMA$dataused],TLP_from_P50_LMA$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
   
   # TLP from P50 and LS
-  TLP_from_P50_LS <- sma_plot_stats(data.frame(trait$P50,trait$LS,trait$TLP),c("P50","LS","TLP"),nbtstrp)
+  TLP_from_P50_LS <- sma_plot_stats(data.frame(trait$P50,trait$LS,trait$TLP),c("P50","LS","TLP"),nbtstrp,regression_type = regr_type)
   plot(trait$TLP[TLP_from_P50_LS$dataused],TLP_from_P50_LS$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
   
   # TLP from LS
-  TLP_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$TLP),c("LS","TLP"),nbtstrp)
+  TLP_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$TLP),c("LS","TLP"),nbtstrp,regression_type = regr_type)
   
   # TLP from P50
-  TLP_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP),c("P50","TLP"),nbtstrp)
+  TLP_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP),c("P50","TLP"),nbtstrp,regression_type = regr_type)
   
   # TLP from LMA
-  TLP_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$TLP),c("LMA","TLP"),nbtstrp)
+  TLP_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$TLP),c("LMA","TLP"),nbtstrp,regression_type = regr_type)
   
   # Some of the above combinations have relatively high R2adj, but very reduced data points. Therefore test if the worse-performing combinations are only worse performing because they include a greater diversity of data.
   
   # TLP from P50 (same species as for LS, LMA and P50)
-  TLP_from_P50_limitLSLMAP50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP),c("P50","TLP"),nbtstrp,F,TLP_from_LS_LMA_P50$dataused)
+  TLP_from_P50_limitLSLMAP50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP),c("P50","TLP"),nbtstrp,F,indin = TLP_from_LS_LMA_P50$dataused,regression_type = regr_type)
   
   # TLP from P50 and LMA (same species as for LS, LMA and P50)
-  TLP_from_P50_LMA_limitLALMAP50 <- sma_plot_stats(data.frame(trait$P50,trait$LMA,trait$TLP),c("P50","LMA","TLP"),nbtstrp,F,TLP_from_LS_LMA_P50$dataused)
+  TLP_from_P50_LMA_limitLALMAP50 <- sma_plot_stats(data.frame(trait$P50,trait$LMA,trait$TLP),c("P50","LMA","TLP"),nbtstrp,F,indin = TLP_from_LS_LMA_P50$dataused,regression_type = regr_type)
   
   # Summarise statistics
   all_testnames_TLP <- c("TLP_from_LS_LMA_P50_WD","TLP_from_LS_LMA_P50_slope","TLP_from_LS_LMA_P50","TLP_from_LS_LMA","TLP_from_P50_LMA","TLP_from_P50_LMA_limitLALMAP50","TLP_from_P50_LS","TLP_from_LS","TLP_from_P50","TLP_from_LMA","TLP_from_P50_limitLSLMAP50")
@@ -150,30 +233,30 @@ LMA_multivar_test_BDT <- function(trait_BDT,view_stats=FALSE, regr_type = 'lm' )
   # This version for BD and BT only.
   
   # LMA from TLP, LS and WD
-  LMA_from_TLP_LS_WD <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$WD,trait_BDT$LMA),c("TLP","LS","WD","LMA"),nbtstrp)
+  LMA_from_TLP_LS_WD <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$WD,trait_BDT$LMA),c("TLP","LS","WD","LMA"),nbtstrp,regression_type = regr_type)
   plot(trait_BDT$LMA[LMA_from_TLP_LS_WD$dataused],LMA_from_TLP_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from TLP and LS
-  LMA_from_TLP_LS <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$LMA),c("TLP","LS","LMA"),nbtstrp)
+  LMA_from_TLP_LS <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$LMA),c("TLP","LS","LMA"),nbtstrp,regression_type = regr_type)
   plot(trait_BDT$LMA[LMA_from_TLP_LS$dataused],LMA_from_TLP_LS$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from TLP and WD
-  LMA_from_TLP_WD <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$WD,trait_BDT$LMA),c("TLP","WD","LMA"),nbtstrp)
+  LMA_from_TLP_WD <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$WD,trait_BDT$LMA),c("TLP","WD","LMA"),nbtstrp,regression_type = regr_type)
   plot(trait_BDT$LMA[LMA_from_TLP_WD$dataused],LMA_from_TLP_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from LS and WD
-  LMA_from_LS_WD <- sma_plot_stats(data.frame(trait_BDT$LS,trait_BDT$WD,trait_BDT$LMA),c("LS","WD","LMA"),nbtstrp)
+  LMA_from_LS_WD <- sma_plot_stats(data.frame(trait_BDT$LS,trait_BDT$WD,trait_BDT$LMA),c("LS","WD","LMA"),nbtstrp,regression_type = regr_type)
   plot(trait_BDT$LMA[LMA_from_LS_WD$dataused],LMA_from_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from TLP
-  LMA_from_TLP <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LMA),c("TLP","LMA"),nbtstrp)
+  LMA_from_TLP <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LMA),c("TLP","LMA"),nbtstrp,regression_type = regr_type)
   plot(trait_BDT$LMA[LMA_from_TLP$dataused],LMA_from_TLP$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from LS
-  LMA_from_LS <- sma_plot_stats(data.frame(trait_BDT$LS,trait_BDT$LMA),c("LS","LMA"),nbtstrp)
+  LMA_from_LS <- sma_plot_stats(data.frame(trait_BDT$LS,trait_BDT$LMA),c("LS","LMA"),nbtstrp,regression_type = regr_type)
   
   # LMA from WD
-  LMA_from_WD <- sma_plot_stats(data.frame(trait_BDT$WD,trait_BDT$LMA),c("WD","LMA"),nbtstrp)
+  LMA_from_WD <- sma_plot_stats(data.frame(trait_BDT$WD,trait_BDT$LMA),c("WD","LMA"),nbtstrp,regression_type = regr_type)
   
   # Summarise statistics
   all_testnames_LMA <- c("LMA_from_TLP_LS_WD","LMA_from_TLP_LS","LMA_from_TLP_WD","LMA_from_LS_WD","LMA_from_TLP","LMA_from_LS","LMA_from_WD")
@@ -230,11 +313,11 @@ LMA_multivar_test_BE <- function(trait_BE,view_stats=FALSE, regr_type = 'lm' ) {
   # Some of the above combinations have relatively high R2adj, but very reduced data points. Therefore test if the worse-performing combinations are only worse performing because they include a greater diversity of data.
   
   # LMA from LS and WD (same species as for LS, WD and TLP)
-  LMA_from_LS_WD_limitTLPLSWD <- sma_plot_stats(data.frame(trait_BE$LS,trait_BE$WD,trait_BE$LMA),c("LS","WD","LMA"),nbtstrp,F,LMA_from_TLP_LS_WD$dataused, regression_type =  regr_type)
+  LMA_from_LS_WD_limitTLPLSWD <- sma_plot_stats(data.frame(trait_BE$LS,trait_BE$WD,trait_BE$LMA),c("LS","WD","LMA"),nbtstrp,F,indin = LMA_from_TLP_LS_WD$dataused, regression_type =  regr_type)
   plot(trait_BE$LMA[LMA_from_LS_WD_limitTLPLSWD$dataused],LMA_from_LS_WD_limitTLPLSWD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from TLP and WD (same species as for LS, WD and TLP)
-  LMA_from_TLP_WD_limitTLPLSWD <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$WD,trait_BE$LMA),c("TLP","WD","LMA"),nbtstrp,F,LMA_from_TLP_LS_WD$dataused, regression_type =  regr_type)
+  LMA_from_TLP_WD_limitTLPLSWD <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$WD,trait_BE$LMA),c("TLP","WD","LMA"),nbtstrp,F,indin = LMA_from_TLP_LS_WD$dataused, regression_type =  regr_type)
   plot(trait_BE$LMA[LMA_from_TLP_WD_limitTLPLSWD$dataused],LMA_from_TLP_WD_limitTLPLSWD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # Summarise statistics
@@ -264,31 +347,42 @@ LMA_multivar_test_BE <- function(trait_BE,view_stats=FALSE, regr_type = 'lm' ) {
 WD_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
   
   # WD from P50 and slope
-  WD_from_P50_slope <- sma_plot_stats(data.frame(trait$P50,trait$slope,trait$WD),c("P50","slope","WD"),nbtstrp)
+  WD_from_P50_slope <- sma_plot_stats(data.frame(trait$P50,trait$slope,trait$WD),c("P50","slope","WD"),nbtstrp, regression_type = regr_type)
   plot(trait$WD[WD_from_P50_slope$dataused],WD_from_P50_slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
   # WD from slope and P50*slope (interaction term) - NOTE: Testing the interactions because P50 and slope are so highly correlated with each other
-  WD_from_slope_P50slope <- sma_plot_stats(data.frame(trait$slope,trait$P50*trait$slope,trait$WD),c("slope","P50*slope","WD"),nbtstrp)
+  WD_from_slope_P50slope <- sma_plot_stats(data.frame(trait$slope,trait$P50*trait$slope,trait$WD),c("slope","P50*slope","WD"),nbtstrp,regression_type = regr_type)
   plot(trait$WD[WD_from_slope_P50slope$dataused],WD_from_slope_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+ 
+  
+  # WD from slope Ks and P50*slope (interaction term) 
+  WD_from_slope_Ks_P50slope <- sma_plot_stats(data.frame(trait$slope,trait$Ks,trait$P50*trait$slope,trait$WD),c("slope","Ks","P50*slope","WD"),nbtstrp,regression_type = regr_type)
+  plot(trait$WD[WD_from_slope_Ks_P50slope$dataused],WD_from_slope_Ks_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
   # WD from P50 and P50*slope (interaction term)
-  WD_from_P50_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp)
+  WD_from_P50_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp,regression_type = regr_type)
   plot(trait$WD[WD_from_P50_P50slope$dataused],WD_from_P50_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
   # WD from P50 and slope
-  WD_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$WD),c("P50","WD"),nbtstrp)
+  WD_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$WD),c("P50","WD"),nbtstrp,regression_type = regr_type)
   plot(trait$WD[WD_from_P50$dataused],WD_from_P50$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
   # WD from slope
-  WD_from_slope <- sma_plot_stats(data.frame(trait$slope,trait$WD),c("slope","WD"),nbtstrp)
+  WD_from_slope <- sma_plot_stats(data.frame(trait$slope,trait$WD),c("slope","WD"),nbtstrp,regression_type = regr_type)
   plot(trait$WD[WD_from_slope$dataused],WD_from_slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
+  # WD from Ks P50
+  WD_from_Ks_P50 <- sma_plot_stats(data.frame(trait$Ks,trait$P50,trait$WD),c("Ks","P50","WD"),nbtstrp,regression_type = regr_type)
+  plot(trait$WD[WD_from_Ks_P50$dataused],WD_from_Ks_P50$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
+  
+  
   # Summarise statistics
-  all_testnames_WD <- c("WD_from_P50_slope","WD_from_slope_P50slope","WD_from_P50_P50slope","WD_from_P50","WD_from_slope")
-  all_R2_WD <- c(WD_from_P50_slope$R2,WD_from_slope_P50slope$R2,WD_from_P50_P50slope$R2,WD_from_P50$R2,WD_from_slope$R2)
-  all_R2adj_WD <- c(WD_from_P50_slope$R2adj,WD_from_slope_P50slope$R2adj,WD_from_P50_P50slope$R2adj,WD_from_P50$R2adj,WD_from_slope$R2adj)
-  all_rmse_WD <- c(WD_from_P50_slope$rmse,WD_from_slope_P50slope$rmse,WD_from_P50_P50slope$rmse,WD_from_P50$rmse,WD_from_slope$rmse)
-  all_ndata_WD <- c(WD_from_P50_slope$ndata,WD_from_slope_P50slope$ndata,WD_from_P50_P50slope$ndata,WD_from_P50$ndata,WD_from_slope$ndata)
+  all_testnames_WD <- c("WD_from_P50_slope",    "WD_from_slope_P50slope"," WD_from_slope_Ks_P50slope",     "WD_from_P50_P50slope","WD_from_P50","WD_from_slope"," WD_from_Ks_P50")
+  all_R2_WD <- c(WD_from_P50_slope$R2,         WD_from_slope_P50slope$R2, WD_from_slope_Ks_P50slope$R,      WD_from_P50_P50slope$R2,WD_from_P50$R2,WD_from_slope$R2,WD_from_Ks_P50$R)
+  all_R2adj_WD <- c(WD_from_P50_slope$R2adj,WD_from_slope_P50slope$R2adj,  WD_from_slope_Ks_P50slope$R2adj, WD_from_P50_P50slope$R2adj,WD_from_P50$R2adj,WD_from_slope$R2adj,WD_from_Ks_P50$R2adj)
+  all_rmse_WD <- c(WD_from_P50_slope$rmse,   WD_from_slope_P50slope$rmse, WD_from_slope_Ks_P50slope$rmse,   WD_from_P50_P50slope$rmse,WD_from_P50$rmse,WD_from_slope$rmse,WD_from_Ks_P50$rmse)
+  all_ndata_WD <- c(WD_from_P50_slope$ndata,WD_from_slope_P50slope$ndata, WD_from_slope_Ks_P50slope$ndata,  WD_from_P50_P50slope$ndata,WD_from_P50$ndata,WD_from_slope$ndata,WD_from_Ks_P50$ndata)
   
   all_WD <- data.frame(all_testnames_WD,all_R2_WD,all_R2adj_WD,all_rmse_WD,all_ndata_WD)
    if(view_stats==TRUE)View(all_WD)
@@ -309,73 +403,78 @@ WD_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
 slope_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm') {
   
   # slope from P50, TLP, WD and Ks
-  slope_from_P50_TLP_WD_Ks <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$WD,trait$Ks,trait$slope),c("P50","TLP","WD","Ks","slope"),nbtstrp)
+  slope_from_P50_TLP_WD_Ks <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$WD,trait$Ks,trait$slope),c("P50","TLP","WD","Ks","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_P50_TLP_WD_Ks$dataused],slope_from_P50_TLP_WD_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from P50, TLP and WD
-  slope_from_P50_TLP_WD <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$WD,trait$slope),c("P50","TLP","WD","slope"),nbtstrp)
+  slope_from_P50_TLP_WD <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$WD,trait$slope),c("P50","TLP","WD","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_P50_TLP_WD$dataused],slope_from_P50_TLP_WD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from P50, TLP and Ks
-  slope_from_P50_TLP_Ks <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$Ks,trait$slope),c("P50","TLP","Ks","slope"),nbtstrp)
+  slope_from_P50_TLP_Ks <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$Ks,trait$slope),c("P50","TLP","Ks","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_P50_TLP_Ks$dataused],slope_from_P50_TLP_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from P50, WD and Ks
-  slope_from_P50_WD_Ks <- sma_plot_stats(data.frame(trait$P50,trait$WD,trait$Ks,trait$slope),c("P50","WD","Ks","slope"),nbtstrp)
+  slope_from_P50_WD_Ks <- sma_plot_stats(data.frame(trait$P50,trait$WD,trait$Ks,trait$slope),c("P50","WD","Ks","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_P50_WD_Ks$dataused],slope_from_P50_WD_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from TLP, WD and Ks
-  slope_from_TLP_WD_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$WD,trait$Ks,trait$slope),c("TLP","WD","Ks","slope"),nbtstrp)
+  slope_from_TLP_WD_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$WD,trait$Ks,trait$slope),c("TLP","WD","Ks","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_TLP_WD_Ks$dataused],slope_from_TLP_WD_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from P50 and TLP
-  slope_from_P50_TLP <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$slope),c("P50","TLP","slope"),nbtstrp)
+  slope_from_P50_TLP <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$slope),c("P50","TLP","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_P50_TLP$dataused],slope_from_P50_TLP$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from P50 and TLPP50 (interaction)
-  slope_from_P50_TLPP50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP*trait$P50,trait$slope),c("P50","TLP*P50","slope"),nbtstrp)
+  slope_from_P50_TLPP50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP*trait$P50,trait$slope),c("P50","TLP*P50","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_P50_TLPP50$dataused],slope_from_P50_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from TLP and TLPP50 (interaction)
-  slope_from_TLP_TLPP50 <- sma_plot_stats(data.frame(trait$TLP,trait$TLP*trait$P50,trait$slope),c("TLP","TLP*P50","slope"),nbtstrp)
+  slope_from_TLP_TLPP50 <- sma_plot_stats(data.frame(trait$TLP,trait$TLP*trait$P50,trait$slope),c("TLP","TLP*P50","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_TLP_TLPP50$dataused],slope_from_TLP_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from TLP and Ks
-  slope_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$slope),c("TLP","Ks","slope"),nbtstrp)
+  slope_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$slope),c("TLP","Ks","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_TLP_Ks$dataused],slope_from_TLP_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from TLP and WD
-  slope_from_TLP_WD <- sma_plot_stats(data.frame(trait$TLP,trait$WD,trait$slope),c("TLP","WD","slope"),nbtstrp)
+  slope_from_TLP_WD <- sma_plot_stats(data.frame(trait$TLP,trait$WD,trait$slope),c("TLP","WD","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_TLP_WD$dataused],slope_from_TLP_WD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from TLP
-  slope_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$slope),c("TLP","slope"),nbtstrp)
+  slope_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$slope),c("TLP","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_TLP$dataused],slope_from_TLP$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from P50
-  slope_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$slope),c("P50","slope"),nbtstrp)
+  slope_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$slope),c("P50","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_P50$dataused],slope_from_P50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from WD
-  slope_from_WD <- sma_plot_stats(data.frame(trait$WD,trait$slope),c("WD","slope"),nbtstrp)
+  slope_from_WD <- sma_plot_stats(data.frame(trait$WD,trait$slope),c("WD","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_WD$dataused],slope_from_WD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from Ks
-  slope_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$slope),c("Ks","slope"),nbtstrp)
+  slope_from_Ks <- sma_plot_stats(data.frame(trait$Ks,trait$slope),c("Ks","slope"),nbtstrp,regression_type = regr_type)
   plot(trait$slope[slope_from_Ks$dataused],slope_from_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+  
+  # slope from Ks
+  slope_from_WD_P50WD_ <- sma_plot_stats(data.frame(trait$Ks,trait$slope),c("Ks","slope"),nbtstrp,regression_type = regr_type)
+  plot(trait$slope[slope_from_Ks$dataused],slope_from_Ks$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+  
   
   # Some of the above combinations have relatively high R2adj, but very reduced data points. Therefore test if the worse-performing combinations are only worse performing because they include a greater diversity of data.
   
   # slope from P50, WD and Ks (same species as slope_from_P50_TLP_WD_Ks) (NOTE: testing because the fit for slope_from_P50_WD_Ks is only marginally worse than for slope_from_P50_TLP_Ks, but it has many more species)
-  slope_from_P50_WD_Ks_limitP50TLPWDKs <- sma_plot_stats(data.frame(trait$P50,trait$WD,trait$Ks,trait$slope),c("P50","WD","Ks","slope"),nbtstrp,F,slope_from_P50_TLP_WD_Ks$dataused)
+  slope_from_P50_WD_Ks_limitP50TLPWDKs <- sma_plot_stats(data.frame(trait$P50,trait$WD,trait$Ks,trait$slope),c("P50","WD","Ks","slope"),nbtstrp,F,indin = slope_from_P50_TLP_WD_Ks$dataused,regression_type = regr_type)
   plot(trait$slope[slope_from_P50_WD_Ks_limitP50TLPWDKs$dataused],slope_from_P50_WD_Ks_limitP50TLPWDKs$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from P50, TLP and Ks (same species as slope_from_P50_TLP_WD_Ks) (NOTE: testing because the fit for slope_from_P50_WD_Ks is only marginally worse than for slope_from_P50_TLP_Ks, but it has many more species)
-  slope_from_P50_TLP_Ks_limitP50TLPWDKs <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$Ks,trait$slope),c("P50","TLP","Ks","slope"),nbtstrp,F,slope_from_P50_TLP_WD_Ks$dataused)
+  slope_from_P50_TLP_Ks_limitP50TLPWDKs <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$Ks,trait$slope),c("P50","TLP","Ks","slope"),nbtstrp,F,indin = slope_from_P50_TLP_WD_Ks$dataused,regression_type = regr_type)
   plot(trait$slope[slope_from_P50_TLP_Ks_limitP50TLPWDKs$dataused],slope_from_P50_TLP_Ks_limitP50TLPWDKs$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from P50 (same species as slope_from_P50_TLP_WD_Ks)
-  slope_from_P50_limitP50TLPWDKs <- sma_plot_stats(data.frame(trait$P50,trait$slope),c("P50","slope"),nbtstrp,F,slope_from_P50_TLP_WD_Ks$dataused)
+  slope_from_P50_limitP50TLPWDKs <- sma_plot_stats(data.frame(trait$P50,trait$slope),c("P50","slope"),nbtstrp,F,indin = slope_from_P50_TLP_WD_Ks$dataused, regression_type = regr_type)
   plot(trait$slope[slope_from_P50_limitP50TLPWDKs$dataused],slope_from_P50_limitP50TLPWDKs$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # Summarise statistics
@@ -406,27 +505,27 @@ Ks_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm') {
   # not really a test, as the trait network is already established, but testing the thin lines in slide 10, too:
   
   # Ks from P50, TLP, LS
-  Ks_from_P50_TLP_LS <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$LS,trait$Ks),c("P50","TLP","LS","Ks"),nbtstrp)
+  Ks_from_P50_TLP_LS <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$LS,trait$Ks),c("P50","TLP","LS","Ks"),nbtstrp,regression_type = regr_type)
   plot(trait$Ks[ Ks_from_P50_TLP_LS$dataused], Ks_from_P50_TLP_LS$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
   
   # Ks from P50, LS, LMA
-  Ks_from_P50_LS_LMA <- sma_plot_stats(data.frame(trait$P50,trait$LS,trait$LMA,trait$Ks),c("P50","LS","LMA","Ks"),nbtstrp)
+  Ks_from_P50_LS_LMA <- sma_plot_stats(data.frame(trait$P50,trait$LS,trait$LMA,trait$Ks),c("P50","LS","LMA","Ks"),nbtstrp,regression_type = regr_type)
   plot(trait$Ks[Ks_from_P50_LS_LMA$dataused],Ks_from_P50_LS_LMA$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
   
   # Ks from P50, LS
-  Ks_from_P50_LS <- sma_plot_stats(data.frame(trait$P50,trait$LS,trait$Ks),c("P50","LS","Ks"),nbtstrp)
+  Ks_from_P50_LS <- sma_plot_stats(data.frame(trait$P50,trait$LS,trait$Ks),c("P50","LS","Ks"),nbtstrp,regression_type = regr_type)
   plot(trait$Ks[Ks_from_P50_LS$dataused],Ks_from_P50_LS$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
   
   # Ks from LS
-  Ks_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$Ks),c("LS","Ks"),nbtstrp)
+  Ks_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$Ks),c("LS","Ks"),nbtstrp,regression_type = regr_type)
   plot(trait$Ks[ Ks_from_LS$dataused], Ks_from_LS$var_est,pch=16,xlab="KS",ylab="KS_est",main="KS vs Ks_est")
   
   # Ks from P50 
-  Ks_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$Ks),c("P50","Ks"),nbtstrp)
+  Ks_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$Ks),c("P50","Ks"),nbtstrp,regression_type = regr_type)
   plot(trait$Ks[Ks_from_P50$dataused], Ks_from_P50$var_est,pch=16,xlab="Ks",ylab="Ks_est",main="Ks vs Ks_est")
   
   # Ks from LS
-  Ks_from_LS_limitP50LS <- sma_plot_stats(data.frame(trait$LS,trait$Ks),c("LS","Ks"),nbtstrp,F,Ks_from_P50_LS$dataused)
+  Ks_from_LS_limitP50LS <- sma_plot_stats(data.frame(trait$LS,trait$Ks),c("LS","Ks"),nbtstrp,F,indin = Ks_from_P50_LS$dataused,regression_type = regr_type)
   plot(trait$Ks[ Ks_from_LS$dataused], Ks_from_LS$var_est,pch=16,xlab="KS",ylab="KS_est",main="KS vs Ks_est")
 
   
@@ -451,7 +550,7 @@ Ks_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm') {
   # DECISION: Ks_from_P50_LS
   
   return_vals <- list("all_Ks"= all_Ks,
-                      "Ks_from_P50_LS"= Ks_from_P50_LS)#_LMA)
+                      "Ks_from_P50_LS_LMA"= Ks_from_P50_LS_LMA)
   
   return(return_vals)
 }
@@ -512,7 +611,7 @@ LS_multivar_test <- function(trait, view_stats = FALSE, leaf_type = NULL, regr_t
   plot(trait$LS[LS_from_P50$dataused],LS_from_P50$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
   
   # LS from TLP
-  LS_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$LS),c("TLP","LS"),nbtstrp, F, LS_from_LMA_TLP_Ks$dataused, regression_type =  regr_type)
+  LS_from_TLP <- sma_plot_stats(data.frame(trait$TLP,trait$LS),c("TLP","LS"),nbtstrp, F, indin = LS_from_LMA_TLP_Ks$dataused, regression_type =  regr_type)
   plot(trait$LS[LS_from_TLP$dataused],LS_from_TLP$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
   
   # LS from Ks
@@ -524,11 +623,11 @@ LS_multivar_test <- function(trait, view_stats = FALSE, leaf_type = NULL, regr_t
   plot(trait$LS[LS_from_P50$dataused],LS_from_P50$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
   
   # LS from LMA
-  LS_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$LS),c("LMA","LS"),nbtstrp, F, LS_from_LMA_TLP_Ks$dataused, regression_type =  regr_type)
+  LS_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$LS),c("LMA","LS"),nbtstrp, F, indin = LS_from_LMA_TLP_Ks$dataused, regression_type =  regr_type)
   plot(trait$LS[LS_from_LMA$dataused],LS_from_LMA$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
   
   # LS from Ks (samples from TLP_Ks)
-  LS_from_Ks_limitTLPKs <- sma_plot_stats(data.frame(trait$Ks,trait$LS),c("Ks","LS"),nbtstrp,F,LS_from_TLP_Ks$dataused, regression_type =  regr_type)
+  LS_from_Ks_limitTLPKs <- sma_plot_stats(data.frame(trait$Ks,trait$LS),c("Ks","LS"),nbtstrp,F,indin = LS_from_TLP_Ks$dataused, regression_type =  regr_type)
   plot(trait$LS[LS_from_Ks$dataused],LS_from_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
   
   
@@ -542,22 +641,22 @@ LS_multivar_test <- function(trait, view_stats = FALSE, leaf_type = NULL, regr_t
   all_LS <- data.frame(all_testnames_LS,all_R2_LS,all_R2adj_LS,all_rmse_LS,all_ndata_LS)
   if(view_stats==TRUE)View(all_LS)
   
-  if(leaf_type== 'BE'){
+  if(leaf_type== 'BDT'){
   # Test MAT and PPT coverage of species for chosen model
   plot(trait$MAT[LS_from_TLP_Ks$dataused],trait$MAP[LS_from_TLP_Ks$dataused],main = "Climate coverage")
   # WIDE CLIMATE COVERAGE
   
-  # DECISION for BE: :LS_from_TLP_Ks
+  # DECISION for BDT: :LS_from_TLP_Ks
     return_vals <- list("all_LS"=all_LS,
                         "LS_from_TLP_Ks"= LS_from_TLP_Ks)
   }
   
-  if(leaf_type == 'BDT'){
+  if(leaf_type == 'BE'){
     # Test MAT and PPT coverage of species for chosen model
     plot(trait$MAT[LS_from_LMA_TLP_Ks$dataused],trait$MAP[LS_from_LMA_TLP_Ks$dataused],main = "Climate coverage")
     # WIDE CLIMATE COVERAGE
     
-    # DECISION: LS_from_LMA_TLP_Ks
+    # DECISION for BE: LS_from_LMA_TLP_Ks
     
     return_vals <- list("all_LS"=all_LS,
                         "LS_from_LMA_TLP_Ks"= LS_from_LMA_TLP_Ks)
