@@ -37,18 +37,18 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
       set.seed(1234)
       index = 1:length(ind)
       trait_samp = sample(index, n_trait_sel, replace=F) 
-      LS_e = LS_comb[trait_samp] 
-      Ks_e = Ks_comb[trait_samp] 
+      LS_e_start = LS_comb[trait_samp] 
+      Ks_e_start = Ks_comb[trait_samp] 
       # Plot sample against all data as a check for sampling density ( !=4 suppresses plot as this is now the lhcube option)
       if(n_trait_sel != 4){
         plot(LS_comb,Ks_comb)
-        points(LS_e,Ks_e,col="red")
+        points(LS_e_start,Ks_e_start,col="red")
       }
      
       
       if (n_trait_sel == 4){
-        LS_e  <- est_lhs$LS_e
-        Ks_e <- est_lhs$Ks_e  
+        LS_e_start  <- est_lhs$LS_e
+        Ks_e_start <- est_lhs$Ks_e  
       }
     } else {
       # Systematic sample
@@ -85,17 +85,17 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
       # Test those points for inclusion in the hypervolume
       in_hv <- hypervolume_inclusion_test(hv,LS_Ks_seq,fast.or.accurate = "accurate")
       
-      LS_e <- LS_Ks_seq$Var1[in_hv]
-      length( LS_e )
-      Ks_e <- LS_Ks_seq$Var2[in_hv]
-      length( Ks_e )
+      LS_e_start <- LS_Ks_seq$Var1[in_hv]
+      length( LS_e_start )
+      Ks_e_start <- LS_Ks_seq$Var2[in_hv]
+      length( Ks_e_start )
   
-      plot_Hypervolume(hv,LS_e,Ks_e)
+      plot_Hypervolume(hv,LS_e_start,Ks_e_start)
     }
   } else {
     # Go through all observed combinations of KS and LS
-    Ks_e=Ks_comb
-    LS_e=LS_comb
+    Ks_e_start=Ks_comb
+    LS_e_start=LS_comb
   }
   
   # ---
@@ -113,45 +113,57 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
   # ---
   # Do the optimisation
   
-  ndata=length(LS_e)
+  ndata=length(LS_e_start)
   
   P50_e <- matrix(NA, nrow= ndata, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
   LMA_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
   TLP_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
   WD_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
   slope_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-
+  LS_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
+  Ks_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
+  
   # Loop over all the combinations of KS and LS
   # The new estimates of traits use the suffix "_e"
   for (dd in 1:ndata) {
     print(dd)
     
-    # Carry out the optimisation - based on Ks_e and LS_e as starting points
+    # Carry out the optimisation - based on Ks_e_start and LS_e_start as starting points
     opt_vals <- trait_opt(traits$P50[ind_spec_group],
                           traits$TLP[ind_spec_group],
                           traits$LMA[ind_spec_group],
                           traits$WD[ind_spec_group],
                           traits$slope[ind_spec_group],
+                          traits$LS[ind_spec_group],
+                          traits$Ks[ind_spec_group],
                           LMA_multivar_BDT$LMA_from_TLP,
                           LMA_multivar_BE$LMA_from_TLP_LS,
-                          TLP_multivar$TLP_from_LS_LMA_P50,
-                          P50_multivar$P50_from_TLP_Ks,
-                          slope_multivar$slope_from_P50_TLP_Ks,
-                          WD_multivar$WD_from_slope_P50slope,
+                          LS_multivar_BE$LS_from_LMA_TLP_Ks,
+                          LS_multivar_BDT$LS_from_TLP_Ks,
+                          Ks_multivar$Ks_from_P50_LS_slope_WD,#Ks_from_P50_LS_slope,
+                          TLP_multivar$TLP_from_LS_LMA_P50_slope,
+                          P50_multivar$P50_from_TLP_LS_Ks_slope_WD,
+                          slope_multivar$slope_from_P50_TLP_WD_Ks,#slope_from_P50_TLP_Ks,
+                          WD_multivar$WD_from_P50_slope_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
                           bivar$LMA_from_TLP,
                           bivar$P50_from_Ks,
                           bivar$TLP_from_P50,
-                          Ks_e[dd],
-                          LS_e[dd],
+                          bivar$WD_from_LMA,
+                          bivar$slope_from_WD,
+                          Ks_e_start[dd],
+                          LS_e_start[dd],
                           n_uncer,
                           use_LMA_from_TLP_LS)
     
 
-    P50_e[dd,] <- opt_vals$P50_e
-    TLP_e[dd,] <- opt_vals$TLP_e
-    LMA_e[dd,] <- opt_vals$LMA_e
-    WD_e[dd,] <- opt_vals$WD_e
+    P50_e[dd,]   <- opt_vals$P50_e
+    TLP_e[dd,]   <- opt_vals$TLP_e
+    LMA_e[dd,]   <- opt_vals$LMA_e
+    WD_e[dd,]    <- opt_vals$WD_e
     slope_e[dd,] <- opt_vals$slope_e
+    LS_e[dd,]    <- opt_vals$LS # they are not _e estimated values, but the _start values are reported here. name used for easier downstream plotting.!! dangerous..
+    Ks_e[dd,]    <- opt_vals$Ks
+    
   }
  
   # discard values across all trait lists where observed trait limits were surpassed (labelled as NA within in function trait_opt_bivar_start_LSP50)
@@ -160,8 +172,9 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
   ind = complete.cases(predicted.df)
   
   #re-define list elements as matrix after sub-setting ([ind]) so that subsequent functions in analysis still work:
-  predicted <- list("TLP_e"=as.matrix(TLP_e[ind,]),"P50_e"=as.matrix(P50_e[ind,]),"LMA_e"=as.matrix(LMA_e[ind,]),"WD_e"=as.matrix(WD_e[ind,]),"slope_e"=as.matrix(slope_e[ind,]))
-  predictors <- list('Ks_e' = as.matrix(Ks_e[ind]),'LS_e'  = as.matrix(LS_e[ind]))
+  predicted <- list("TLP_e"= as.matrix(TLP_e[ind,]),"P50_e" = as.matrix(P50_e[ind,]),"LMA_e" = as.matrix(LMA_e[ind,]),"WD_e" = as.matrix(WD_e[ind,]),
+                    "slope_e"= as.matrix(slope_e[ind,]),"LS_e"= as.matrix(LS_e[ind,]), "Ks_e"= as.matrix(Ks_e[ind,]))
+  predictors <- list('Ks_e_start' = as.matrix(Ks_e_start[ind]),'LS_e_start'  = as.matrix(LS_e_start[ind]))
   return_vals <- list('predictors'=predictors ,'predicted' =predicted )
   
   #inform about the extend to which data was discarded during the optimisation:
