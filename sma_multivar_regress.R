@@ -56,8 +56,11 @@ sma_regress_multivar <- function(yy,nbtstrp=10000,bootout=F) {
       PCA_R$vectors[4,5]*sdev[5]/PCA_R$vectors[5,5]/sdev[4]*ybar[4]+
       ybar[5]
   }
+  else if (cc==6) {
+   print(" type II regression with SMA not implemented for 6 variables. It is implemented for option lm though.")
+  }
   else {
-    stop('sma_regress_multivar cannot accept more than 5 variables')
+    stop('sma_regress_multivar cannot accept more than 6 variables')
   }
   
   #Compute slope estimate
