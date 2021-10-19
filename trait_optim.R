@@ -137,19 +137,22 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
                           traits$LS[ind_spec_group],
                           traits$Ks[ind_spec_group],
                           LMA_multivar_BDT$LMA_from_TLP,
-                          LMA_multivar_BE$LMA_from_TLP_LS,
-                          LS_multivar_BE$LS_from_LMA_TLP_Ks,
+                          LMA_multivar_BE$LMA_from_TLP_LS_WD,
+                          LS_multivar_BE$LS_from_P50_TLP_Ks, 
                           LS_multivar_BDT$LS_from_TLP_Ks,
                           Ks_multivar$Ks_from_P50_LS_slope_WD,#Ks_from_P50_LS_slope,
                           TLP_multivar$TLP_from_LS_LMA_P50_slope,
                           P50_multivar$P50_from_TLP_LS_Ks_slope_WD,
                           slope_multivar$slope_from_P50_TLP_WD_Ks,#slope_from_P50_TLP_Ks,
-                          WD_multivar$WD_from_P50_slope_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
-                          bivar$LMA_from_TLP,
+                          WD_multivar_BDT$WD_from_P50_slope_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
+                          WD_multivar_BE$WD_from_P50_slope_Ks_LMA,
+                          bivar$LMA_from_LS,
                           bivar$P50_from_Ks,
                           bivar$TLP_from_P50,
                           bivar$WD_from_LMA,
                           bivar$slope_from_WD,
+                          bivar$Ks_from_LS,
+                          bivar$LS_from_LMA, # not technically necessary here, but for consistency between functions.
                           Ks_e_start[dd],
                           LS_e_start[dd],
                           n_uncer,
@@ -173,8 +176,8 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
   
   #re-define list elements as matrix after sub-setting ([ind]) so that subsequent functions in analysis still work:
   predicted <- list("TLP_e"= as.matrix(TLP_e[ind,]),"P50_e" = as.matrix(P50_e[ind,]),"LMA_e" = as.matrix(LMA_e[ind,]),"WD_e" = as.matrix(WD_e[ind,]),
-                    "slope_e"= as.matrix(slope_e[ind,]),"LS_e"= as.matrix(LS_e[ind,]), "Ks_e"= as.matrix(Ks_e[ind,]))
-  predictors <- list('Ks_e_start' = as.matrix(Ks_e_start[ind]),'LS_e_start'  = as.matrix(LS_e_start[ind]))
+                    "slope_e"= as.matrix(slope_e[ind,]))
+  predictors <- list('Ks_e' = as.matrix(Ks_e_start[ind]),'LS_e'  = as.matrix(LS_e_start[ind]))
   return_vals <- list('predictors'=predictors ,'predicted' =predicted )
   
   #inform about the extend to which data was discarded during the optimisation:

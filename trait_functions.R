@@ -68,8 +68,15 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_
       var_est_boot[,nn] <- mod$boot.intercept[nn] + mod$boot.y1[nn]*vars[ind,1] + mod$boot.y2[nn]*vars[ind,2] +
         mod$boot.y3[nn]*vars[ind,3] + mod$boot.y4[nn]*vars[ind,4]
     }
+  } else if (nvars==6) {
+    var_est <- mod$intercept_R + mod$slope_R.y1*vars[ind,1] + mod$slope_R.y2*vars[ind,2] +
+      mod$slope_R.y3*vars[ind,3] + mod$slope_R.y4*vars[ind,4] + mod$slope_R.y5*vars[ind,5]
+    for (nn in 1:nbtstrp) {
+      var_est_boot[,nn] <- mod$boot.intercept[nn] + mod$boot.y1[nn]*vars[ind,1] + mod$boot.y2[nn]*vars[ind,2] +
+        mod$boot.y3[nn]*vars[ind,3] + mod$boot.y4[nn]*vars[ind,4] + mod$boot.y5[nn]*vars[ind,5]
+    }
   } else {
-    stop('sma_plot_stats can only handle a maximum of 5 variables')
+    stop('sma_plot_stats can only handle a maximum of 6 variables')
   }
   
   var_est_L95=unname(apply(var_est_boot, 1, quantile,0.05))

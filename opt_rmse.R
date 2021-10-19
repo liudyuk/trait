@@ -30,11 +30,12 @@ opt_rmse <- function(trait,
     trait_sel       <- get(paste0(tn, '_e')) # call trait object with name tn
     ind_trait_sel   = which(!is.na(trait[[tn]][ind]) & !is.na(trait_sel[,1]))
     trait_sel_res   <- trait[[tn]][ind[ind_trait_sel]]-trait_sel[ind_trait_sel,1]
-    trait_sel_rmse  <- sqrt(mean(  trait_sel_res^2,na.rm=T))
+    trait_sel_rmse  <- sqrt(mean(  trait_sel_res^2,na.rm=T))  # standardised residuals
+    
     trait_sel_ndata <- length(which(is.na(trait_sel_res)==F))
     trait_sel_R     <- cor(trait[[tn]][ind[ind_trait_sel]],trait_sel[ind_trait_sel,1])
     trait_sel_R2    <- trait_sel_R^2
-    # account for slopw and WD having more predictors:
+    # account for slope and WD having more predictors:
     if(tn == 'slope' | tn == 'WD'){
       trait_sel_R2adj <- 1 - ( ((1-trait_sel_R2)*(trait_sel_ndata-1))/(trait_sel_ndata-nregress_other-1) )
     }else{

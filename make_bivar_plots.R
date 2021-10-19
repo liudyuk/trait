@@ -1,4 +1,4 @@
-make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
+ make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
   # Make the bivariate SMA regressions necessary to populate the hypothesis framework
   #
   # Dependencies: trait_functions.R
@@ -51,14 +51,22 @@ make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
   
   LMA_from_KS <- sma_plot_stats(data.frame(trait$Ks,trait$LMA),c("Ks","LMA"),nbtstrp,T,regression_type =regr_type)
  
+  LS_from_WD <- sma_plot_stats(data.frame(trait$WD,trait$LS),c("WD","LS"),nbtstrp,T,regression_type =regr_type)
+  
+  slope_from_WD <- sma_plot_stats(data.frame(trait$WD,trait$slope),c("WD","slope"),nbtstrp,T,regression_type =regr_type)
+  
+  Ks_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$Ks),c("LS","Ks"),nbtstrp,T,regression_type =regr_type)
+  
+  LMA_from_LS <- sma_plot_stats(data.frame(trait$LS,trait$LMA),c("LS","LMA"),nbtstrp,T,regression_type =regr_type)
+  
   # Set back to single plot
   par(mfrow=c(1,1))
   par(mar=c(5.1,4.1,4.1,2.1))
   
 
   # Make a data frame summarising the fits of the regressions
-  all_label1 <- c("P50","TLP",   "P50", "WD", "P50","slope","LMA","LMA","Ks", "LS", "TLP","LMA","Ks","Ks", "LS", "TLP",'P50','Ks')
-  all_label2 <- c("TLP","slope","slope","TLP","WD", "WD", "TLP","LS", "P50","P50","LS", "WD", "slope","WD","Ks","Ks",'LMA','LMA')
+  all_label1 <- c("P50","TLP",   "P50", "WD", "P50","slope","LMA","LMA","Ks", "LS", "TLP","LMA","Ks","Ks", "LS", "TLP",'P50','Ks','WD','WD','LS','LS')
+  all_label2 <- c("TLP","slope","slope","TLP","WD", "WD", "TLP","LS", "P50","P50","LS", "WD", "slope","WD","Ks","Ks",'LMA','LMA','LS','slope','Ks','LMA')
   all_R <- c(TLP_from_P50$R,
               slope_from_TLP$R,
               slope_from_P50$R,
@@ -76,7 +84,11 @@ make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
               Ks_fom_LS$R,
               Ks_fom_TLP$R,
               LMA_from_P50$R,
-              LMA_from_KS$R)
+              LMA_from_KS$R,
+              LS_from_WD$R,
+              slope_from_WD$R,
+             Ks_from_LS$R,
+             LMA_from_LS$R)
   all_R2 <- c(TLP_from_P50$R2,
               slope_from_TLP$R2,
               slope_from_P50$R2,
@@ -94,7 +106,11 @@ make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
               Ks_fom_LS$R2,
               Ks_fom_TLP$R2,
               LMA_from_P50$R2,
-              LMA_from_KS$R2)
+              LMA_from_KS$R2,
+              LS_from_WD$R2,
+              slope_from_WD$R2,
+              Ks_from_LS$R2,
+              LMA_from_LS$R2)
   all_R2adj <- c(TLP_from_P50$R2adj,
                  slope_from_TLP$R2adj,
                  slope_from_P50$R2adj,
@@ -112,7 +128,11 @@ make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
                  Ks_fom_LS$R2adj,
                  Ks_fom_TLP$R2adj,
                  LMA_from_P50$R2adj,
-                 LMA_from_KS$R2adj)
+                 LMA_from_KS$R2adj,
+                 LS_from_WD$R2adj,
+                 slope_from_WD$R2adj,
+                 Ks_from_LS$R2adj,
+                 LMA_from_LS$R2adj)
   all_rmse <- c(TLP_from_P50$rmse,
                 slope_from_TLP$rmse,
                 slope_from_P50$rmse,
@@ -130,7 +150,11 @@ make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
                 Ks_fom_LS$rmse,
                 Ks_fom_TLP$rmse,
                 LMA_from_P50$rmse,
-                LMA_from_KS$rmse)
+                LMA_from_KS$rmse,
+                LS_from_WD$rmse,
+                slope_from_WD$rmse,
+                Ks_from_LS$rmse,
+                LMA_from_LS$rmse)
   pearson_cor = c(TLP_from_P50$pearson_cor,
                   slope_from_TLP$pearson_cor,
                   slope_from_P50$pearson_cor,
@@ -148,7 +172,11 @@ make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
                   Ks_fom_LS$pearson_cor,
                   Ks_fom_TLP$pearson_cor,
                   LMA_from_P50$pearson_cor,
-                  LMA_from_KS$pearson_cor)
+                  LMA_from_KS$pearson_cor,
+                  LS_from_WD$pearson_cor,
+                  slope_from_WD$pearson_cor,
+                  Ks_from_LS$pearson_cor,
+                  LMA_from_LS$pearson_cor)
   
   all_sma_bivar <- data.frame(all_label1,all_label2,all_R,all_R2,all_R2adj,all_rmse,pearson_cor)
   
@@ -170,6 +198,10 @@ make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
                       "Ks_fom_TLP" = Ks_fom_TLP,
                       "LMA_from_P50" =LMA_from_P50,
                       "LMA_from_KS" = LMA_from_KS,
+                      "LS_from_WD" = LS_from_WD,
+                      "slope_from_WD" =  slope_from_WD,
+                      "Ks_from_LS" = Ks_from_LS,
+                      "LMA_from_LS" = LMA_from_LS,
                       "all_sma_bivar" = all_sma_bivar)
 
   

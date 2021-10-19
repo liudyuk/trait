@@ -50,7 +50,10 @@ lm_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F){
   slope_R.y4 <-as.numeric( mod_tmp$coefficients[5])
   }
   if(nvars > 5){
-    stop('sma_regress_multivar cannot accept more than 5 variables')
+    slope_R.y5 <-as.numeric( mod_tmp$coefficients[6])
+  }
+  if(nvars > 6){
+    stop('sma_regress_multivar cannot accept more than 6 variables')
   }
   
   
@@ -66,6 +69,9 @@ lm_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F){
   }
   if (cc>4) {
     slope_R.y4.boot <- numeric(nbtstrp)
+  }
+  if (cc>5) {
+    slope_R.y5.boot <- numeric(nbtstrp)
   }
   
   for(i in 1:nbtstrp) {
@@ -86,7 +92,10 @@ lm_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F){
        }
     if(cc> 4){
        slope_R.y4.boot[i] =  as.numeric(mod_boot$coefficients[5])
-       }
+    }
+    if(cc> 5){
+      slope_R.y5.boot[i] =  as.numeric(mod_boot$coefficients[6])
+    }
     }#bootstrap end
 
   
@@ -109,6 +118,10 @@ lm_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F){
     L95_R.y4=quantile(slope_R.y4.boot,0.025)
     U95_R.y4=quantile(slope_R.y4.boot,0.975)
   }
+  if (cc>5) {
+    L95_R.y5=quantile(slope_R.y5.boot,0.025)
+    U95_R.y5=quantile(slope_R.y5.boot,0.975)
+  }
   
   
   # Create return values array
@@ -123,6 +136,9 @@ lm_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F){
   if (cc>4) {
     r4 <- list("slope_R.y4"=slope_R.y4,"L95_R.y4"=L95_R.y4,"U95_R.y4"=U95_R.y4)
   }
+  if (cc>5) {
+    r5 <- list("slope_R.y5"=slope_R.y5,"L95_R.y5"=L95_R.y5,"U95_R.y5"=U95_R.y5)
+  }
   if (bootout) {
     b1 <- list("boot.intercept"=intercept_R.boot,"boot.y1"=slope_R.y1.boot)
     if (cc>2) {
@@ -135,6 +151,10 @@ lm_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F){
     if (cc>4) {
       b1 <- list("boot.intercept"=intercept_R.boot,"boot.y1"=slope_R.y1.boot,"boot.y2"=slope_R.y2.boot,
                  "boot.y3"=slope_R.y3.boot,"boot.y4"=slope_R.y4.boot)
+    }
+    if (cc>5) {
+      b1 <- list("boot.intercept"=intercept_R.boot,"boot.y1"=slope_R.y1.boot,"boot.y2"=slope_R.y2.boot,
+                 "boot.y3"=slope_R.y3.boot,"boot.y4"=slope_R.y4.boot,"boot.y5"=slope_R.y5.boot)
     }
   }
   
@@ -168,6 +188,14 @@ lm_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F){
     }
     else {
       return_vals <- c(r1,r2,r3,r4)
+    }
+  }
+  else if (cc==6) {
+    if (bootout) {
+      return_vals <- c(r1,r2,r3,r4,r5,b1)
+    }
+    else {
+      return_vals <- c(r1,r2,r3,r4,r5)
     }
   }
   else {return_vals=NA}
