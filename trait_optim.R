@@ -142,7 +142,7 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
                           LS_multivar_BDT$LS_from_TLP_Ks,
                           Ks_multivar$Ks_from_P50_LS_slope_WD,#Ks_from_P50_LS_slope,
                           TLP_multivar$TLP_from_LS_LMA_P50_slope,
-                          P50_multivar$P50_from_TLP_LS_Ks_slope_WD,
+                          P50_multivar$P50_from_TLP_Ks_WD,
                           slope_multivar$slope_from_P50_TLP_WD_Ks,#slope_from_P50_TLP_Ks,
                           WD_multivar_BDT$WD_from_P50_slope_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
                           WD_multivar_BE$WD_from_P50_slope_Ks_LMA,
