@@ -70,10 +70,10 @@ P50_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
     plot(trait$MAT[P50_from_TLP_Ks$dataused],trait$MAP[P50_from_TLP_Ks$dataused])
     #plot(trait$MAT[P50_from_TLP_LS_Ks_slope$dataused],trait$MAP[P50_from_TLP_LS_Ks_slope$dataused])
     #P50_from_TLP_LS_Ks_slope_WD
-    plot(trait$MAT[P50_from_TLP_LS_Ks_slope_WD$dataused],trait$MAP[P50_from_TLP_LS_Ks_slope_WD$dataused])
+    plot(trait$MAT[P50_from_TLP_Ks_WD$dataused],trait$MAP[P50_from_TLP_Ks_WD$dataused])
     # RESULT: WIDE CLIMATE COVERAGE
     
-    # DECISION: P50_from_TLP_Ks
+    # DECISION: P50_from_TLP_Ks_WD
     
     return_vals <- list("all_P50"=all_P50,
                         "P50_from_TLP_Ks_WD" = P50_from_TLP_Ks_WD )
@@ -235,7 +235,7 @@ TLP_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
   # DECISION: TLP_from_LS_LMA_P50
   
   return_vals <- list("all_TLP"=all_TLP,
-                      "TLP_from_LS_LMA_P50_slope"=TLP_from_LS_LMA_P50_slope)
+                      "TLP_from_LS_LMA_P50"=TLP_from_LS_LMA_P50)
   
   return(return_vals)
 }

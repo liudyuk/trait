@@ -10,7 +10,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
                       LS_from_P50_TLP_Ks_LMA,
                       LS_from_P50_TLP_Ks,
                       Ks_from_P50_LS_slope_WD,#Ks_from_P50_LS_slope,
-                      TLP_from_LS_LMA_P50_slope,
+                      TLP_from_LS_LMA_P50,
                       P50_from_TLP_Ks_WD,
                       slope_from_P50_TLP_WD_Ks,
                       WD_from_P50_slope_Ks,
@@ -118,11 +118,12 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       mod_Ks_slope_y2_sample     <- Ks_from_P50_LS_slope_WD$mod$slope_R.y2
       mod_Ks_slope_y3_sample     <- Ks_from_P50_LS_slope_WD$mod$slope_R.y3
       mod_Ks_slope_y4_sample     <- Ks_from_P50_LS_slope_WD$mod$slope_R.y4
-      mod_TLP_intercept_sample   <- TLP_from_LS_LMA_P50_slope$mod$intercept_R #TLP_from_LS_LMA_P50
-      mod_TLP_slope_y1_sample    <- TLP_from_LS_LMA_P50_slope$mod$slope_R.y1
-      mod_TLP_slope_y2_sample    <- TLP_from_LS_LMA_P50_slope$mod$slope_R.y2
-      mod_TLP_slope_y3_sample    <- TLP_from_LS_LMA_P50_slope$mod$slope_R.y3
-      mod_TLP_slope_y4_sample    <- TLP_from_LS_LMA_P50_slope$mod$slope_R.y4
+      
+      mod_TLP_intercept_sample   <- TLP_from_LS_LMA_P50$mod$intercept_R #TLP_from_LS_LMA_P50
+      mod_TLP_slope_y1_sample    <- TLP_from_LS_LMA_P50$mod$slope_R.y1
+      mod_TLP_slope_y2_sample    <- TLP_from_LS_LMA_P50$mod$slope_R.y2
+      mod_TLP_slope_y3_sample    <- TLP_from_LS_LMA_P50$mod$slope_R.y3
+      
       mod_P50_intercept_sample   <- P50_from_TLP_Ks_WD$mod$intercept_R #P50_from_TLP_Ks
       mod_P50_slope_y1_sample    <- P50_from_TLP_Ks_WD$mod$slope_R.y1
       mod_P50_slope_y2_sample    <- P50_from_TLP_Ks_WD$mod$slope_R.y2
@@ -170,11 +171,11 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       mod_Ks_slope_y2_sample <- Ks_from_P50_LS_slope_WD$mod$boot.y2[ss]
       mod_Ks_slope_y3_sample <- Ks_from_P50_LS_slope_WD$mod$boot.y3[ss]
       mod_Ks_slope_y4_sample <- Ks_from_P50_LS_slope_WD$mod$boot.y4[ss]
-      mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50_slope$mod$boot.intercept[ss] #TLP_from_LS_LMA_P50
-      mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50_slope$mod$boot.y1[ss]
-      mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50_slope$mod$boot.y2[ss]
-      mod_TLP_slope_y3_sample <- TLP_from_LS_LMA_P50_slope$mod$boot.y3[ss]
-      mod_TLP_slope_y4_sample <- TLP_from_LS_LMA_P50_slope$mod$boot.y4[ss]
+      
+      mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$boot.intercept[ss] #TLP_from_LS_LMA_P50
+      mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$boot.y1[ss]
+      mod_TLP_slope_y2_sample <- TLP_from_LS_LMA_P50$mod$boot.y2[ss]
+      mod_TLP_slope_y3_sample <- TLP_from_LS_LMA_P50$mod$boot.y3[ss]
       
       mod_P50_intercept_sample <- P50_from_TLP_Ks_WD$mod$boot.intercept[ss] #P50_from_TLP_Ks
       mod_P50_slope_y1_sample  <- P50_from_TLP_Ks_WD$mod$boot.y1[ss]
@@ -246,8 +247,9 @@ trait_opt_bivar_start_LSP50 <- function(P50,
     Ks_e_last  = mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*P50_e_start +  
       mod_Ks_slope_y2_sample* LS_e_start  +  mod_Ks_slope_y3_sample* slope_e_last  +  mod_Ks_slope_y4_sample* WD_e_last
     
+    #TLP_from_LS_LMA_P50
     TLP_e_last = mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*LS_e_start + 
-      mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e_start + mod_TLP_slope_y4_sample*slope_e_last
+      mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e_start 
     
    # P50_e_last = mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e_last +  mod_P50_slope_y2_sample*LS_e_start + 
    #   mod_P50_slope_y3_sample*Ks_e_start + mod_P50_slope_y4_sample*slope_e_last + mod_P50_slope_y5_sample*WD_e_last
@@ -282,8 +284,9 @@ trait_opt_bivar_start_LSP50 <- function(P50,
         WD_e[ss] = mod_WD_intercept_sample  + mod_WD_slope_y1_sample*P50_e_start  + mod_WD_slope_y2_sample*slope_e_last+ 
           mod_WD_slope_y3_sample*Ks_e_last
       }
+      #TLP_from_LS_LMA_P50
       TLP_e[ss] = mod_TLP_intercept_sample + mod_TLP_slope_y1_sample*LS_e_start + 
-        mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e_start + mod_TLP_slope_y4_sample*slope_e_last
+        mod_TLP_slope_y2_sample*LMA_e_last + mod_TLP_slope_y3_sample*P50_e_start 
       
      # P50_e[ss] = mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e_last +  mod_P50_slope_y2_sample*LS_e_start + 
       #  mod_P50_slope_y3_sample*Ks_e_start + mod_P50_slope_y4_sample*slope_e_last + mod_P50_slope_y5_sample*WD_e_last
@@ -292,7 +295,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
                mod_Ks_slope_y3_sample* slope_e_last  +  mod_Ks_slope_y4_sample* WD_e_last
       
       slope_e[ss] = mod_slope_intercept_sample + mod_slope_slope_y1_sample*P50_e_start + 
-        mod_slope_slope_y2_sample*TLP_e_last + mod_slope_slope_y3_sample*WD_e_last + mod_slope_slope_y4_sample*Ks_e_last
+          mod_slope_slope_y2_sample*TLP_e_last + mod_slope_slope_y3_sample*WD_e_last + mod_slope_slope_y4_sample*Ks_e_last
       
       
       

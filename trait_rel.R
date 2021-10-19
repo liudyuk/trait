@@ -121,8 +121,8 @@ library(gridExtra)
 library(olsrr)
 
 #--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
-# multivariate lm and sma regression ppossible. change option here:
-regr_type = 'sma'
+# multivariate lm and sma regression possible. change option here:
+regr_type = 'lm'
 
 #--- Read in the trait data ---
 
@@ -169,9 +169,9 @@ bivar <- make_bivar_plots(trait_B,nbtstrp,regr_type = regr_type)
 # Calculate for all evergreen broadleaf
 bivar_BE <- make_bivar_plots(trait_BE,nbtstrp,regr_type = regr_type)
 # AHES: negative bivatiate correlation in data, but sma shows positive correlation 
-subs <- na.omit(trait_BDT[,c("Ks","LMA")])
+subs <- na.omit(trait_BDT[,c("WD","slope")])
 
-cor(subs$LMA,subs$TLP)
+cor(subs$WD,subs$slope)
 cor.test(subs$LMA,subs$Ks)
 plot(-exp(subs$P50),subs$slope)
 plot(subs$Ks,subs$WD)
@@ -400,7 +400,7 @@ propagate_uncer=T
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
-trait_sel= F
+trait_sel= T
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or set = 4 for a predefined (above) hypercube sample.
@@ -612,7 +612,7 @@ names(traits_KSLS.df) <- names(traits_LPJG_KSLS)
 
 ## create correlation table to report and test for sign in correlation being correct --------
 tt <- test_cor_signs(trait_BDT,data.frame(LMA = LMA_e_mean, P50 = P50_e_mean, TLP = TLP_e_mean, slope = slope_e_mean, LS = as.vector(LS_e), WD = WD_e_mean, Ks = as.vector(Ks_e)))
-
+tt
 # clean up
 rm(list=(ls(pattern="_e_")))
 rm(Ks_e,LS_e)
