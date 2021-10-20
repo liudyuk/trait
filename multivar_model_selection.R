@@ -390,7 +390,7 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   
   # WD from P50 Ks
   WD_from_P50_Ks <- sma_plot_stats(data.frame(trait$P50,trait$Ks,trait$WD),c("P50","Ks","WD"),nbtstrp,regression_type = regr_type)
-  plot(trait$WD[WD_from_P50$dataused],WD_from_P50$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  plot(trait$WD[WD_from_P50_Ks$dataused],WD_from_P50_Ks$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
   # WD from P50
   WD_from_P50 <- sma_plot_stats(data.frame(trait$P50,trait$WD),c("P50","WD"),nbtstrp,regression_type = regr_type)
@@ -523,12 +523,15 @@ slope_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm') {
   slope_from_P50_limitP50TLPWDKs <- sma_plot_stats(data.frame(trait$P50,trait$slope),c("P50","slope"),nbtstrp,F,indin = slope_from_P50_TLP_WD_Ks$dataused, regression_type = regr_type)
   plot(trait$slope[slope_from_P50_limitP50TLPWDKs$dataused],slope_from_P50_limitP50TLPWDKs$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
+  slope_from_P50_TLP_WD_limitP50TLPWD <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$WD,trait$slope),c("P50","TLP","WD","slope"),nbtstrp,F, indin= slope_from_P50_TLP_WD_Ks$dataused, regression_type = regr_type)
+  plot(trait$slope[slope_from_P50_TLP_WD_limitP50TLPWD$dataused],slope_from_P50_TLP_WD_limitP50TLPWD$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+  
   # Summarise statistics
-  all_testnames_slope <- c("slope_from_P50_TLP_WD_Ks","slope_from_P50_TLP_WD","slope_from_P50_TLP_Ks","slope_from_P50_WD_Ks","slope_from_TLP_WD_Ks","slope_from_P50_TLP","slope_from_P50_TLPP50","slope_from_TLP_TLPP50","slope_from_TLP_Ks","slope_from_TLP_WD","slope_from_TLP","slope_from_P50","slope_from_WD","slope_from_Ks","slope_from_P50_WD_Ks_limitP50TLPWDKs","slope_from_P50_TLP_Ks_limitP50TLPWDKs","slope_from_P50_limitP50TLPWDKs")
-  all_R2_slope <- c(slope_from_P50_TLP_WD_Ks$R2,slope_from_P50_TLP_WD$R2,slope_from_P50_TLP_Ks$R2,slope_from_P50_WD_Ks$R2,slope_from_TLP_WD_Ks$R2,slope_from_P50_TLP$R2,slope_from_P50_TLPP50$R2,slope_from_TLP_TLPP50$R2,slope_from_TLP_Ks$R2,slope_from_TLP_WD$R2,slope_from_TLP$R2,slope_from_P50$R2,slope_from_WD$R2,slope_from_Ks$R2,slope_from_P50_WD_Ks_limitP50TLPWDKs$R2,slope_from_P50_TLP_Ks_limitP50TLPWDKs$R2,slope_from_P50_limitP50TLPWDKs$R2)
-  all_R2adj_slope <- c(slope_from_P50_TLP_WD_Ks$R2adj,slope_from_P50_TLP_WD$R2adj,slope_from_P50_TLP_Ks$R2adj,slope_from_P50_WD_Ks$R2adj,slope_from_TLP_WD_Ks$R2adj,slope_from_P50_TLP$R2adj,slope_from_P50_TLPP50$R2adj,slope_from_TLP_TLPP50$R2adj,slope_from_TLP_Ks$R2adj,slope_from_TLP_WD$R2adj,slope_from_TLP$R2adj,slope_from_P50$R2adj,slope_from_WD$R2adj,slope_from_Ks$R2adj,slope_from_P50_WD_Ks_limitP50TLPWDKs$R2adj,slope_from_P50_TLP_Ks_limitP50TLPWDKs$R2adj,slope_from_P50_limitP50TLPWDKs$R2adj)
-  all_rmse_slope <- c(slope_from_P50_TLP_WD_Ks$rmse,slope_from_P50_TLP_WD$rmse,slope_from_P50_TLP_Ks$rmse,slope_from_P50_WD_Ks$rmse,slope_from_TLP_WD_Ks$rmse,slope_from_P50_TLP$rmse,slope_from_P50_TLPP50$rmse,slope_from_TLP_TLPP50$rmse,slope_from_TLP_Ks$rmse,slope_from_TLP_WD$rmse,slope_from_TLP$rmse,slope_from_P50$rmse,slope_from_WD$rmse,slope_from_Ks$rmse,slope_from_P50_WD_Ks_limitP50TLPWDKs$rmse,slope_from_P50_TLP_Ks_limitP50TLPWDKs$rmse,slope_from_P50_limitP50TLPWDKs$rmse)
-  all_ndata_slope <- c(slope_from_P50_TLP_WD_Ks$ndata,slope_from_P50_TLP_WD$ndata,slope_from_P50_TLP_Ks$ndata,slope_from_P50_WD_Ks$ndata,slope_from_TLP_WD_Ks$ndata,slope_from_P50_TLP$ndata,slope_from_P50_TLPP50$ndata,slope_from_TLP_TLPP50$ndata,slope_from_TLP_Ks$ndata,slope_from_TLP_WD$ndata,slope_from_TLP$ndata,slope_from_P50$ndata,slope_from_WD$ndata,slope_from_Ks$ndata,slope_from_P50_WD_Ks_limitP50TLPWDKs$ndata,slope_from_P50_TLP_Ks_limitP50TLPWDKs$ndata,slope_from_P50_limitP50TLPWDKs$ndata)
+  all_testnames_slope <- c("slope_from_P50_TLP_WD_Ks","slope_from_P50_TLP_WD","slope_from_P50_TLP_Ks","slope_from_P50_WD_Ks","slope_from_TLP_WD_Ks","slope_from_P50_TLP","slope_from_P50_TLPP50","slope_from_TLP_TLPP50","slope_from_TLP_Ks","slope_from_TLP_WD","slope_from_TLP","slope_from_P50","slope_from_WD","slope_from_Ks","slope_from_P50_WD_Ks_limitP50TLPWDKs","slope_from_P50_TLP_Ks_limitP50TLPWDKs","slope_from_P50_limitP50TLPWDKs","slope_from_P50_TLP_WD_Ks_limitP50TLPWD")
+  all_R2_slope <- c(slope_from_P50_TLP_WD_Ks$R2,slope_from_P50_TLP_WD$R2,slope_from_P50_TLP_Ks$R2,slope_from_P50_WD_Ks$R2,slope_from_TLP_WD_Ks$R2,slope_from_P50_TLP$R2,slope_from_P50_TLPP50$R2,slope_from_TLP_TLPP50$R2,slope_from_TLP_Ks$R2,slope_from_TLP_WD$R2,slope_from_TLP$R2,slope_from_P50$R2,slope_from_WD$R2,slope_from_Ks$R2,slope_from_P50_WD_Ks_limitP50TLPWDKs$R2,slope_from_P50_TLP_Ks_limitP50TLPWDKs$R2,slope_from_P50_limitP50TLPWDKs$R2,slope_from_P50_TLP_WD_limitP50TLPWD$R2)
+  all_R2adj_slope <- c(slope_from_P50_TLP_WD_Ks$R2adj,slope_from_P50_TLP_WD$R2adj,slope_from_P50_TLP_Ks$R2adj,slope_from_P50_WD_Ks$R2adj,slope_from_TLP_WD_Ks$R2adj,slope_from_P50_TLP$R2adj,slope_from_P50_TLPP50$R2adj,slope_from_TLP_TLPP50$R2adj,slope_from_TLP_Ks$R2adj,slope_from_TLP_WD$R2adj,slope_from_TLP$R2adj,slope_from_P50$R2adj,slope_from_WD$R2adj,slope_from_Ks$R2adj,slope_from_P50_WD_Ks_limitP50TLPWDKs$R2adj,slope_from_P50_TLP_Ks_limitP50TLPWDKs$R2adj,slope_from_P50_limitP50TLPWDKs$R2adj,slope_from_P50_TLP_WD_limitP50TLPWD$R2adj)
+  all_rmse_slope <- c(slope_from_P50_TLP_WD_Ks$rmse,slope_from_P50_TLP_WD$rmse,slope_from_P50_TLP_Ks$rmse,slope_from_P50_WD_Ks$rmse,slope_from_TLP_WD_Ks$rmse,slope_from_P50_TLP$rmse,slope_from_P50_TLPP50$rmse,slope_from_TLP_TLPP50$rmse,slope_from_TLP_Ks$rmse,slope_from_TLP_WD$rmse,slope_from_TLP$rmse,slope_from_P50$rmse,slope_from_WD$rmse,slope_from_Ks$rmse,slope_from_P50_WD_Ks_limitP50TLPWDKs$rmse,slope_from_P50_TLP_Ks_limitP50TLPWDKs$rmse,slope_from_P50_limitP50TLPWDKs$rmse,slope_from_P50_TLP_WD_limitP50TLPWD$rmse)
+  all_ndata_slope <- c(slope_from_P50_TLP_WD_Ks$ndata,slope_from_P50_TLP_WD$ndata,slope_from_P50_TLP_Ks$ndata,slope_from_P50_WD_Ks$ndata,slope_from_TLP_WD_Ks$ndata,slope_from_P50_TLP$ndata,slope_from_P50_TLPP50$ndata,slope_from_TLP_TLPP50$ndata,slope_from_TLP_Ks$ndata,slope_from_TLP_WD$ndata,slope_from_TLP$ndata,slope_from_P50$ndata,slope_from_WD$ndata,slope_from_Ks$ndata,slope_from_P50_WD_Ks_limitP50TLPWDKs$ndata,slope_from_P50_TLP_Ks_limitP50TLPWDKs$ndata,slope_from_P50_limitP50TLPWDKs$ndata,slope_from_P50_TLP_WD_limitP50TLPWD$ndata)
   
   all_slope <- data.frame(all_testnames_slope,all_R2_slope,all_R2adj_slope,all_rmse_slope,all_ndata_slope)
    if(view_stats==TRUE)View(all_slope)
@@ -618,15 +621,15 @@ Ks_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm') {
   #CHOICE: Ks_from_LS has more data points, but marginally worse fit. Check whether both trait combination options
   # span the whole climate space. 
     
-  plot(trait$MAT[Ks_from_LS$dataused],trait$MAP[Ks_from_LS$dataused],main = "Climate coverage")  
+ # plot(trait$MAT[Ks_from_LS$dataused],trait$MAP[Ks_from_LS$dataused],main = "Climate coverage")  
   # Test MAT and PPT coverage of species for chosen model
-  plot(trait$MAT[Ks_from_P50_LS$dataused],trait$MAP[Ks_from_P50_LS$dataused],main = "Climate coverage")
+  plot(trait$MAT[Ks_from_P50_LS_WD$dataused],trait$MAP[Ks_from_P50_LS_WD$dataused],main = "Climate coverage")
   # WIDE CLIMATE COVERAGE: The climate coverage is similar for both, despite less data for Ks_from_P50_LS.
   
-  # DECISION: Ks_from_P50_LS
+  # DECISION: Ks_from_P50_LS_WD
   
   return_vals <- list("all_Ks"= all_Ks,
-                      "Ks_from_P50_LS_slope_WD"= Ks_from_P50_LS_slope_WD)
+                      "Ks_from_P50_LS_WD"= Ks_from_P50_LS_WD)
   
   return(return_vals)
 }

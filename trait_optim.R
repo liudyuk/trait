@@ -1,4 +1,4 @@
-# Annemarie Eckes-Shephard moved this code from T. Pugh into this function ( 2021 May )
+trait_optim.R # Annemarie Eckes-Shephard moved this code from T. Pugh into this function ( 2021 May )
 # this function subsets the data, chooses options for the type of sampling (random or strategic subset vs. use all Ks LS combinations)
 # it then carries out the optimisation. The number of outputs optimised values depends on the subset options parsed into the function
 # if propagate_uncer=T, must provide nbtsrp value
@@ -140,7 +140,7 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
                           LMA_multivar_BE$LMA_from_TLP_LS_WD,
                           LS_multivar_BE$LS_from_P50_TLP_Ks, 
                           LS_multivar_BDT$LS_from_TLP_Ks,
-                          Ks_multivar$Ks_from_P50_LS_slope_WD,#Ks_from_P50_LS_slope,
+                          Ks_multivar$Ks_from_P50_LS_WD,#Ks_from_P50_LS_slope,
                           TLP_multivar$TLP_from_LS_LMA_P50,
                           P50_multivar$P50_from_TLP_Ks_WD,
                           slope_multivar$slope_from_P50_TLP_WD_Ks,#slope_from_P50_TLP_Ks,
