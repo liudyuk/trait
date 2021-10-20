@@ -133,11 +133,11 @@ trait_opt <- function(P50,
       mod_P50_slope_y2_sample    <- P50_from_TLP_Ks_WD$mod$slope_R.y2
       mod_P50_slope_y3_sample    <- P50_from_TLP_Ks_WD$mod$slope_R.y3
       
-      mod_slope_intercept_sample <-  slope_from_P50_TLP_WD_Ks$mod$intercept_R # slope_from_P50_TLP_WD_Ks#slope_from_P50_TLP_Ks
-      mod_slope_slope_y1_sample  <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y1
-      mod_slope_slope_y2_sample  <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y2
-      mod_slope_slope_y3_sample  <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y3
-      mod_slope_slope_y4_sample  <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y4
+      mod_slope_intercept_sample <-  slope_from_P50_TLP_WD$mod$intercept_R # slope_from_P50_TLP_WD_Ks#slope_from_P50_TLP_Ks
+      mod_slope_slope_y1_sample  <-  slope_from_P50_TLP_WD$mod$slope_R.y1
+      mod_slope_slope_y2_sample  <-  slope_from_P50_TLP_WD$mod$slope_R.y2
+      mod_slope_slope_y3_sample  <-  slope_from_P50_TLP_WD$mod$slope_R.y3
+    
 
     } else {
       if(use_LMA_from_TLP_LS) {
@@ -187,11 +187,11 @@ trait_opt <- function(P50,
       mod_P50_slope_y2_sample <- P50_from_TLP_Ks_WD$mod$boot.y2[ss]
       mod_P50_slope_y3_sample <- P50_from_TLP_Ks_WD$mod$boot.y3[ss]
       
-      mod_slope_intercept_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.intercept[ss] #slope_from_P50_TLP_Ks
-      mod_slope_slope_y1_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y1[ss]
-      mod_slope_slope_y2_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y2[ss]
-      mod_slope_slope_y3_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y3[ss]
-      mod_slope_slope_y4_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y4[ss]
+      mod_slope_intercept_sample <- slope_from_P50_TLP_WD$mod$boot.intercept[ss] #slope_from_P50_TLP_Ks
+      mod_slope_slope_y1_sample <- slope_from_P50_TLP_WD$mod$boot.y1[ss]
+      mod_slope_slope_y2_sample <- slope_from_P50_TLP_WD$mod$boot.y2[ss]
+      mod_slope_slope_y3_sample <- slope_from_P50_TLP_WD$mod$boot.y3[ss]
+      
 
     }
     # These regression coefficients will now be used in the optimisation calculations
@@ -260,8 +260,9 @@ trait_opt <- function(P50,
     P50_e_last = mod_P50_intercept_sample + mod_P50_slope_y1_sample*TLP_e_last +  
       mod_P50_slope_y2_sample*Ks_e_start  + mod_P50_slope_y3_sample*WD_e_last
     
+    #slope_from_P50_TLP_WD
     slope_e_last = mod_slope_intercept_sample + mod_slope_slope_y1_sample*P50_e_last + 
-      mod_slope_slope_y2_sample*TLP_e_last + mod_slope_slope_y3_sample*WD_e_last + mod_slope_slope_y4_sample*Ks_e_start
+      mod_slope_slope_y2_sample*TLP_e_last + mod_slope_slope_y3_sample*WD_e_last 
     
 
     
@@ -300,8 +301,9 @@ trait_opt <- function(P50,
     #  Ks_e[ss] = mod_Ks_intercept_sample + mod_Ks_slope_y1_sample*P50_e_last +  mod_Ks_slope_y2_sample* LS_e_start +
      #         mod_Ks_slope_y3_sample* slope_e_last  +  mod_Ks_slope_y4_sample* WD_e_last
       
+      #slope_from_P50_TLP_WD
       slope_e[ss] = mod_slope_intercept_sample + mod_slope_slope_y1_sample*P50_e_last + 
-        mod_slope_slope_y2_sample*TLP_e_last + mod_slope_slope_y3_sample*WD_e_last + mod_slope_slope_y4_sample*Ks_e_start
+        mod_slope_slope_y2_sample*TLP_e_last + mod_slope_slope_y3_sample*WD_e_last
       
     
       

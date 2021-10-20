@@ -244,7 +244,6 @@ Ks_multivar     <- Ks_multivar_test(trait_B,regr_type = regr_type)
 
 LS_multivar_BE <- LS_multivar_test(trait_BE, leaf_type ='BE',regr_type = regr_type) # returns LS_from_LMA_TLP_Ks
 
-
 LS_multivar_BDT <- LS_multivar_test(trait_BDT, leaf_type ='BDT',regr_type = regr_type) # returns LS_from_TLP_Ks
 
 
