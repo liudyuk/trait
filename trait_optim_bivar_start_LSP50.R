@@ -137,8 +137,8 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
                                             TLP_multivar$TLP_from_LS_LMA_P50,
                                             P50_multivar$P50_from_TLP_Ks_WD,
                                             slope_multivar$slope_from_P50_TLP_WD,#slope_from_P50_TLP_Ks,
-                                            WD_multivar_BDT$WD_from_P50_slope_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
-                                            WD_multivar_BE$WD_from_P50_slope_Ks_LMA,
+                                            WD_multivar_BDT$WD_from_P50_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
+                                            WD_multivar_BE$WD_from_P50_LMA_Ks,
                                             bivar$LMA_from_LS,
                                             bivar$P50_from_Ks,
                                             bivar$TLP_from_P50,
@@ -166,7 +166,7 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
   
   # discard values across all trait lists where observed trait limits were surpassed (labelled as NA within function trait_opt_bivar_start_LSP50)
   # this will reduce the number of predictor and predicted points in the lists
-  predicted.df <- data.frame("TLP_e"=TLP_e,"Ks_e"=Ks_e,"LMA_e"=LMA_e,"WD_e"=WD_e,"slope_e"=slope_e,"LS_e" =LS_e)
+  predicted.df <- data.frame("TLP_e"=TLP_e,"Ks_e"=Ks_e,"LMA_e"=LMA_e,"WD_e"=WD_e,"slope_e"=slope_e)#,"LS_e" =LS_e)
   ind = complete.cases(predicted.df)
   
   #re-define list elements as matrix after sub-setting ([ind]) so that subsequent functions in analysis still work:

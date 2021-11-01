@@ -122,7 +122,7 @@ library(olsrr)
 
 #--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
 # multivariate lm and sma regression possible. change option here:
-regr_type = 'lm'
+regr_type = 'sma'
 
 #--- Read in the trait data ---
 
@@ -250,49 +250,6 @@ LS_multivar_BDT <- LS_multivar_test(trait_BDT, leaf_type ='BDT',regr_type = regr
 
 # Make plots showing quality of fits and climate coverage -----------------
 
-MATp1 <- trait_B$MAT[P50_multivar$P50_from_TLP_Ks$dataused]
-MAPp1 <- trait_B$MAP[P50_multivar$P50_from_TLP_Ks$dataused]/10
-name1 <- rep("P50",length(MATp1))
-
-MATp2 <- trait_B$MAT[TLP_multivar$TLP_from_LS_LMA_P50$dataused]
-MAPp2 <- trait_B$MAP[TLP_multivar$TLP_from_LS_LMA_P50$dataused]/10
-name2 <- rep("TLP",length(MATp2))
-
-MATp3 <- trait_B$MAT[WD_multivar$WD_from_slope_P50slope$dataused]
-MAPp3 <- trait_B$MAP[WD_multivar$WD_from_slope_P50slope$dataused]/10
-name3 <- rep("WD",length(MATp3))
-
-MATp4 <- trait_B$MAT[slope_multivar$slope_from_P50_TLP_Ks$dataused]
-MAPp4 <- trait_B$MAP[slope_multivar$slope_from_P50_TLP_Ks$dataused]/10
-name4 <- rep("Slope",length(MATp4))
-
-MATp5 <- trait_BE$MAT[LMA_multivar_BE$LMA_from_TLP$dataused]
-MAPp5 <- trait_BE$MAP[LMA_multivar_BE$LMA_from_TLP$dataused]/10
-name5 <- rep("LMA (BE)",length(MATp5))
-
-MATp6 <- trait_BDT$MAT[LMA_multivar_BDT$LMA_from_TLP$dataused]
-MAPp6 <- trait_BDT$MAP[LMA_multivar_BDT$LMA_from_TLP$dataused]/10
-name6 <- rep("LMA (BD)",length(MATp6))
-
-MATp7 <- trait_BDT$MAT[LS_multivar_BDT$LS_from_LMA_TLP_Ks$dataused]
-MAPp7 <- trait_BDT$MAP[LS_multivar_BDT$LS_from_LMA_TLP_Ks$dataused]/10
-name7 <- rep("LS (BDT)",length(MATp7))
-
-MATp8 <- trait_BE$MAT[LS_multivar_BE$LS_from_TLP_Ks$dataused]
-MAPp8 <- trait_BE$MAP[LS_multivar_BE$LS_from_TLP_Ks$dataused]/10
-name8 <- rep("LS (BE)",length(MATp8))
-
-MATp9 <- trait_B$MAT[Ks_multivar$Ks_from_P50_LS$dataused]
-MAPp9 <- trait_B$MAP[Ks_multivar$Ks_from_P50_LS$dataused]/10
-name9 <- rep("Ks",length(MATp9))
-
-
-data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6,MATp7,MATp8,MATp9),
-                             "MAPp"=c(MAPp1,MAPp2,MAPp3,MAPp4,MAPp5,MAPp6,MAPp7,MAPp8,MAPp9),
-                             "name"=c(name1,name2,name3,name4,name5,name6,name7,name8,name9))
-
-whittaker_biomes_plot(data_MATp_MAPp)
-
 
 # Derive traits that are not subject to optimisation--------------------------
 
@@ -327,7 +284,7 @@ ind = which(!is.na(traits$Ks) & !is.na(traits$LS) & !is.na(traits$P50) & !is.na(
 set.seed(1400)
 # Number of samples
 n = 200
-#lc_sample <- optimumLHS(n,k = 4, maxSweeps = 2, eps = 0.1, verbose = FALSE)
+lc_sample <- optimumLHS(n,k = 4, maxSweeps = 2, eps = 0.1, verbose = FALSE)
 # the drawn lc_samples from the sampling space are normally distributed and between 0 and 1
 
 # The trait observations are not strictly normally distributed (according to shapiro- wilk test) 
@@ -399,14 +356,14 @@ propagate_uncer=T
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
-trait_sel= T
+trait_sel= F
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or set = 4 for a predefined (above) hypercube sample.
 n_trait_sel= 40
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 2
+spec_group_sel = 1
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
@@ -665,9 +622,9 @@ if(spec_group_sel==1){
 #list2env(traits_after_opt , envir = .GlobalEnv)
 
 # perform PCA with observed data:
-traits_obs_BE <- transform_obs_for_PCA(trait_BE)
-traits_obs_BDT <-  transform_obs_for_PCA(trait_BDT)
-traits_obs_B  <-  transform_obs_for_PCA(trait_B)
+#traits_obs_BE <- transform_obs_for_PCA(trait_BE)
+#traits_obs_BDT <-  transform_obs_for_PCA(trait_BDT)
+#traits_obs_B  <-  transform_obs_for_PCA(trait_B)
 
 
 par(mfrow=c(1,3))

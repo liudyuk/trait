@@ -1,4 +1,4 @@
-trait_optim.R # Annemarie Eckes-Shephard moved this code from T. Pugh into this function ( 2021 May )
+# Annemarie Eckes-Shephard moved this code from T. Pugh into this function ( 2021 May )
 # this function subsets the data, chooses options for the type of sampling (random or strategic subset vs. use all Ks LS combinations)
 # it then carries out the optimisation. The number of outputs optimised values depends on the subset options parsed into the function
 # if propagate_uncer=T, must provide nbtsrp value
@@ -32,7 +32,7 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
  
   
   if (trait_sel) {
-    if (n_trait_sel>0) {trait_optim.R 
+    if (n_trait_sel>0) { 
       # Random selection of LS and Ks values to be tested
       set.seed(1234)
       index = 1:length(ind)
@@ -144,8 +144,8 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
                           TLP_multivar$TLP_from_LS_LMA_P50,
                           P50_multivar$P50_from_TLP_Ks_WD,
                           slope_multivar$slope_from_P50_TLP_WD,#slope_from_P50_TLP_Ks,
-                          WD_multivar_BDT$WD_from_P50_slope_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
-                          WD_multivar_BE$WD_from_P50_slope_Ks_LMA,
+                          WD_multivar_BDT$WD_from_P50_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
+                          WD_multivar_BE$WD_from_P50_LMA_Ks,
                           bivar$LMA_from_LS,
                           bivar$P50_from_Ks,
                           bivar$TLP_from_P50,
