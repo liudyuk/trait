@@ -122,7 +122,7 @@ library(olsrr)
 
 #--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
 # multivariate lm and sma regression possible. change option here:
-regr_type = 'sma'
+regr_type = 'lm'
 
 #--- Read in the trait data ---
 
@@ -230,8 +230,8 @@ WD_multivar_BE <- WD_multivar_test(trait_BE,leaf_type='BE',regr_type = regr_type
 # slope fits --------------------------------------------------------------
 
 slope_multivar <- slope_multivar_test(trait_B,regr_type = regr_type)
-hist(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est,xlab ="slope-slope_est", main=paste(" distribution of residuals; model: ", Ks_multivar$Ks_from_P50_L$`regression_type (lm or sma)` ))
-shapiro.test(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est)
+#hist(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est,xlab ="slope-slope_est", main=paste(" distribution of residuals; model: ", Ks_multivar$Ks_from_P50_L$`regression_type (lm or sma)` ))
+#shapiro.test(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est)
 
 
 # Ks fits ----------------------------------------------------------------
@@ -356,11 +356,11 @@ propagate_uncer=T
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
-trait_sel= F
+trait_sel= T
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or set = 4 for a predefined (above) hypercube sample.
-n_trait_sel= 40
+n_trait_sel= -1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel = 1
@@ -615,21 +615,22 @@ if(spec_group_sel==1){
 # used as test to see whether starting from different trait combinations has an impact on the PFT-spread.
 
 # save objects from analysis above, useful for quick jump to this section, if only PCA is of interest
-#traits_after_opt        <- c(traits_KSLS.df, traits_LSTLP.df, traits_LSP50.df, traits_KSTLP.df)
-#names(traits_after_opt) <- c('traits_KSLS.df', 'traits_LSTLP.df', 'traits_LSP50.df', 'traits_KSTLP.df')
-#save(traits_after_opt,file='traits_after_opt_BE_sma.RData')
+traits_after_opt        <- c(traits_KSLS.df, traits_KSTLP.df, traits_LSP50.df)
+names(traits_after_opt) <- c('traits_KSLS.df', 'traits_KSTLP.df', 'traits_LSP50.df')
+#save(traits_after_opt,file='traits_after_opt_BDT_lm.RData')
+
 #load('traits_after_opt_BE_sma.RData')
 #list2env(traits_after_opt , envir = .GlobalEnv)
 
 # perform PCA with observed data:
-#traits_obs_BE <- transform_obs_for_PCA(trait_BE)
-#traits_obs_BDT <-  transform_obs_for_PCA(trait_BDT)
-#traits_obs_B  <-  transform_obs_for_PCA(trait_B)
+#traits_obs_BE  <- transform_obs_for_PCA(trait_BE)
+#traits_obs_BDT <- transform_obs_for_PCA(trait_BDT)
+#traits_obs_B   <- transform_obs_for_PCA(trait_B)
 
 
 par(mfrow=c(1,3))
 #par(mfrow=c(1,1))
-opt_traits <-  c('traits_KSLS.df', 'traits_KSTLP.df', 'traits_LSP50.df')#, 'traits_obs_BE','traits_obs_BDT','traits_obs_B')
+opt_traits <-  c('traits_KSLS.df', 'traits_KSTLP.df', 'traits_LSP50.df')#
 for(o in 1:3){
 traits_PCA  <- get(opt_traits[o])
 #traits_BE <- traits_KSLS.df
@@ -699,33 +700,7 @@ p_KSTLP <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
 ##sign of correlations correct?
 test_cor_signs(trait_BE, traits_PCA)
 }
-#if(o==4){
-#  pca_with_pretty_biplot(traits_PCA[,c(1,3,4,6,10,12,17)])
-  
-#p_LSP50 <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
-  #labs(y= "y axis name", x = "x axis name") +
-#  ggtitle('LSP50')
-  
 
-  ##sign of correlations correct?
-#  test_cor_signs(trait_BE, traits_PCA)
-  
-#}
-if(o==5){
-  p_obs_BE <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
-    #labs(y= "y axis name", x = "x axis name") +
-    ggtitle('obs_BE')
-}
-if(o==6){
-  p_obs_BDT <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
-    #labs(y= "y axis name", x = "x axis name") +
-    ggtitle('obs_BDT')
-}
-if(o==7){
-  p_obs_B <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2) +
-    #labs(y= "y axis name", x = "x axis name") +
-    ggtitle('obs_B')
-}
 }
 if(spec_group_sel==1){
   mtext(outer=TRUE, 'Broadleaf deciduous', line = -1.5)
@@ -753,7 +728,6 @@ grid.arrange(p_KsLS, p_LSP50, nrow = 1)
 
 #Create LPJGuess insfiles-----------------------------------------------------------------------------
 ###old: write .ins file for LPJGuess based on the above optimised trait combinations for 28 PFT 'variants' per PFT.
-# write .ins file for LPJGuess based on the above optimised trait combinations for 28 PFT 'variants' per PFT.
 
 # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
 #basePFT = 4
@@ -773,34 +747,20 @@ grid.arrange(p_KsLS, p_LSP50, nrow = 1)
 
 
 if(spec_group_sel==2){# evergreen
-# for traits_LPJG_KSLS
-ind = c(1,115,79,33,118,151,101,34,153,63,23,22,179,145,192,131,148,185,132,25,123,119,15,43,71,177,50,190,26,157)
-traits_LPJG_KSLS_BE <- lapply(seq_along(traits_LPJG_KSLS), function(x) traits_LPJG_KSLS[[x]][ind])
-names(traits_LPJG_KSLS_BE) <- names(traits_LPJG_KSLS)
-
-# for traits_LPJG_LSP50
-ind =  c(1,115,119,31,123,104,182,34,106,102,23,143,153,47,85,185,29,59,2,184,177,81,186,187,126,171,63,192,125,49)
-traits_LPJG_LSP50_BE <- lapply(seq_along(traits_LPJG_LSP50), function(x) traits_LPJG_LSP50[[x]][ind])
-names(traits_LPJG_LSP50_BE) <- names(traits_LPJG_LSP50)
-
-#save new PFT subset or load existing one: 
-#save(traits_LPJG_KSLS_BE, traits_LPJG_LSP50_BE, file = 'LPJGuessPFTS_BE.RData')
-#load('LPJGuessPFTS_BE.RData')
-}
-
-if(spec_group_sel==4){# deciduous
-  # for traits_LPJG_KSLS
-  ind = c(150,52,116,1,48,11,99,93,122,46,80,164,161,65,97,166,128,67,149,123,119,88,89,127,96,136,105,17,23,16,19)
-  traits_LPJG_KSLS_BDT <- lapply(seq_along(traits_LPJG_KSLS), function(x) traits_LPJG_KSLS[[x]][ind])
-  names(traits_LPJG_KSLS_BDT) <- names(traits_LPJG_KSLS)
-  
   # for traits_LPJG_LSP50
-  ind =  c(117,69,140,176,53,55,113,5,115,26,15,146,149,45,111,17,97,67,159,27,75,89,163,38,132,126,152,41,123,184,19)
-  traits_LPJG_LSP50_BDT <- lapply(seq_along(traits_LPJG_LSP50), function(x) traits_LPJG_LSP50[[x]][ind])
-  names(traits_LPJG_LSP50_BDT) <- names(traits_LPJG_LSP50)
+  traits_LPJG_LSP50_BE <- traits_LPJG_LSP50
   
   #save new PFT subset or load existing one: 
-  save(traits_LPJG_KSLS_BDT, traits_LPJG_LSP50_BDT, file = 'LPJGuessPFTS_BDT.RData')
+  save(traits_LPJG_LSP50_BE, file = 'LPJGuessPFTS_BE.RData')
+  #load('LPJGuessPFTS_BE.RData')
+}
+
+if(spec_group_sel==1){# deciduous
+  # for traits_LPJG_LSP50
+  traits_LPJG_LSP50_BDT <- traits_LPJG_LSP50
+  
+  #save new PFT subset or load existing one: 
+  save(traits_LPJG_LSP50_BDT, file = 'LPJGuessPFTS_BDT.RData')
   #load('LPJGuessPFTS_BE.RData')
 }
 
@@ -810,21 +770,23 @@ if(spec_group_sel==4){# deciduous
 #output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
 #AHES commented out for now during testing
 #output_fol="/Users/annemarie/Documents/1_TreeMort/2_Analysis/1_Inputs"
-output_fol="/Users/annemarie/Desktop"
+
 if(spec_group_sel==2){# broadleaf evergreen in TRY
+  output_fol="/Users/annemarie/Desktop/TrBE"
   # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
   basePFT = 4  # tropical broadleaf evergreen PFT for LPJGuess
   # create .ins files for  LPJ-GUESS_hydro
   #started with KSLS
-  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_BE)
+  #write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_BE)
   #started with LSP50
   write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_BE)
 }
-if(spec_group_sel==4){# 4 = TBD tropical broadleaf deciduous in TRY
+if(spec_group_sel==1){# 1 = TBD tropical and temperate broadleaf deciduous in TRY
+  output_fol="/Users/annemarie/Desktop/TrBR"
   basePFT= 5 # tropical raingreen PFT for LPJGuess
   # create .ins files for  LPJ-GUESS_hydro
   #started with KSLS
-  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_BDT)
+  #write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_KSLS_BDT)
   #started with LSP50
   write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_BDT)
 }
