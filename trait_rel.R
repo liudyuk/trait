@@ -363,7 +363,7 @@ trait_sel= T
 n_trait_sel= -1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 1
+spec_group_sel = 2
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
@@ -618,6 +618,7 @@ if(spec_group_sel==1){
 traits_after_opt        <- c(traits_KSLS.df, traits_KSTLP.df, traits_LSP50.df)
 names(traits_after_opt) <- c('traits_KSLS.df', 'traits_KSTLP.df', 'traits_LSP50.df')
 #save(traits_after_opt,file='traits_after_opt_BDT_lm.RData')
+#save(traits_after_opt,file='traits_after_opt_BE_lm.RData')
 
 #load('traits_after_opt_BE_sma.RData')
 #list2env(traits_after_opt , envir = .GlobalEnv)
