@@ -1,4 +1,4 @@
-# Convert trait database values to the values/variables needed in LPJ-GUESS
+# Convert trait database and estimated values to the values/variables needed in LPJ-GUESS
 #
 # T. Pugh
 # 04.08.20
