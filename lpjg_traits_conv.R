@@ -58,10 +58,10 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged)
   
   #Limit ranges
-  lambda_LPJG[lambda_LPJG<-0.3]=0.3 # From Papastefanou et al. (2020, Front. Plant Sci.)
-  lambda_LPJG[lambda_LPJG>1.0]=1.0 # From Papastefanou et al. (2020, Front. Plant Sci.)
-  DeltaPsiWW_LPJG[DeltaPsiWW_LPJG<0.3]=0.3 # From Papastefanou et al. (2020, Front. Plant Sci.)
-  DeltaPsiWW_LPJG[DeltaPsiWW_LPJG>10.0]=10.0
+  lambda_LPJG[lambda_LPJG  < -0.3] = -0.3 # From Papastefanou et al. (2020, Front. Plant Sci.)
+  lambda_LPJG[lambda_LPJG  > 1.0]  = 1.0  # From Papastefanou et al. (2020, Front. Plant Sci.)
+  DeltaPsiWW_LPJG[DeltaPsiWW_LPJG < 0.3]  = 0.3 # From Papastefanou et al. (2020, Front. Plant Sci.)
+  DeltaPsiWW_LPJG[DeltaPsiWW_LPJG > 10.0] = 10.0
   
   # No transformation needed
   Ks_LPJG <- Ks_e_mean_unlogged
