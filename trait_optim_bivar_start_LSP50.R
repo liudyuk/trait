@@ -20,7 +20,9 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
     ind_spec_group=which(traits$group=='BD')
   }
   
-  # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
+ 
+  # Identify all combinations of P50 and LS (do this across full range of species)
+ 
   ind=which(!is.na(traits$P50) & !is.na(traits$LS))
   
   LS_comb <- traits$LS[ind]
@@ -28,7 +30,7 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
   
   if (trait_sel) {
     if (n_trait_sel>0) {
-      # Random selection of LS and Ks values to be tested
+      # Random selection of LS and P50 values to be tested
       set.seed(1234)
       index = 1:length(ind)
       trait_samp = sample(index, n_trait_sel, replace=F) 
@@ -88,8 +90,9 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
     }
   } else {
     # Go through all observed combinations of P50 and LS
-    P50_e_start=P50_comb
-    LS_e_start=LS_comb
+    P50_e_start = P50_comb
+    LS_e_start = LS_comb
+   
   }
   
   # ---
@@ -170,16 +173,18 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
   ind = complete.cases(predicted.df)
   
   #re-define list elements as matrix after sub-setting ([ind]) so that subsequent functions in analysis still work:
-  predicted <- list("TLP_e"=as.matrix(TLP_e[ind,]),"Ks_e"=as.matrix(Ks_e[ind,]),"LMA_e"=as.matrix(LMA_e[ind,]),"WD_e"=as.matrix(WD_e[ind,]),"slope_e"=as.matrix(slope_e[ind,]),
+  predicted <- list("TLP_e"=as.matrix(TLP_e[ind,]),"Ks_e"=as.matrix(Ks_e[ind,]),"LMA_e"=as.matrix(LMA_e[ind,]),
+                    "WD_e"=as.matrix(WD_e[ind,]),"slope_e"=as.matrix(slope_e[ind,]),
                     "LS_e" =as.matrix(LS_e[ind,]),"P50_e" =as.matrix(P50_e[ind,]))
   predictors <- list('P50_e_start' = as.matrix(P50_e_start[ind]),'LS_e_start' = as.matrix(LS_e_start[ind]))
-  return_vals <- list('predictors' = predictors ,'predicted' = predicted )
+  return_vals <- list('predictors' = predictors ,'predicted' = predicted)
   
   #inform about the extend to which data was discarded during the optimisation:
-  nkeep <- count(ind)[which(count(ind)$x=='TRUE'),'freq']
-  ndiscard <- count(ind)[which(count(ind)$x=='FALSE'),'freq']
-  
-  if(length(ndiscard) != 0){
+  #nkeep <- count(ind)[which(count(ind)$x=='TRUE'),'freq']
+  nkeep <- sum(ind[which(ind == TRUE)])
+  #ndiscard <- count(ind)[which(count(ind)$x=='FALSE'),'freq']
+  ndiscard <- sum(ind[which(ind == FALSE)])
+  if(ndiscard != 0){
     print(paste('The optimisation started with ',dim(predicted.df)[1],'predictor values and keept ',nkeep,'values and discarded ',ndiscard))
     print('This means that predicted values could not converge, as some fell outside the range of observations')
   }
