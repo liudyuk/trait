@@ -360,6 +360,7 @@ LMA_multivar_test_BE <- function(trait_BE,view_stats=FALSE, regr_type = 'lm' ) {
 
 WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type = 'lm' )  {
   
+  if(regr_type == 'lm'){# sma cannot handle more than 5 variables, so ecxlude from analysis here
   # WD from P50  slope Ks and LMA
   WD_from_P50_slope_Ks_LMA <- sma_plot_stats(data.frame(trait$P50,trait$slope,trait$Ks,trait$LMA,trait$WD),c("P50","slope","Ks","LMA","WD"),nbtstrp, regression_type = regr_type)
   plot(trait$WD[WD_from_P50_slope_Ks_LMA$dataused],WD_from_P50_slope_Ks_LMA$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
@@ -368,6 +369,7 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   WD_from_P50_Ks_LMA_limitP50slopeKsLMA <- sma_plot_stats(data.frame(trait$P50,trait$Ks,trait$LMA,trait$WD),c("P50","Ks","LMA","WD"),nbtstrp,F, indin=WD_from_P50_slope_Ks_LMA$dataused, regression_type = regr_type)
   plot(trait$WD[WD_from_P50_Ks_LMA_limitP50slopeKsLMA$dataused],WD_from_P50_Ks_LMA_limitP50slopeKsLMA$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
+  }
   
   # WD from P50  slope and Ks
   WD_from_P50_slope_Ks <- sma_plot_stats(data.frame(trait$P50,trait$slope,trait$Ks,trait$WD),c("P50","slope","Ks","WD"),nbtstrp, regression_type = regr_type)
@@ -393,9 +395,10 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   WD_from_P50_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp,regression_type = regr_type)
   plot(trait$WD[WD_from_P50_P50slope$dataused],WD_from_P50_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
-  #WD_from_slope_P50slope limit WD_from_slope_Ks_P50slope
-  WD_from_slope_P50slope_limit_slope_Ks_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp,T, WD_from_slope_Ks_P50slope$dataused,regression_type = regr_type)
-  
+  if(regr_type=='lm'){
+    #WD_from_slope_P50slope limit WD_from_slope_Ks_P50slope
+    WD_from_slope_P50slope_limit_slope_Ks_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp,T, WD_from_slope_Ks_P50slope$dataused,regression_type = regr_type)
+  }
   # WD from P50 Ks
   WD_from_P50_Ks <- sma_plot_stats(data.frame(trait$P50,trait$Ks,trait$WD),c("P50","Ks","WD"),nbtstrp,regression_type = regr_type)
   plot(trait$WD[WD_from_P50_Ks$dataused],WD_from_P50_Ks$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
@@ -659,7 +662,7 @@ LS_multivar_test <- function(trait, view_stats = FALSE, leaf_type = NULL, regr_t
   
   # not really a test, as the trait network is already established, but testing the thin lines in slide 10, too:
   
-
+  if( regr_type=='lm'){  # smal regr cannot handle more 4 variables, so exclude there.
   # LS from LMA TLP, KS, P50
   LS_from_P50_TLP_Ks_LMA <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$Ks,trait$LMA,trait$LS),c("P50","TLP","Ks","LMA","LS"),nbtstrp, regression_type = regr_type )
   plot(trait$LS[LS_from_P50_TLP_Ks_LMA$dataused], LS_from_P50_TLP_Ks_LMA$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
@@ -667,7 +670,8 @@ LS_multivar_test <- function(trait, view_stats = FALSE, leaf_type = NULL, regr_t
   # LS from TLP, KS, LMA  ( samples from  LS_from_P50_TLP_Ks_LMA )
   LS_from_TLP_Ks_LMA_limitP50TLPKsMA <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$LMA,trait$LS),c("TLP","Ks","LMA","LS"),nbtstrp,F, LS_from_P50_TLP_Ks_LMA$dataused, regression_type =  regr_type)
   plot(trait$LS[LS_from_TLP_Ks_LMA_limitP50TLPKsMA$dataused], LS_from_TLP_Ks_LMA_limitP50TLPKsMA$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
-  
+  }
+
   # LS from LMA TLP
   LS_from_LMA_TLP<- sma_plot_stats(data.frame(trait$LMA,trait$TLP,trait$LS),c("LMA","TLP","LS"),nbtstrp, regression_type =  regr_type)
   plot(trait$LS[LS_from_LMA_TLP$dataused], LS_from_LMA_TLP$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
@@ -680,13 +684,15 @@ LS_multivar_test <- function(trait, view_stats = FALSE, leaf_type = NULL, regr_t
   LS_from_LMA_TLP_Ks <- sma_plot_stats(data.frame(trait$LMA,trait$TLP,trait$Ks,trait$LS),c("LMA","TLP","Ks","LS"),nbtstrp, regression_type =  regr_type)
   plot(trait$LS[LS_from_LMA_TLP_Ks$dataused],LS_from_LMA_TLP_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
   
-  # LS from TLP and Ks
-  LS_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$LS),c("TLP","Ks","LS"),nbtstrp, regression_type =  regr_type)
-  plot(trait$LS[LS_from_TLP_Ks$dataused],LS_from_TLP_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
-  
+  if(regr_type=='lm'){
   # LS from TLP and Ks, limit to data from LS_from_LMA_TLP_Ks
   LS_from_TLP_Ks_limitLMA_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$LS),c("TLP","Ks","LS"),nbtstrp,  indin= LS_from_LMA_TLP_Ks$dataused, regression_type =  regr_type)
   plot(trait$LS[LS_from_TLP_Ks_limitLMA_TLP_Ks$dataused],LS_from_TLP_Ks_limitLMA_TLP_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
+  } # smal regr cannot handle more 4 variables
+
+  # LS from TLP and Ks
+  LS_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$LS),c("TLP","Ks","LS"),nbtstrp, regression_type =  regr_type)
+  plot(trait$LS[LS_from_TLP_Ks$dataused],LS_from_TLP_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
   
   # LS from TLP and LMA
   LS_from_TLP_LMA <- sma_plot_stats(data.frame(trait$TLP,trait$LMA,trait$LS),c("TLP","LMA","LS"),nbtstrp, regression_type =  regr_type)
