@@ -1,5 +1,3 @@
-#trait_rel_supplementaries
-
 # moved other starting-pair network optimisations here
 # Script to read in the processed trait data, make bivariate and multivariate SMA regressions and then
 # carry out an optimisation procedure to unify inter-trait relationships across the whole trait dataset.
@@ -113,21 +111,16 @@ source('pca_with_pretty_biplot.R')
 # PCA plotting
 #install_github("vqv/ggbiplot") # must have devtools installed to use install_github
 library('ggbiplot')
-# systematic sampling for optimisation
-library('hypervolume')
-# efficient sampling of multiple parameter combinations using hypercube sampling
-library('lhs')
-# used to create samples by transforming latin hypercube sampling space
-library('QRM')
 #for plotting of hypercube sampling results:
 library(grid)
 library(ggplot2)
 library("ggpubr")
 # to plot PCA ggplots in grid
 library(gridExtra)
-
 # convenience package for ols normality checks, required in function lm_regress_multivar
 library(olsrr)
+# for PCR regression models, now used in the network
+library(pls)
 
 #--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
 # multivariate lm and sma regression possible. change option here:
@@ -276,6 +269,10 @@ leafN_from_LMA_limit <- regress_limit_adjust(trait_B$leafN,trait_B$LMA,leafN_fro
 plot(trait_B$LMA,trait_B$leafN)
 points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lower,col="green")
 points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
+
+
+# Create PCR-models on what we have already determined to be the relationships and network. PCR is only used
+# to address the 
 
 
 #----------------------------------------------------------------------------------------------------------------------

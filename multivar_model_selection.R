@@ -662,7 +662,7 @@ LS_multivar_test <- function(trait, view_stats = FALSE, leaf_type = NULL, regr_t
   
   # not really a test, as the trait network is already established, but testing the thin lines in slide 10, too:
   
-  if( regr_type=='lm'){  # smal regr cannot handle more 4 variables, so exclude there.
+  if( regr_type=='lm'|regr_type == 'pcr'|regr_type == 'plsr'){  # smal regr cannot handle more 4 variables, so exclude there.
   # LS from LMA TLP, KS, P50
   LS_from_P50_TLP_Ks_LMA <- sma_plot_stats(data.frame(trait$P50,trait$TLP,trait$Ks,trait$LMA,trait$LS),c("P50","TLP","Ks","LMA","LS"),nbtstrp, regression_type = regr_type )
   plot(trait$LS[LS_from_P50_TLP_Ks_LMA$dataused], LS_from_P50_TLP_Ks_LMA$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
@@ -684,7 +684,7 @@ LS_multivar_test <- function(trait, view_stats = FALSE, leaf_type = NULL, regr_t
   LS_from_LMA_TLP_Ks <- sma_plot_stats(data.frame(trait$LMA,trait$TLP,trait$Ks,trait$LS),c("LMA","TLP","Ks","LS"),nbtstrp, regression_type =  regr_type)
   plot(trait$LS[LS_from_LMA_TLP_Ks$dataused],LS_from_LMA_TLP_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
   
-  if(regr_type=='lm'){
+  if(regr_type=='lm'|regr_type == 'pcr'|regr_type == 'plsr'){
   # LS from TLP and Ks, limit to data from LS_from_LMA_TLP_Ks
   LS_from_TLP_Ks_limitLMA_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$LS),c("TLP","Ks","LS"),nbtstrp,  indin= LS_from_LMA_TLP_Ks$dataused, regression_type =  regr_type)
   plot(trait$LS[LS_from_TLP_Ks_limitLMA_TLP_Ks$dataused],LS_from_TLP_Ks_limitLMA_TLP_Ks$var_est,pch=16,xlab="LS",ylab="LS_est",main="LS vs LS_est")
@@ -732,11 +732,23 @@ LS_multivar_test <- function(trait, view_stats = FALSE, leaf_type = NULL, regr_t
   
   
   # Summarise statistics
-  all_testnames_LS <-       c("LS_from_TLP_Ks_LMA_limitP50TLPKsMA","LS_from_P50_TLP_Ks_LMA"      ,"LS_from_P50_TLP_Ks","LS_from_LMA_TLP_Ks",       "LS_from_LMA_TLP"          ,"LS_from_TLP_Ks"    ,"LS_from_TLP_Ks_limitLMA_TLP_Ks" ,  "LS_from_P50_TLP","LS_from_P50_Ks","LS_from_P50","LS_from_TLP_limitLMA_TLP_Ks","LS_from_Ks",  "LS_from_LMA_limitLMA_TLP_Ks)", "LS_from_Ks_limitTLPKs")
-  all_R2_LS       <- c(LS_from_TLP_Ks_LMA_limitP50TLPKsMA$R       , LS_from_P50_TLP_Ks_LMA$R     ,LS_from_P50_TLP_Ks$R,LS_from_LMA_TLP_Ks$R,         LS_from_LMA_TLP$R         ,LS_from_TLP_Ks$R   ,LS_from_TLP_Ks_limitLMA_TLP_Ks$R ,   LS_from_P50_TLP$R,LS_from_P50_Ks$R,LS_from_P50$R,LS_from_TLP$R,LS_from_Ks$R,  LS_from_LMA$R,LS_from_Ks_limitTLPKs$R)
-  all_R2adj_LS <- c(LS_from_TLP_Ks_LMA_limitP50TLPKsMA$R2adj      , LS_from_P50_TLP_Ks_LMA$R2adj ,LS_from_P50_TLP_Ks$R2adj,LS_from_LMA_TLP_Ks$R2adj, LS_from_LMA_TLP$R2adj   , LS_from_TLP_Ks$R2adj,LS_from_TLP_Ks_limitLMA_TLP_Ks$R2,   LS_from_P50_TLP$R2adj,LS_from_P50_Ks$R2adj,LS_from_P50$R2adj,LS_from_TLP$R2adj,LS_from_Ks$R2adj,LS_from_LMA$R2adj, LS_from_Ks_limitTLPKs$R2adj)
-  all_rmse_LS <- c(LS_from_TLP_Ks_LMA_limitP50TLPKsMA$rmse        ,LS_from_P50_TLP_Ks_LMA$rmse   ,LS_from_P50_TLP_Ks$rmse,LS_from_LMA_TLP_Ks$rmse   ,LS_from_LMA_TLP$rmse    ,LS_from_TLP_Ks$rmse  ,LS_from_TLP_Ks_limitLMA_TLP_Ks$rmse, LS_from_P50_TLP$rmse,LS_from_P50_Ks$rmse,LS_from_P50$rmse,LS_from_TLP$rmse,LS_from_Ks$rmse,LS_from_LMA$rmse,LS_from_Ks_limitTLPKs$rmse)
-  all_ndata_LS <- c(LS_from_TLP_Ks_LMA_limitP50TLPKsMA$ndata,      LS_from_P50_TLP_Ks_LMA$ndata  ,LS_from_P50_TLP_Ks$ndata,LS_from_LMA_TLP_Ks$ndata ,LS_from_LMA_TLP$ndata   ,LS_from_TLP_Ks$ndata ,LS_from_TLP_Ks_limitLMA_TLP_Ks$ndata,LS_from_P50_TLP$ndata,LS_from_P50_Ks$ndata,LS_from_P50$ndata,LS_from_TLP$ndata,LS_from_Ks$ndata,LS_from_LMA$ndata,LS_from_Ks_limitTLPKs$ndata)
+  if(regr_type == 'lm'|regr_type == 'pcr'|regr_type == 'plsr'){
+    # Summarise statistics
+    all_testnames_LS <-       c("LS_from_TLP_Ks_LMA_limitP50TLPKsMA","LS_from_P50_TLP_Ks_LMA"      ,"LS_from_P50_TLP_Ks","LS_from_LMA_TLP_Ks",       "LS_from_LMA_TLP"          ,"LS_from_TLP_Ks"    ,"LS_from_TLP_Ks_limitLMA_TLP_Ks" ,  "LS_from_P50_TLP","LS_from_P50_Ks","LS_from_P50","LS_from_TLP_limitLMA_TLP_Ks","LS_from_Ks",  "LS_from_LMA_limitLMA_TLP_Ks)", "LS_from_Ks_limitTLPKs")
+    all_R2_LS       <- c(LS_from_TLP_Ks_LMA_limitP50TLPKsMA$R       , LS_from_P50_TLP_Ks_LMA$R     ,LS_from_P50_TLP_Ks$R,LS_from_LMA_TLP_Ks$R,         LS_from_LMA_TLP$R         ,LS_from_TLP_Ks$R   ,LS_from_TLP_Ks_limitLMA_TLP_Ks$R ,   LS_from_P50_TLP$R,LS_from_P50_Ks$R,LS_from_P50$R,LS_from_TLP$R,LS_from_Ks$R,  LS_from_LMA$R,LS_from_Ks_limitTLPKs$R)
+    all_R2adj_LS <- c(LS_from_TLP_Ks_LMA_limitP50TLPKsMA$R2adj      , LS_from_P50_TLP_Ks_LMA$R2adj ,LS_from_P50_TLP_Ks$R2adj,LS_from_LMA_TLP_Ks$R2adj, LS_from_LMA_TLP$R2adj   , LS_from_TLP_Ks$R2adj,LS_from_TLP_Ks_limitLMA_TLP_Ks$R2,   LS_from_P50_TLP$R2adj,LS_from_P50_Ks$R2adj,LS_from_P50$R2adj,LS_from_TLP$R2adj,LS_from_Ks$R2adj,LS_from_LMA$R2adj, LS_from_Ks_limitTLPKs$R2adj)
+    all_rmse_LS <- c(LS_from_TLP_Ks_LMA_limitP50TLPKsMA$rmse        ,LS_from_P50_TLP_Ks_LMA$rmse   ,LS_from_P50_TLP_Ks$rmse,LS_from_LMA_TLP_Ks$rmse   ,LS_from_LMA_TLP$rmse    ,LS_from_TLP_Ks$rmse  ,LS_from_TLP_Ks_limitLMA_TLP_Ks$rmse, LS_from_P50_TLP$rmse,LS_from_P50_Ks$rmse,LS_from_P50$rmse,LS_from_TLP$rmse,LS_from_Ks$rmse,LS_from_LMA$rmse,LS_from_Ks_limitTLPKs$rmse)
+    all_ndata_LS <- c(LS_from_TLP_Ks_LMA_limitP50TLPKsMA$ndata,      LS_from_P50_TLP_Ks_LMA$ndata  ,LS_from_P50_TLP_Ks$ndata,LS_from_LMA_TLP_Ks$ndata ,LS_from_LMA_TLP$ndata   ,LS_from_TLP_Ks$ndata ,LS_from_TLP_Ks_limitLMA_TLP_Ks$ndata,LS_from_P50_TLP$ndata,LS_from_P50_Ks$ndata,LS_from_P50$ndata,LS_from_TLP$ndata,LS_from_Ks$ndata,LS_from_LMA$ndata,LS_from_Ks_limitTLPKs$ndata)
+    
+  }else{
+    # Summarise statistics
+    all_testnames_LS <-  c("LS_from_P50_TLP_Ks_LMA"      ,"LS_from_P50_TLP_Ks","LS_from_LMA_TLP_Ks",       "LS_from_LMA_TLP"          ,"LS_from_TLP_Ks"    ,"LS_from_TLP_Ks_limitLMA_TLP_Ks" ,  "LS_from_P50_TLP","LS_from_P50_Ks","LS_from_P50","LS_from_TLP_limitLMA_TLP_Ks","LS_from_Ks",  "LS_from_LMA_limitLMA_TLP_Ks)", "LS_from_Ks_limitTLPKs")
+    all_R2_LS        <- c( LS_from_P50_TLP_Ks_LMA$R      ,LS_from_P50_TLP_Ks$R,LS_from_LMA_TLP_Ks$R,         LS_from_LMA_TLP$R         ,LS_from_TLP_Ks$R   ,LS_from_TLP_Ks_limitLMA_TLP_Ks$R ,   LS_from_P50_TLP$R,LS_from_P50_Ks$R,LS_from_P50$R,LS_from_TLP$R,LS_from_Ks$R,  LS_from_LMA$R,LS_from_Ks_limitTLPKs$R)
+    all_R2adj_LS     <- c( LS_from_P50_TLP_Ks_LMA$R2adj  ,LS_from_P50_TLP_Ks$R2adj,LS_from_LMA_TLP_Ks$R2adj, LS_from_LMA_TLP$R2adj   , LS_from_TLP_Ks$R2adj,LS_from_TLP_Ks_limitLMA_TLP_Ks$R2,   LS_from_P50_TLP$R2adj,LS_from_P50_Ks$R2adj,LS_from_P50$R2adj,LS_from_TLP$R2adj,LS_from_Ks$R2adj,LS_from_LMA$R2adj, LS_from_Ks_limitTLPKs$R2adj)
+    all_rmse_LS      <- c(LS_from_P50_TLP_Ks_LMA$rmse    ,LS_from_P50_TLP_Ks$rmse,LS_from_LMA_TLP_Ks$rmse   ,LS_from_LMA_TLP$rmse    ,LS_from_TLP_Ks$rmse  ,LS_from_TLP_Ks_limitLMA_TLP_Ks$rmse, LS_from_P50_TLP$rmse,LS_from_P50_Ks$rmse,LS_from_P50$rmse,LS_from_TLP$rmse,LS_from_Ks$rmse,LS_from_LMA$rmse,LS_from_Ks_limitTLPKs$rmse)
+    all_ndata_LS     <- c( LS_from_P50_TLP_Ks_LMA$ndata  ,LS_from_P50_TLP_Ks$ndata,LS_from_LMA_TLP_Ks$ndata ,LS_from_LMA_TLP$ndata   ,LS_from_TLP_Ks$ndata ,LS_from_TLP_Ks_limitLMA_TLP_Ks$ndata,LS_from_P50_TLP$ndata,LS_from_P50_Ks$ndata,LS_from_P50$ndata,LS_from_TLP$ndata,LS_from_Ks$ndata,LS_from_LMA$ndata,LS_from_Ks_limitTLPKs$ndata)
+    
+  }
   
   all_LS <- data.frame(all_testnames_LS,all_R2_LS,all_R2adj_LS,all_rmse_LS,all_ndata_LS)
   if(view_stats==TRUE)View(all_LS)

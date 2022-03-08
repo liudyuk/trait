@@ -1,5 +1,5 @@
 sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_type = 'lm') {
-  # Call the sma_regress_multivar or lm_regress_multivar function, make plots (if required) and calculate stats
+  # Call the sma_regress_multivar lm_regress_multivar or pca_regress_multivar function, make plots (if required) and calculate stats
   #
   # Last column in the data.frame is the one being predicted
   #
@@ -12,6 +12,8 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_
   #
   # T. Pugh
   # 23.07.20
+  # AHES 06.10.2021, 07.03.2022
+  # small adjustments to accommodate lm and pca regression
   
   #testing AHES
   #vars = data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$LMA)
@@ -19,6 +21,7 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_
   #vars =data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$WD,trait_BE$LMA)
   #labels = c("TLP","LS","WD","LMA")
   ## remove above later AHES
+  
   
   
   nvars=ncol(vars)
@@ -39,6 +42,9 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_
   }
   if(regression_type == 'sma'){
   mod <- sma_regress_multivar(vars[ind,],nbtstrp,T)
+  }
+  if(regression_type == 'pcr' | regression_type == 'plsr'){
+  mod <- pca_regress_multivar(vars[ind,],nbtstrp,T,regr_type = regression_type)
   }
 
   pearson_cor <- cor(vars[ind,])[1,2]
@@ -99,7 +105,7 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_
   R2 <- R^2
   R2adj <- 1 - ( ((1-R2)*(ndata-1))/(ndata-nregress-1) )
   
-  return_vals <- list("regression_type (lm or sma)" = regression_type,"mod"=mod,"rmse"=rmse,"R"=R,"R2"=R2,"R2adj"=R2adj,"var_est"=var_est,
+  return_vals <- list("regression_type (lm, sma or pcr/plsr)" = regression_type,"mod"=mod,"rmse"=rmse,"R"=R,"R2"=R2,"R2adj"=R2adj,"var_est"=var_est,
                       "var_est_L95"=var_est_L95,"var_est_U95"=var_est_U95,"ndata"=ndata,"dataused"=ind,'pearson_cor'=  pearson_cor)
   
   return(return_vals)
