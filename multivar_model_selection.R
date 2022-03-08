@@ -360,7 +360,7 @@ LMA_multivar_test_BE <- function(trait_BE,view_stats=FALSE, regr_type = 'lm' ) {
 
 WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type = 'lm' )  {
   
-  if(regr_type == 'lm'){# sma cannot handle more than 5 variables, so ecxlude from analysis here
+  if(regr_type == 'lm' |regr_type == 'pcr'|regr_type == 'plsr'){# sma cannot handle more than 5 variables, so ecxlude from analysis here
   # WD from P50  slope Ks and LMA
   WD_from_P50_slope_Ks_LMA <- sma_plot_stats(data.frame(trait$P50,trait$slope,trait$Ks,trait$LMA,trait$WD),c("P50","slope","Ks","LMA","WD"),nbtstrp, regression_type = regr_type)
   plot(trait$WD[WD_from_P50_slope_Ks_LMA$dataused],WD_from_P50_slope_Ks_LMA$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
@@ -395,7 +395,7 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   WD_from_P50_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp,regression_type = regr_type)
   plot(trait$WD[WD_from_P50_P50slope$dataused],WD_from_P50_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
-  if(regr_type=='lm'){
+  if(regr_type=='lm'|regr_type == 'pcr'|regr_type == 'plsr'){
     #WD_from_slope_P50slope limit WD_from_slope_Ks_P50slope
     WD_from_slope_P50slope_limit_slope_Ks_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp,T, WD_from_slope_Ks_P50slope$dataused,regression_type = regr_type)
   }
