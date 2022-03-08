@@ -329,10 +329,10 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       }
       
       # Save the values for this iteration to the output array (only for debugging, can be commented out)
-      P50_c[niter] <- P50_e[ss]
+      #P50_c[niter] <- P50_e[ss]
       LMA_c[niter] <- LMA_e[ss]
       TLP_c[niter] <- TLP_e[ss]
-      LS_c[niter] <- LS_e[ss]
+      #LS_c[niter] <- LS_e[ss]
       Ks_c[niter] <- Ks_e[ss]
       WD_c[niter] <- WD_e[ss]
       slope_c[niter] <- slope_e[ss]

@@ -60,6 +60,7 @@ traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_int
 # related to trait network construction
 source('sma_multivar_regress.R')
 source('lm_regress_multivar.R')
+source('pca_regress_multivar.R')
 source('trait_functions.R')
 source('make_bivar_plots.R')
 source('multivar_model_selection.R')
@@ -122,9 +123,6 @@ library(olsrr)
 # for PCR regression models, now used in the network
 library(pls)
 
-#--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
-# multivariate lm and sma regression possible. change option here:
-regr_type = 'lm'
 
 #--- Read in the trait data ---
 
@@ -165,28 +163,21 @@ trait_BT<-subset(traits,group=="BT",drop = T)
 # These are used to fill out the hypothesis framework plot with R
 
 # Calculate for all broadleaf 
-bivar <- make_bivar_plots(trait_B,nbtstrp,regr_type = regr_type)
+bivar <- make_bivar_plots(trait_B,nbtstrp,regr_type = 'lm')
 #View(bivar$all_sma_bivar)
 
 # Calculate for all evergreen broadleaf
-bivar_BE <- make_bivar_plots(trait_BE,nbtstrp,regr_type = regr_type)
-# AHES: negative bivatiate correlation in data, but sma shows positive correlation 
-subs <- na.omit(trait_BDT[,c("WD","slope")])
-
-cor(subs$WD,subs$slope)
-cor.test(subs$LMA,subs$Ks)
-plot(-exp(subs$P50),subs$slope)
-plot(subs$Ks,subs$WD)
+bivar_BE <- make_bivar_plots(trait_BE,nbtstrp,regr_type = 'lm')
 #View(bivar_BE$all_sma_bivar)
 
 # Calculate for all deciduous broadleaf
-bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp, regr_type = regr_type)
+bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp, regr_type = 'lm')
 # View(bivar_BDT$all_sma_bivar)
-# AHES: negative bivatiate correlation in data, but sma shows positive correlation sign
-subs <- na.omit(trait_BD[,c("P50","LS")])
-cor(subs$P50,subs$LS)
-cor.test(subs$WD,subs$P50)
 
+
+#--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
+# multivariate lm, sma, pc(r) or pls(r) regression possible. change option here:
+regr_type = 'plsr'
 #----------------------------------------------------------------------------------------------------------------------
 # Test single and multivariate correlation models
 #----------------------------------------------------------------------------------------------------------------------
@@ -231,8 +222,8 @@ WD_multivar_BE <- WD_multivar_test(trait_BE,leaf_type='BE',regr_type = regr_type
 # slope fits --------------------------------------------------------------
 
 slope_multivar <- slope_multivar_test(trait_B,regr_type = regr_type)
-#hist(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est,xlab ="slope-slope_est", main=paste(" distribution of residuals; model: ", Ks_multivar$Ks_from_P50_L$`regression_type (lm or sma)` ))
-#shapiro.test(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est)
+#AHES hist(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est,xlab ="slope-slope_est", main=paste(" distribution of residuals; model: ", Ks_multivar$Ks_from_P50_L$`regression_type (lm or sma)` ))
+#AHES shapiro.test(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est)
 
 
 # Ks fits ----------------------------------------------------------------
@@ -243,7 +234,7 @@ Ks_multivar     <- Ks_multivar_test(trait_B,regr_type = regr_type)
 # Separate for BE and BDT (BD + BT) on the basis that LS has a very different range and set of bivariate relationships for these
 # two different groups, unlike the other traits here.
 
-LS_multivar_BE <- LS_multivar_test(trait_BE, leaf_type ='BE',regr_type = regr_type) # returns LS_from_LMA_TLP_Ks
+LS_multivar_BE  <- LS_multivar_test(trait_BE, leaf_type ='BE',regr_type = regr_type) # returns LS_from_LMA_TLP_Ks
 
 LS_multivar_BDT <- LS_multivar_test(trait_BDT, leaf_type ='BDT',regr_type = regr_type) # returns LS_from_TLP_Ks
 
@@ -271,8 +262,81 @@ points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_lowe
 points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_upper,col="red")
 
 
-# Create PCR-models on what we have already determined to be the relationships and network. PCR is only used
-# to address the 
+# Create PCA regression-models (later called PCR models) on what we have already determined to be the relationships between the traits 
+# through functional knowledge on that they should interact, and checked above using 
+# correlation analysis to double-check that they indeed also interact in the dataset ( otherwise we won't be able to predict anything)
+# - avoid multicollinearity
+# - reduce dimensions, but keep most variability in predictors
+# - reduce risk of overfitting
+
+set.seed (1234)
+
+pcr_model       <- pcr(LS~., data = trait_BDT[c('P50','TLP','Ks','LS')], scale = TRUE, validation = "CV", na.action = na.omit)
+
+LS_multivar_BDT <- LS_multivar_test(LS~.,trait_BDT[c('P50','TLP','Ks','LS')], leaf_type ='BDT',regr_type = regr_type) # returns LS_from_TLP_Ks
+
+pcr_pred <- predict.pcr(pcr_model,trait_BDT[108,c('P50','TLP','Ks','LS')], ncomp = pcr_model$ncomp)
+predplot(pcr_model)
+
+pcr_model2 <- plsr(LS~., data = trait_BDT[c('P50','TLP','Ks','LS')], validation = "LOO", jackknife=T)
+plot(pcr_model2,col='green')
+validationplot(pcr_model2, val.type = "MSEP")
+validationplot()
+
+
+coef(pcr_model2,intercept=TRUE)
+
+jack.test(pcr_model2, ncomp = 3)
+pcr_model$Ymeans  # is this the intercept?
+# make sure newdata is a data frame when doing predictions or be sure the newdata matrix contains only predictors. From help:
+#It is also possible to supply a matrix instead of a data frame as newdata, which is then assumed to be the X data matrix. 
+# Note that the usual checks for the type of the data are then omitted. 
+#Also note that this is only possible with predict; it will not work in functions like predplot, 
+# RMSEP or R2, because they also need the response variable of the new data.
+
+regression_type
+leafN_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,trait_B$leafN),c("LMA","leafN"),nbtstrp,T)
+leafL_from_LMA_sma <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'sma')
+leafL_from_LMA_lm <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'lm')
+leafL_from_LMA_pca <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'pcr')
+leafL_from_LMA_plsr <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'plsr')
+
+trait = trait_B
+P50_from_TLP_Ks_WD_plsr <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'plsr')
+P50_from_TLP_Ks_WD_pca  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'pcr')
+P50_from_TLP_Ks_WD_lm   <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
+P50_from_TLP_Ks_WD_sma  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'sma')
+
+P50_from_TLP_Ks_WD_plsr$dataused == P50_from_TLP_Ks_WD_lm$dataused
+P50_from_TLP_Ks_WD_plsr$R == P50_from_TLP_Ks_WD_lm$R
+P50_from_TLP_Ks_WD_plsr$mod$intercept_R == P50_from_TLP_Ks_WD_lm$mod$intercept_R
+P50_from_TLP_Ks_WD_plsr$mod$slope_R.y1 == P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
+P50_from_TLP_Ks_WD_sma$mod$slope_R.y1
+P50_from_TLP_Ks_WD_plsr$mod$slope_R.y1
+P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
+P50_from_TLP_Ks_WD_pca$mod$slope_R.y1
+
+varnames =c("TLP","Ks","WD","P50")
+nvars=length(varnames)
+yy= vars=data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50)
+pcr_model       <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), data = yy, scale = TRUE, validation = "CV", na.action = na.omit)
+coef(pcr_model,intercept = TRUE)
+P50_from_TLP_Ks_WD_plsr <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'plsr')
+P50_from_TLP_Ks_WD_pca <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'pcr')
+
+P50_from_TLP_Ks_WD_pca$mod$intercept_R
+P50_from_TLP_Ks_WD_pca$mod$slope_R.y1
+P50_from_TLP_Ks_WD_pca$mod$slope_R.y2
+P50_from_TLP_Ks_WD_pca$mod$slope_R.y3
+
+P50_from_TLP_Ks_WD_lm  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
+
+P50_from_TLP_Ks_WD_lm$mod$intercept_R
+P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
+P50_from_TLP_Ks_WD_lm$mod$slope_R.y2
+P50_from_TLP_Ks_WD_lm$mod$slope_R.y3
+
+
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -288,7 +352,7 @@ points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_uppe
 limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
 
 # Decide whether to run the uncertainty propagation (T) or not (F)
-propagate_uncer=T
+propagate_uncer=F
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
@@ -296,7 +360,7 @@ trait_sel= F
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or set = 4 for a predefined (above) hypercube sample.
-n_trait_sel= 4
+n_trait_sel= 28
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel = 2
@@ -313,8 +377,8 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 # lowest bivariate relationship in the trait network for evergreen subset: pearson cor = 0.23.
 # it is thought to have no functional relationship.
 # Attempt to iteratively converge on the best fit values of Ks, TLP ,slope, WD and LMA, given known LS and P50
-outs_LSP50 <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
-outs_LSP50_hv <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
+outs_LSP50     <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
+outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
 outs_LSP50_lhc <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = 4, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
 
 # to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
