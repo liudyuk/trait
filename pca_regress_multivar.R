@@ -35,12 +35,18 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
       # apply pcr/plsr model, DF2formula helps to remain flexible with input variables:
       varnames <- names(yy)
       if(regr_type =='pcr'){
-        mod_tmp <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), scale = TRUE, data = yy)
+        sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
+        mtraits =  apply(yy[varnames],2,mean,na.rm=TRUE)
+        yy = (yy-mtraits)/sdtraits # scaling is done manually here, and then set to FALSE below.
+        mod_tmp <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), scale = FALSE, data = yy)
         # <- pcr(LS~., data = trait_BDT[c('P50','TLP','Ks','LS')], scale = TRUE, validation = "CV", na.action = na.omit)
 
       }
       if(regr_type =='plsr'){
-        mod_tmp <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale = TRUE, data = yy)
+        sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
+        mtraits =  apply(yy[varnames],2,mean,na.rm=TRUE)
+        yy = (yy-mtraits)/sdtraits # scaling is done manually here, and then set to FALSE below.
+        mod_tmp <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale = FALSE, data = yy,na.action=na.omit)
       }
       
       
@@ -88,10 +94,16 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
         
         #Compute intercept estimate 
         if(regr_type =='pcr'){
-          mod_boot            = pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), scale=TRUE,data = bootsample)
+          sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
+          mtraits =  apply(yy[varnames],2,mean,na.rm=TRUE)
+          yy = (yy-mtraits)/sdtraits # scaling is done manually here, and then set to FALSE below.
+          mod_boot <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale = FALSE, data = bootsample,na.action=na.omit)
         }
         if(regr_type =='plsr'){
-          mod_boot            = plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), scale=TRUE,data = bootsample)
+          sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
+          mtraits =  apply(yy[varnames],2,mean,na.rm=TRUE)
+          yy = (yy-mtraits)/sdtraits # scaling is done manually here, and then set to FALSE below.
+          mod_boot <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale = FALSE, data = bootsample,na.action=na.omit)
         }
         
         intercept_R.boot[i] = as.numeric(coef(mod_boot,intercept=TRUE)[1])
@@ -138,7 +150,7 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
       
       
       # Create return values array
-      r1 <- list("intercept_R"=intercept_R,"L95_R.intercept"=L95_R.intercept,"U95_R.intercept"=U95_R.intercept,
+      r1 <- list("stdevtraits"=sdtraits,"meantraits"=mtraits,"intercept_R"=intercept_R,"L95_R.intercept"=L95_R.intercept,"U95_R.intercept"=U95_R.intercept,
                  "slope_R.y1"=slope_R.y1,"L95_R.y1"=L95_R.y1,"U95_R.y1"=U95_R.y1)
       if (cc>2) {
         r2 <- list("slope_R.y2"=slope_R.y2,"L95_R.y2"=L95_R.y2,"U95_R.y2"=U95_R.y2)

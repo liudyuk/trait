@@ -87,6 +87,22 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
       P50_e_start <- LS_P50_seq$Var2[in_hv]
       length( P50_e_start )
       plot_Hypervolume(hv,LS_e_start,P50_e_start)
+      
+      # add maximum and minimum P50 and LS values to extend sampling range as much as possible:
+      #max LS
+      P50_e_start = append(P50_e_start,traits[which(traits$LS ==max(traits$LS[ind])),]$P50)
+      LS_e_start  = append( LS_e_start,max(traits$LS[ind]))
+      # min LS
+      P50_e_start = append(P50_e_start,traits[which(traits$LS ==min(traits$LS[ind])),]$P50)
+      LS_e_start  = append( LS_e_start,min(traits$LS[ind]))
+      
+      #max P50
+      LS_e_start  = append(LS_e_start,traits[which(traits$P50 ==max(traits$P50[ind])),]$LS)
+      P50_e_start = append(P50_e_start,max(traits$P50[ind]))
+      # min P50
+      LS_e_start  = append(LS_e_start,traits[which(traits$P50 ==min(traits$P50[ind])),]$LS)
+      P50_e_start = append(P50_e_start,min(traits$P50[ind]))
+      
     }
   } else {
     # Go through all observed combinations of P50 and LS
@@ -119,29 +135,64 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
   LS_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
   Ks_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
   
+  #for pcr and plsr analysis, the traits must be standardised before they are used in the network:
+  # this is necessary, because pcr and plsr regression models were defined using standardised data
+  if(LMA_multivar_BDT$LMA_from_TLP$`regression_type (lm, sma or pcr/plsr)`=='pcr' || 
+     LMA_multivar_BDT$LMA_from_TLP$`regression_type (lm, sma or pcr/plsr)`=='plsr'){
+    
+    P50 = (traits$P50[ind_spec_group] - P50_multivar$P50_from_TLP_Ks$mod$meantraits[3]) / P50_multivar$P50_from_TLP_Ks$mod$stdevtraits[3]
+    TLP = (traits$TLP[ind_spec_group] - TLP_multivar$TLP_from_LS_LMA_P50$mod$meantraits[4]) / TLP_multivar$TLP_from_LS_LMA_P50$mod$stdevtraits[4]
+    WD  = (traits$WD[ind_spec_group]  - WD_multivar$WD_from_P50_Ks$mod$meantraits[3]) / WD_multivar$WD_from_P50_Ks$mod$stdevtraits[3]
+    slope = (traits$slope[ind_spec_group] - slope_multivar$slope_from_P50_TLP_WD$mod$meantraits[4]) / slope_multivar$slope_from_P50_TLP_WD$mod$stdevtraits[4]
+    Ks  = (traits$Ks[ind_spec_group]  - Ks_multivar$Ks_from_P50_LS$mod$meantraits[3]) / Ks_multivar$Ks_from_P50_LS$mod$stdevtraits[3]
+    P50_e_start = (P50_e_start        - P50_multivar$P50_from_TLP_Ks$mod$meantraits[3]) / P50_multivar$P50_from_TLP_Ks$mod$stdevtraits[3]
+    
+    ## Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4)
+    if(spec_group_sel == 1 || spec_group_sel == 3 || spec_group_sel == 4){
+    LS_e_start  = (LS_e_start - LS_multivar_BDT$LS_from_P50_TLP_Ks$mod$meantraits[4]) / LS_multivar_BDT$LS_from_P50_TLP_Ks$mod$stdevtraits[4]
+    LS  = (traits$LS[ind_spec_group]  - LS_multivar_BDT$LS_from_P50_TLP_Ks$mod$meantraits[4]) / LS_multivar_BDT$LS_from_P50_TLP_Ks$mod$stdevtraits[4]
+    LMA = (traits$LMA[ind_spec_group] - LMA_multivar_BDT$LMA_from_TLP$mod$meantraits[2]) / LMA_multivar_BDT$LMA_from_TLP$mod$stdevtraits[2]
+    }
+    if(spec_group_sel == 2){
+      LS_e_start  = (LS_e_start - LS_multivar_BE$LS_from_P50_TLP_Ks_LMA$mod$meantraits[5]) / LS_multivar_BE$LS_from_P50_TLP_Ks_LMA$mod$stdevtraits[5]
+      LS  = (traits$LS[ind_spec_group]  - LS_multivar_BE$LS_from_P50_TLP_Ks_LMA$mod$meantraits[5]) / LS_multivar_BE$LS_from_P50_TLP_Ks_LMA$mod$stdevtraits[5]
+      LMA = (traits$LMA[ind_spec_group] - LMA_multivar_BE$LMA_from_TLP_LS$mod$meantraits[3]) /  LMA_multivar_BE$LMA_from_TLP_LS$mod$meantraits[3]
+    }
+    
+  }else{ # otherwise proceed as normal, and do not standardise the traits
+    P50 = traits$P50[ind_spec_group]
+    TLP = traits$TLP[ind_spec_group]
+    LMA = traits$LMA[ind_spec_group]
+    WD  = traits$WD[ind_spec_group]
+    slope = traits$slope[ind_spec_group]
+    LS  = traits$LS[ind_spec_group]
+    Ks  = traits$Ks[ind_spec_group]
+  }
+  
+  
   # Loop over all the combinations of KS and LS
   # The new estimates of traits use the suffix "_e"
   for (dd in 1:ndata) {
     print(dd)
     
     # Carry out the optimisation - based on LS_e_start and P50_e_start as starting points
-    opt_vals <- trait_opt_bivar_start_LSP50(traits$P50[ind_spec_group],
-                                            traits$TLP[ind_spec_group],
-                                            traits$LMA[ind_spec_group],
-                                            traits$WD[ind_spec_group],
-                                            traits$slope[ind_spec_group],
-                                            traits$LS[ind_spec_group],
-                                            traits$Ks[ind_spec_group],
+    opt_vals <- trait_opt_bivar_start_LSP50(P50,
+                                            TLP,
+                                            LMA,
+                                            WD,
+                                            slope,
+                                            LS,
+                                            Ks,
                                             LMA_multivar_BDT$LMA_from_TLP,
-                                            LMA_multivar_BE$LMA_from_TLP_LS_WD,
+                                            LMA_multivar_BE$LMA_from_TLP_LS,
                                             LS_multivar_BE$LS_from_P50_TLP_Ks_LMA,
                                             LS_multivar_BDT$LS_from_P50_TLP_Ks,
-                                            Ks_multivar$Ks_from_P50_LS_WD,#Ks_from_P50_LS_slope,
+                                            Ks_multivar$Ks_from_P50_LS,#Ks_from_P50_LS_slope,
                                             TLP_multivar$TLP_from_LS_LMA_P50,
-                                            P50_multivar$P50_from_TLP_Ks_WD,
+                                            P50_multivar$P50_from_TLP_Ks,
                                             slope_multivar$slope_from_P50_TLP_WD,#slope_from_P50_TLP_Ks,
-                                            WD_multivar_BDT$WD_from_P50_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
-                                            WD_multivar_BE$WD_from_P50_LMA_Ks,
+                                            WD_multivar$WD_from_P50_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
+                                            #WD_multivar_BE$WD_from_P50_LMA_Ks,
                                             bivar$LMA_from_LS,
                                             bivar$P50_from_Ks,
                                             bivar$TLP_from_P50,
@@ -166,6 +217,31 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
     
   }
   
+  #'unstandardise' the values again: 
+  if(LMA_multivar_BDT$LMA_from_TLP$`regression_type (lm, sma or pcr/plsr)`=='pcr' || 
+     LMA_multivar_BDT$LMA_from_TLP$`regression_type (lm, sma or pcr/plsr)`=='plsr'){
+    
+  
+    # [TODO] super hack-y and unflexible ([3][4][5] to get last item in vector )
+    P50 = traits$P50[ind_spec_group] * P50_multivar$P50_from_TLP_Ks$mod$stdevtraits[3] + P50_multivar$P50_from_TLP_Ks$mod$meantraits[3]
+    TLP = traits$TLP[ind_spec_group] * TLP_multivar$TLP_from_LS_LMA_P50$mod$stdevtraits[4] + TLP_multivar$TLP_from_LS_LMA_P50$mod$meantraits[4]
+    WD  = traits$WD[ind_spec_group]  * WD_multivar$WD_from_P50_Ks$mod$stdevtraits[3] + WD_multivar$WD_from_P50_Ks$mod$meantraits[3]
+    slope = traits$slope[ind_spec_group] *  slope_multivar$slope_from_P50_TLP_WD$mod$stdevtraits[4] + slope_multivar$slope_from_P50_TLP_WD$mod$meantraits[4]
+    Ks  = traits$Ks[ind_spec_group]  * Ks_multivar$Ks_from_P50_LS$mod$stdevtraits[3] + Ks_multivar$Ks_from_P50_LS$mod$meantraits[3]
+    P50_e_start = P50_e_start        * P50_multivar$P50_from_TLP_Ks$mod$stdevtraits[3] + P50_multivar$P50_from_TLP_Ks$mod$meantraits[3]
+    
+    ## Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4)
+    if(spec_group_sel == 1 || spec_group_sel == 3 || spec_group_sel == 4){
+      LS_e_start  = LS_e_start * LS_multivar_BDT$LS_from_P50_TLP_Ks$mod$stdevtraits[4] + LS_multivar_BDT$LS_from_P50_TLP_Ks$mod$meantraits[4]
+      LS  = traits$LS[ind_spec_group] * LS_multivar_BDT$LS_from_P50_TLP_Ks$mod$stdevtraits[4] + LS_multivar_BDT$LS_from_P50_TLP_Ks$mod$meantraits[4]
+      LMA = traits$LMA[ind_spec_group] * LMA_multivar_BDT$LMA_from_TLP$mod$stdevtraits[2] + LMA_multivar_BDT$LMA_from_TLP$mod$meantraits[2]
+    }
+    if(spec_group_sel == 2){
+      LS_e_start  = LS_e_start * LS_multivar_BE$LS_from_P50_TLP_Ks_LMA$mod$stdevtraits[5] + LS_multivar_BE$LS_from_P50_TLP_Ks_LMA$mod$meantraits[5]
+      LS  = traits$LS[ind_spec_group]  * LS_multivar_BE$LS_from_P50_TLP_Ks_LMA$mod$stdevtraits[5] + LS_multivar_BE$LS_from_P50_TLP_Ks_LMA$mod$meantraits[5]
+      LMA = traits$LMA[ind_spec_group] * LMA_multivar_BE$LMA_from_TLP_LS$mod$meantraits[3] + LMA_multivar_BE$LMA_from_TLP_LS$mod$meantraits[3]
+    }
+  }
   
   # discard values across all trait lists where observed trait limits were surpassed (labelled as NA within function trait_opt_bivar_start_LSP50)
   # this will reduce the number of predictor and predicted points in the lists
