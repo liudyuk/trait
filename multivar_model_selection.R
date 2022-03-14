@@ -6,12 +6,12 @@
 
 P50_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
   
-  if(regr_type=='lm'){#lm allows for mor than 5 variables 
+  if(regr_type=='lm'){#lm allows for more than 5 variables in the regression
     # P50 from TLP, LS , Ks slope and WD
     P50_from_TLP_LS_Ks_slope_WD <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$Ks,trait$slope,trait$WD,trait$P50),c("TLP","LS","Ks","slope","WD","P50"),nbtstrp,regression_type = regr_type)
     plot(trait$P50[P50_from_TLP_LS_Ks_slope_WD$dataused],P50_from_TLP_LS_Ks_slope_WD$var_est,pch=16,xlab="P50",ylab="P50_est",main="P50 vs P50_est")
   }else{ # sma
-    P50_from_TLP_LS_Ks_slope_WD <- list(R=NA, R2adj=NA,rmse=NA, ndata=NA)
+    P50_from_TLP_LS_Ks_slope_WD <- list(R=NA, R2adj=NA,rmse=NA, ndata=NA) # NA, just to adhere to  the general structure of the output
   }
     # P50 from TLP, LS , Ks and slope
     P50_from_TLP_LS_Ks_slope <- sma_plot_stats(data.frame(trait$TLP,trait$LS,trait$Ks,trait$slope,trait$P50),c("TLP","LS","Ks","slope","P50"),nbtstrp,regression_type = regr_type)
@@ -79,7 +79,7 @@ P50_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
     # DECISION: P50_from_TLP_Ks_WD
     
     return_vals <- list("all_P50"=all_P50,
-                        "P50_from_TLP_Ks_WD" = P50_from_TLP_Ks_WD )
+                        "P50_from_TLP_Ks" = P50_from_TLP_Ks )
  
   return(return_vals)
   
@@ -354,7 +354,7 @@ LMA_multivar_test_BE <- function(trait_BE,view_stats=FALSE, regr_type = 'lm' ) {
   # DECISION: LMA_from_TLP_LS
   
   return_vals <- list("all_LMA"=all_LMA,
-                      "LMA_from_TLP_LS_WD"=LMA_from_TLP_LS_WD)
+                      "LMA_from_TLP_LS"=LMA_from_TLP_LS)
   return(return_vals)
 }
 
@@ -384,20 +384,37 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   plot(trait$WD[WD_from_P50_slope$dataused],WD_from_P50_slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
   # WD from slope and P50*slope (interaction term) - NOTE: Testing the interactions because P50 and slope are so highly correlated with each other
-  WD_from_slope_P50slope <- sma_plot_stats(data.frame(trait$slope,trait$P50*trait$slope,trait$WD),c("slope","P50*slope","WD"),nbtstrp,regression_type = regr_type)
-  plot(trait$WD[WD_from_slope_P50slope$dataused],WD_from_slope_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  # pca-regression cannot handle this, so exclude from selection when this model is used:
+  if(regr_type == 'lm' |regr_type == 'sma'){
+    WD_from_slope_P50slope <- sma_plot_stats(data.frame(trait$slope,trait$P50*trait$slope,trait$WD),c("slope","P50*slope","WD"),nbtstrp,regression_type = regr_type)
+    plot(trait$WD[WD_from_slope_P50slope$dataused],WD_from_slope_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+    }else{
+      WD_from_slope_P50slope <-  list(R=NA, R2adj=NA,rmse=NA, ndata=NA) # NA, just to adhere to  the general structure of the output
+    }
   
   # WD from slope Ks and P50*slope (interaction term) 
-  WD_from_slope_Ks_P50slope <- sma_plot_stats(data.frame(trait$slope,trait$Ks,trait$P50*trait$slope,trait$WD),c("slope","Ks","P50*slope","WD"),nbtstrp,regression_type = regr_type)
-  plot(trait$WD[WD_from_slope_Ks_P50slope$dataused],WD_from_slope_Ks_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
-  
+    # pca-regression cannot handle this, so exclude from selection when this model is used:
+    if(regr_type == 'lm' |regr_type == 'sma'){
+      WD_from_slope_Ks_P50slope <- sma_plot_stats(data.frame(trait$slope,trait$Ks,trait$P50*trait$slope,trait$WD),c("slope","Ks","P50*slope","WD"),nbtstrp,regression_type = regr_type)
+      plot(trait$WD[WD_from_slope_Ks_P50slope$dataused],WD_from_slope_Ks_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+      }else{
+        WD_from_slope_Ks_P50slope <-  list(R=NA, R2adj=NA,rmse=NA, ndata=NA) # NA, just to adhere to  the general structure of the output
+      }
+      
   # WD from P50 and P50*slope (interaction term)
-  WD_from_P50_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp,regression_type = regr_type)
-  plot(trait$WD[WD_from_P50_P50slope$dataused],WD_from_P50_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
-  
-  if(regr_type=='lm'|regr_type == 'pcr'|regr_type == 'plsr'){
+    # pca-regression cannot handle this, so exclude from selection when this model is used:
+    if(regr_type == 'lm' |regr_type == 'sma'){
+      WD_from_P50_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp,regression_type = regr_type)
+      plot(trait$WD[WD_from_P50_P50slope$dataused],WD_from_P50_P50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+      }else{
+        WD_from_P50_P50slope <-  list(R=NA, R2adj=NA,rmse=NA, ndata=NA) # NA, just to adhere to  the general structure of the output
+        }
+    
+  if(regr_type=='lm'){
     #WD_from_slope_P50slope limit WD_from_slope_Ks_P50slope
     WD_from_slope_P50slope_limit_slope_Ks_P50slope <- sma_plot_stats(data.frame(trait$P50,trait$P50*trait$slope,trait$WD),c("P50","P50*slope","WD"),nbtstrp,T, WD_from_slope_Ks_P50slope$dataused,regression_type = regr_type)
+  }else{
+    WD_from_slope_P50slope_limit_slope_Ks_P50slope <-  list(R=NA, R2adj=NA,rmse=NA, ndata=NA) # NA, just to adhere to  the general structure of the output
   }
   # WD from P50 Ks
   WD_from_P50_Ks <- sma_plot_stats(data.frame(trait$P50,trait$Ks,trait$WD),c("P50","Ks","WD"),nbtstrp,regression_type = regr_type)
@@ -416,9 +433,12 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   plot(trait$WD[WD_from_Ks_P50$dataused],WD_from_Ks_P50$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
   # WD_from P50 and Ks data limited to WD_from_P50slopeKs
-  WD_from_P50_Ks_limitP50slopeKs  <- sma_plot_stats(data.frame(trait$P50,trait$Ks,trait$WD),c("P50","Ks","WD"),nbtstrp,F, indin= WD_from_P50_slope_Ks$dataused, regression_type = regr_type)
-  plot(trait$WD[WD_from_P50_Ks_limitP50slopeKs$dataused],WD_from_P50_Ks_limitP50slopeKs$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
-  
+  if(regr_type == 'lm' |regr_type == 'sma'){
+    WD_from_P50_Ks_limitP50slopeKs  <- sma_plot_stats(data.frame(trait$P50,trait$Ks,trait$WD),c("P50","Ks","WD"),nbtstrp,F, indin= WD_from_P50_slope_Ks$dataused, regression_type = regr_type)
+    plot(trait$WD[WD_from_P50_Ks_limitP50slopeKs$dataused],WD_from_P50_Ks_limitP50slopeKs$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  }else{
+    WD_from_P50_Ks_limitP50slopeKs <- list(R=NA, R2adj=NA,rmse=NA, ndata=NA) # NA, just to adhere to  the general structure of the output
+  }
   
   # Summarise statistics
   all_testnames_WD <- c("WD_from_P50_slope_Ks_LMA","WD_from_P50_Ks_LMA_limitP50slopeKsLMA","WD_from_P50_slope_Ks" ,  "WD_from_P50_LMA_Ks"          ,"WD_from_P50_slope",    "WD_from_slope_P50slope"," WD_from_slope_Ks_P50slope",     "WD_from_P50_P50slope"                ,"WD_from_P50_Ks"    ,"WD_from_P50"     ,"WD_from_slope",     "WD_from_Ks_P50","WD_from_P50_Ks_limitP50slopeKs")
@@ -433,17 +453,24 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   # CHOICE: WD_from_slope_P50slope has the best combination of R2adj and RMSE
   
   # Test MAT and PPT coverage of species for chosen model
-  plot(trait$MAT[WD_from_slope_P50slope$dataused],trait$MAP[WD_from_slope_P50slope$dataused])
+  # [TODO] cannot currently plot this for pcr pslr, because of interaction term. 
+  #plot(trait$MAT[WD_from_slope_P50slope$dataused],trait$MAP[WD_from_slope_P50slope$dataused],main = "Climate coverage")
   # WIDE CLIMATE COVERAGE
   
   # DECISION: WD_from_slope_P50slope
   
-  return_vals <- list("all_WD"=all_WD,
-                      "WD_from_P50_slope_Ks"=WD_from_P50_slope_Ks)
-  #new:
+  # Test MAT and PPT coverage of species for chosen model
+  plot(trait$MAT[WD_from_P50_Ks$dataused],trait$MAP[WD_from_P50_Ks$dataused],main = "Climate coverage")
+  # WIDE CLIMATE COVERAGE
+  
+  return_vals <- list("all_WD"= all_WD,
+                      "WD_from_P50_Ks"= WD_from_P50_Ks) # WD_from_P50__Ks
+  
+  #new- # check whether leaftype is selected for or not.
+  if(!is.null(leaf_type)){
   if(leaf_type== 'BDT'){
     # Test MAT and PPT coverage of species for chosen model
-    plot(trait$MAT[WD_from_P50_slope_Ks$dataused],trait$MAP[WD_from_P50_slope_Ks$dataused],main = "Climate coverage")
+    plot(trait$MAT[WD_from_P50_Ks$dataused],trait$MAP[WD_from_P50_Ks$dataused],main = "Climate coverage")
     # WIDE CLIMATE COVERAGE
     
     # DECISION for BDT: :
@@ -453,7 +480,7 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   
   if(leaf_type == 'BE'){
     # Test MAT and PPT coverage of species for chosen model
-    plot(trait$MAT[WD_from_P50_slope_Ks_LMA$dataused],trait$MAP[WD_from_P50_slope_Ks_LMA$dataused],main = "Climate coverage")
+    plot(trait$MAT[WD_from_P50_LMA_Ks$dataused],trait$MAP[WD_from_P50_LMA_Ks$dataused],main = "Climate coverage")
     # WIDE CLIMATE COVERAGE
     
     # DECISION for BE: LS_from_LMA_TLP_Ks
@@ -461,6 +488,8 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
     return_vals <- list("all_WD"= all_WD,
                         "WD_from_P50_LMA_Ks"= WD_from_P50_LMA_Ks) # WD_from_P50_LMA_Ks
   }
+  } # check whether leaftype is selected for or not.
+
   
   return(return_vals)
 }
@@ -492,12 +521,20 @@ slope_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm') {
   plot(trait$slope[slope_from_P50_TLP$dataused],slope_from_P50_TLP$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
   
   # slope from P50 and TLPP50 (interaction)
-  slope_from_P50_TLPP50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP*trait$P50,trait$slope),c("P50","TLP*P50","slope"),nbtstrp,regression_type = regr_type)
-  plot(trait$slope[slope_from_P50_TLPP50$dataused],slope_from_P50_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+  if(regr_type == 'lm' |regr_type == 'sma'){
+    slope_from_P50_TLPP50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP*trait$P50,trait$slope),c("P50","TLP*P50","slope"),nbtstrp,regression_type = regr_type)
+    plot(trait$slope[slope_from_P50_TLPP50$dataused],slope_from_P50_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+  }else{
+    slope_from_P50_TLPP50 <- list(R=NA, R2adj=NA,rmse=NA, ndata=NA) # NA, just to adhere to  the general structure of the output
+  }
   
   # slope from TLP and TLPP50 (interaction)
-  slope_from_TLP_TLPP50 <- sma_plot_stats(data.frame(trait$TLP,trait$TLP*trait$P50,trait$slope),c("TLP","TLP*P50","slope"),nbtstrp,regression_type = regr_type)
-  plot(trait$slope[slope_from_TLP_TLPP50$dataused],slope_from_TLP_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+  if(regr_type == 'lm' |regr_type == 'sma'){
+    slope_from_TLP_TLPP50 <- sma_plot_stats(data.frame(trait$TLP,trait$TLP*trait$P50,trait$slope),c("TLP","TLP*P50","slope"),nbtstrp,regression_type = regr_type)
+    plot(trait$slope[slope_from_TLP_TLPP50$dataused],slope_from_TLP_TLPP50$var_est,pch=16,xlab="slope",ylab="slope_est",main="slope vs slope_est")
+  }else{
+    slope_from_TLP_TLPP50 <- list(R=NA, R2adj=NA,rmse=NA, ndata=NA) # NA, just to adhere to  the general structure of the output
+  }
   
   # slope from TLP and Ks
   slope_from_TLP_Ks <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$slope),c("TLP","Ks","slope"),nbtstrp,regression_type = regr_type)
@@ -648,7 +685,7 @@ Ks_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm') {
   # DECISION: Ks_from_P50_LS_WD
   
   return_vals <- list("all_Ks"= all_Ks,
-                      "Ks_from_P50_LS_WD"= Ks_from_P50_LS_WD)
+                      "Ks_from_P50_LS"= Ks_from_P50_LS)
   
   return(return_vals)
 }
