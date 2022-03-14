@@ -55,7 +55,7 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   
   lambda_LPJG <- -0.188+(-0.3*TLP_e_mean_unlogged) # Based on https://docs.google.com/spreadsheets/d/1KvB97vt6OVdy3GPUdOdlxd8c9TdjEk9z4qIl2mcfPHk/edit#gid=51069844
   DeltaPsiWW_LPJG <- -0.5571 + (2.9748*WD_e_mean) # Based on https://docs.google.com/spreadsheets/d/1KvB97vt6OVdy3GPUdOdlxd8c9TdjEk9z4qIl2mcfPHk/edit#gid=51069844
-  Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged)
+  Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged) #### [TODO] Check relationship between TLP and Kleaf using other regression methods
   
   #Limit ranges
   lambda_LPJG[lambda_LPJG  < -0.3] = -0.3 # From Papastefanou et al. (2020, Front. Plant Sci.)
@@ -67,7 +67,13 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   Ks_LPJG <- Ks_e_mean_unlogged
   P50_LPJG <- P50_e_mean_unlogged
   
-  traits_LPJG <- list("WD"=round(WD_LPJG,digits=4),"SLA"=round(SLA_LPJG,digits=4),"P50"=round(P50_LPJG,digits=4),"P88"=round(P88_LPJG,digits=4),"polyslope"=round(polyslope_LPJG,digits=4),"LS"=round(LS_LPJG,digits=4),"leaflong"=round(leaflong_LPJG,digits=4),"lambda"=round(lambda_LPJG,digits=4),"DeltaPsiWW"=round(DeltaPsiWW_LPJG,digits=4),"Ks"=round(Ks_LPJG,digits=4),"Kleaf"=round(Kleaf_LPJG,digits=4),"TLP"=round(TLP_e_mean_unlogged,digits=4),"slope"=round(slope_e_mean_unlogged,digits=4),"leafN_LPJG"=round(leafN_LPJG,digits=4),"CtoN_LPJG"=round(CtoN_LPJG,digits=4),"CtoNmin_LPJG"=round(CtoNmin_LPJG,digits=4))
+  traits_LPJG <- list("WD"=round(WD_LPJG,digits=4),"SLA"=round(SLA_LPJG,digits=4),"P50"=round(P50_LPJG,digits=4),
+                      "P88"=round(P88_LPJG,digits=4),"polyslope"=round(polyslope_LPJG,digits=4),"LS"=round(LS_LPJG,digits=4),
+                      "leaflong"=round(leaflong_LPJG,digits=4),"lambda"=round(lambda_LPJG,digits=4),
+                      "DeltaPsiWW"=round(DeltaPsiWW_LPJG,digits=4),"Ks"=round(Ks_LPJG,digits=4),
+                      "Kleaf"=round(Kleaf_LPJG,digits=4),"TLP"=round(TLP_e_mean_unlogged,digits=4),
+                      "slope"=round(slope_e_mean_unlogged,digits=4),"leafN_LPJG"=round(leafN_LPJG,digits=4),
+                      "CtoN_LPJG"=round(CtoN_LPJG,digits=4),"CtoNmin_LPJG"=round(CtoNmin_LPJG,digits=4))
   return(traits_LPJG)
 }
 
