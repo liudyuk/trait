@@ -32,11 +32,12 @@ opt_test_plots_LSP50 <- function(trait,
   par(mfrow=c(4,4))
   par(mar=c(2,2,2,2))
   
-  plot(trait$P50,trait$Ks,pch=16,xlab="P50",ylab="Ks",main="P50 vs Ks")
-  points(P50_e[,1],Ks_e[,1],col="blue",pch=16) # Using central estimate coefficients
-  points(P50_e[,1],Ks_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
-  points(P50_e[,1],Ks_e_5perc,col="green",pch=16)
-  points(P50_e[,1],Ks_e_95perc,col="green",pch=16)
+  plot(trait$P50,trait$LS,pch=16,xlab="P50",ylab="LS",main="P50 vs LS")
+  points(P50_e[,1],LS_e[,1],col="blue",pch=16,cex=0.4) # Using central estimate coefficients
+  points(P50_e[,1],LS_e[,1],col="red",pch=16,cex=0.4) # Using mean of all bootstrapped estimates 
+  points(P50_e[,1],LS_e[,1],col="green",pch=16,cex=0.4)
+  points(P50_e[,1],LS_e[,1],col="green",pch=16,cex=0.4)
+  
   
   plot(trait$P50,trait$Ks,pch=16,xlab="P50",ylab="Ls",main="P50 vs Ks")
   points(P50_e[,1],Ks_e[,1],col="blue",pch=16) # Using central estimate coefficients

@@ -66,7 +66,6 @@ source('make_bivar_plots.R')
 source('multivar_model_selection.R')
 source("whittaker_biomes_plot.R")
 
-
 # optimisation starting with KsLS and subsequent diagnostic plots 
 source("trait_opt.R")
 source('trait_optim.R')
@@ -152,12 +151,12 @@ trait_B<-subset(traits,group!="CC",drop = T)
 #BT = teperature deciduous
 
 #Also create tables with just BE or BD+BT for later use
-trait_BE<-subset(traits,group=="BE",drop = T)
-trait_BDT<-subset(traits,group=="BD" | group=="BT",drop = T)
+trait_BE  <- subset(traits,group=="BE",drop = T)
+trait_BDT <- subset(traits,group=="BD" | group=="BT",drop = T)
 
 #drought deciduous broadleaves only
-trait_BD<-subset(traits,group=="BD",drop = T)
-trait_BT<-subset(traits,group=="BT",drop = T)
+trait_BD <- subset(traits,group=="BD",drop = T)
+trait_BT <- subset(traits,group=="BT",drop = T)
 
 #--- Bivariate plots and statistics with SMA regression ---
 # These are used to fill out the hypothesis framework plot with R
@@ -177,7 +176,99 @@ bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp, regr_type = 'lm')
 
 #--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
 # multivariate lm, sma, pc(r) or pls(r) regression possible. change option here:
-regr_type = 'plsr'
+regr_type = 'pcr'
+
+#if (regr_type == 'pcr' || regr_type == 'plsr'){
+  
+  # make data more normally distributed:
+  # e.g. log
+  # then normalise
+#  trait_BE_save = trait_BE
+#  traits_save = traits
+  #scale all trait here. If done in each individual function, the sd's are very different from each other. 
+  # this screws with the predictions in the network
+#  trait_BE_sd =  apply(trait_BE,2,sd,na.rm=TRUE)
+#  trait_BE[13:44] = trait_BE[13:44] / trait_BE_sd[13:44]
+  
+#  traits_sd = as.data.frame(t(apply(traits[13:44],2,sd,na.rm=TRUE)))
+#  traits_mean = as.data.frame(t(apply(traits[13:44],2,mean,na.rm=TRUE)))
+#  traits[13:44] = traits[13:44] / traits_sd[13:44]
+  
+#  trait_B_save = trait_B
+#  trait_B_sd      =  apply(trait_B,2,sd,na.rm=TRUE)
+#  trait_B[13:44]  =  trait_B[13:44] / trait_B_sd[13:44]
+  
+#  traits_norm <- (traits[13:44] - traits_mean ) /traits_sd
+#  traits_scaled <- log(traits[13:44]  /traits_sd)
+  
+  
+
+#}
+
+# for now here, in to its own file later:
+
+scale_traits <- function(varst, labels, nlabels, traits_mean, traits_sd){ 
+  # determine context in which the function is used ( e.g. in generating the model or predictions)
+  # for scaling in generating the models, "varst" is multidimensional:
+  if(!is.null(dim(varst))){ 
+    ns <- names(varst)[1:(nlabels-1)]
+    print(paste('scaling',ns))
+    for (n in 1:length(ns)){ # normalise predictor traits only
+      varst[,ns[n]] <- (varst[,ns[n]] - traits_mean[,labels[n]] ) / traits_sd[,labels[n]] 
+    }
+  }else{  # for scaling of single values during the network predictions, varst is a single value ( could be changed to a list, but done like this for now)
+    if(labels == "TLP_e_last"  || labels == "TLP_e_start" || labels == "TLP_e" ){
+      varst <- (varst - traits_mean[,"TLP"] ) / traits_sd[,"TLP"] 
+    }
+    if(labels == "LS_e_last"   || labels == "LS_e_start" || labels == "LS_e" ){
+      varst <- (varst - traits_mean[,"LS"] ) / traits_sd[,"LS"] 
+    }
+    if(labels == "LMA_e_last"   || labels == "LMA_e_start" || labels == "LMA_e" ){
+      varst <- (varst - traits_mean[,"LMA"] ) / traits_sd[,"LMA"] 
+    }
+    if(labels == "P50_e_last"   || labels == "P50_e_start" || labels == "P50_e" ){
+      varst <- (varst - traits_mean[,"P50"] ) / traits_sd[,"P50"] 
+    }
+    if(labels == "Ks_e_last"   || labels == "Ks_e_start" || labels == "Ks_e" ){
+      varst <- (varst - traits_mean[,"Ks"] ) / traits_sd[,"Ks"] 
+    }
+    if(labels == "WD_e_last"   || labels == "WD_e_start" || labels == "WD_e" ){
+      varst <- (varst - traits_mean[,"WD"] ) / traits_sd[,"WD"] 
+    }
+    if(labels == "slope_e_last"   || labels == "slope_e_start" || labels == "slope_e" ){
+      varst <- (varst - traits_mean[,"slope"] ) / traits_sd[,"slope"] 
+    }
+  }
+  return(varst)
+}
+unscale_traits <- function(varst, labels, nlabels, traits_mean, traits_sd){ 
+# for unscaling of single values during the network predictions, varst is a single value ( could be changed to a list, but done like this for now)
+    if(labels == "TLP_e_last"  || labels == "TLP_e_start" || labels == "TLP_e" ){
+      varst <- varst * traits_sd[,"TLP"] + traits_mean[,"TLP"] 
+    }
+    if(labels == "LS_e_last"   || labels == "LS_e_start" || labels == "LS_e" ){
+      varst <- varst * traits_sd[,"LS"]  + traits_mean[,"LS"] 
+    }
+    if(labels == "LMA_e_last"   || labels == "LMA_e_start" || labels == "LMA_e" ){
+      varst <- varst * traits_sd[,"LMA"] + traits_mean[,"LMA"] 
+    }
+    if(labels == "P50_e_last"   || labels == "P50_e_start" || labels == "P50_e" ){
+      varst <- varst * traits_sd[,"P50"] + traits_mean[,"P50"] 
+    }
+    if(labels == "Ks_e_last"   || labels == "Ks_e_start" || labels == "Ks_e" ){
+      varst <- varst * traits_sd[,"Ks"] + traits_mean[,"Ks"] 
+    }
+    if(labels == "WD_e_last"   || labels == "WD_e_start" || labels == "WD_e" ){
+      varst <- varst * traits_sd[,"WD"] + traits_mean[,"WD"] 
+    }
+    if(labels == "slope_e_last"   || labels == "slope_e_start" || labels == "slope_e" ){
+      varst <- varst * traits_sd[,"slope"] + - traits_mean[,"slope"] 
+    }
+  
+  return(varst)
+}
+
+
 #----------------------------------------------------------------------------------------------------------------------
 # Test single and multivariate correlation models
 #----------------------------------------------------------------------------------------------------------------------
@@ -215,9 +306,11 @@ LMA_multivar_BDT <- LMA_multivar_test_BDT(trait_BDT, regr_type =  regr_type)
 
 # WD fits -----------------------------------------------------------------
 
-WD_multivar_BDT <- WD_multivar_test(trait_BE,leaf_type='BDT',regr_type = regr_type)
+#WD_multivar_BDT <- WD_multivar_test(trait_BE,leaf_type='BDT',regr_type = regr_type)
 
-WD_multivar_BE <- WD_multivar_test(trait_BE,leaf_type='BE',regr_type = regr_type)
+#WD_multivar_BE <- WD_multivar_test(trait_BE,leaf_type='BE',regr_type = regr_type)
+
+WD_multivar <- WD_multivar_test(trait_B,leaf_type=NULL,regr_type = regr_type)
 
 # slope fits --------------------------------------------------------------
 
@@ -247,12 +340,13 @@ LS_multivar_BDT <- LS_multivar_test(trait_BDT, leaf_type ='BDT',regr_type = regr
 # Derive traits that are not subject to optimisation--------------------------
 
 # Calculate regression of leafL from LMA ----------------------------------
+# sticking with linear regression here:
 
 leafL_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T)
 
 
 # Calculate limits of leafN vs LMA to allow estimate of leaf C:N ----------
-
+# sticking with linear regression here:
 leafN_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,trait_B$leafN),c("LMA","leafN"),nbtstrp,T)
 
 leafN_from_LMA_limit <- regress_limit_adjust(trait_B$leafN,trait_B$LMA,leafN_from_LMA,0.05)
@@ -268,73 +362,100 @@ points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_uppe
 # - avoid multicollinearity
 # - reduce dimensions, but keep most variability in predictors
 # - reduce risk of overfitting
-
-set.seed (1234)
-
-pcr_model       <- pcr(LS~., data = trait_BDT[c('P50','TLP','Ks','LS')], scale = TRUE, validation = "CV", na.action = na.omit)
-
-LS_multivar_BDT <- LS_multivar_test(LS~.,trait_BDT[c('P50','TLP','Ks','LS')], leaf_type ='BDT',regr_type = regr_type) # returns LS_from_TLP_Ks
-
-pcr_pred <- predict.pcr(pcr_model,trait_BDT[108,c('P50','TLP','Ks','LS')], ncomp = pcr_model$ncomp)
-predplot(pcr_model)
-
-pcr_model2 <- plsr(LS~., data = trait_BDT[c('P50','TLP','Ks','LS')], validation = "LOO", jackknife=T)
-plot(pcr_model2,col='green')
-validationplot(pcr_model2, val.type = "MSEP")
-validationplot()
-
-
-coef(pcr_model2,intercept=TRUE)
-
-jack.test(pcr_model2, ncomp = 3)
-pcr_model$Ymeans  # is this the intercept?
-# make sure newdata is a data frame when doing predictions or be sure the newdata matrix contains only predictors. From help:
-#It is also possible to supply a matrix instead of a data frame as newdata, which is then assumed to be the X data matrix. 
-# Note that the usual checks for the type of the data are then omitted. 
-#Also note that this is only possible with predict; it will not work in functions like predplot, 
-# RMSEP or R2, because they also need the response variable of the new data.
-
-regression_type
-leafN_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,trait_B$leafN),c("LMA","leafN"),nbtstrp,T)
-leafL_from_LMA_sma <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'sma')
-leafL_from_LMA_lm <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'lm')
-leafL_from_LMA_pca <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'pcr')
-leafL_from_LMA_plsr <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'plsr')
-
-trait = trait_B
-P50_from_TLP_Ks_WD_plsr <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'plsr')
-P50_from_TLP_Ks_WD_pca  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'pcr')
-P50_from_TLP_Ks_WD_lm   <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
-P50_from_TLP_Ks_WD_sma  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'sma')
-
-P50_from_TLP_Ks_WD_plsr$dataused == P50_from_TLP_Ks_WD_lm$dataused
-P50_from_TLP_Ks_WD_plsr$R == P50_from_TLP_Ks_WD_lm$R
-P50_from_TLP_Ks_WD_plsr$mod$intercept_R == P50_from_TLP_Ks_WD_lm$mod$intercept_R
-P50_from_TLP_Ks_WD_plsr$mod$slope_R.y1 == P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
-P50_from_TLP_Ks_WD_sma$mod$slope_R.y1
-P50_from_TLP_Ks_WD_plsr$mod$slope_R.y1
-P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
-P50_from_TLP_Ks_WD_pca$mod$slope_R.y1
-
-varnames =c("TLP","Ks","WD","P50")
-nvars=length(varnames)
-yy= vars=data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50)
-pcr_model       <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), data = yy, scale = TRUE, validation = "CV", na.action = na.omit)
-coef(pcr_model,intercept = TRUE)
-P50_from_TLP_Ks_WD_plsr <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'plsr')
-P50_from_TLP_Ks_WD_pca <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'pcr')
-
-P50_from_TLP_Ks_WD_pca$mod$intercept_R
-P50_from_TLP_Ks_WD_pca$mod$slope_R.y1
-P50_from_TLP_Ks_WD_pca$mod$slope_R.y2
-P50_from_TLP_Ks_WD_pca$mod$slope_R.y3
-
-P50_from_TLP_Ks_WD_lm  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
-
-P50_from_TLP_Ks_WD_lm$mod$intercept_R
-P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
-P50_from_TLP_Ks_WD_lm$mod$slope_R.y2
-P50_from_TLP_Ks_WD_lm$mod$slope_R.y3
+testing=FALSE
+if(testing==TRUE){
+  set.seed (1234)
+  
+  #TEST new function:
+  
+  #[TODO] scale + rescale manually
+  sdtraits  <- apply(trait_BDT[c("TLP","Ks","WD","P50")],2,sd,na.rm=TRUE)
+  mtraits =  apply(trait_BDT[c("TLP","Ks","WD","P50")],2,mean,na.rm=TRUE)
+  yy = (yy-mtraits)/sdtraits
+  pcr_model <- pcr(P50~., data = trait_BDT[c("TLP","Ks","WD","P50")], scale = sdtraits[1:3], validation = "CV", na.action = na.omit)
+  
+  DF2formula(yy[varnames[c(nvars,1:nvars-1)]])
+  
+  coef(pcr_model,intercept = TRUE)
+  
+  
+  trait = trait_BDT
+  #P50_from_TLP_Ks_WD_plsr <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'plsr')
+  P50_from_TLP_Ks_WD_pca  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'pcr')
+  #P50_from_TLP_Ks_WD_lm   <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
+  #P50_from_TLP_Ks_WD_sma  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'sma')
+  P50_from_TLP_Ks_WD_pca$mod$intercept_R
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y1
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y2
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y3
+  
+  
+  
+  LS_multivar_BDT <- LS_multivar_test(LS~.,trait_BDT[c('P50','TLP','Ks','LS')], leaf_type ='BDT',regr_type = regr_type) # returns LS_from_TLP_Ks
+  
+  pcr_pred <- predict.pcr(pcr_model,trait_BDT[108,c('P50','TLP','Ks','LS')], ncomp = pcr_model$ncomp)
+  predplot(pcr_model)
+  
+  pcr_model2 <- plsr(LS~., data = trait_BDT[c('P50','TLP','Ks','LS')], validation = "LOO", jackknife=T)
+  plot(pcr_model2,col='green')
+  validationplot(pcr_model2, val.type = "MSEP")
+  validationplot()
+  
+  
+  coef(pcr_model2,intercept=TRUE)
+  
+  jack.test(pcr_model2, ncomp = 3)
+  pcr_model$Ymeans  # is this the intercept?
+  # make sure newdata is a data frame when doing predictions or be sure the newdata matrix contains only predictors. From help:
+  #It is also possible to supply a matrix instead of a data frame as newdata, which is then assumed to be the X data matrix. 
+  # Note that the usual checks for the type of the data are then omitted. 
+  #Also note that this is only possible with predict; it will not work in functions like predplot, 
+  # RMSEP or R2, because they also need the response variable of the new data.
+  
+  regression_type
+  leafN_from_LMA      <- sma_plot_stats(data.frame(trait_B$LMA,trait_B$leafN),c("LMA","leafN"),nbtstrp,T)
+  leafL_from_LMA_sma  <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'sma')
+  leafL_from_LMA_lm   <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'lm')
+  leafL_from_LMA_pca  <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'pcr')
+  leafL_from_LMA_plsr <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T,regression_type = 'plsr')
+  
+  trait = trait_B
+  P50_from_TLP_Ks_WD_plsr <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'plsr')
+  P50_from_TLP_Ks_WD_pca  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'pcr')
+  P50_from_TLP_Ks_WD_lm   <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
+  P50_from_TLP_Ks_WD_sma  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'sma')
+  
+  P50_from_TLP_Ks_WD_plsr$dataused == P50_from_TLP_Ks_WD_lm$dataused
+  P50_from_TLP_Ks_WD_plsr$R == P50_from_TLP_Ks_WD_lm$R
+  P50_from_TLP_Ks_WD_plsr$mod$intercept_R == P50_from_TLP_Ks_WD_lm$mod$intercept_R
+  P50_from_TLP_Ks_WD_plsr$mod$slope_R.y1 == P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
+  P50_from_TLP_Ks_WD_sma$mod$slope_R.y1
+  P50_from_TLP_Ks_WD_plsr$mod$slope_R.y1
+  P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y1
+  
+  varnames =c("TLP","Ks","WD","P50")
+  nvars=length(varnames)
+  yy= vars=data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50)
+  pcr_model       <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), data = yy, scale = TRUE, validation = "CV", na.action = na.omit)
+  coef(pcr_model,intercept = TRUE)
+  P50_from_TLP_Ks_WD_plsr <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'plsr')
+  P50_from_TLP_Ks_WD_pca <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'pcr')
+  
+  P50_from_TLP_Ks_WD_pca$mod$intercept_R
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y1
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y2
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y3
+  
+  P50_from_TLP_Ks_WD_lm  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
+  
+  P50_from_TLP_Ks_WD_lm$mod$intercept_R
+  P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
+  P50_from_TLP_Ks_WD_lm$mod$slope_R.y2
+  P50_from_TLP_Ks_WD_lm$mod$slope_R.y3
+  
+  
+}
 
 
 
@@ -389,6 +510,8 @@ list2env(outs_LSP50$predicted , envir = .GlobalEnv)
 # Stats defining the uncertainty range for each point
 create_uncertainty_range_stats(outs_LSP50)
 
+#trait_BE = trait_BE_save
+
 opt_test_plots_LSP50(trait_plot,
                      Ks_e_mean,
                      Ks_e_5perc,
@@ -431,7 +554,7 @@ traits_LSP50.df <- data.frame(matrix(unlist(traits_LPJG_LSP50), ncol=length(trai
 names(traits_LSP50.df) <- names(traits_LPJG_LSP50)
 
 # # create correlation table to report and test for sign in correlation being correct --------
-tt <- test_cor_signs(trait_BDT,data.frame(LMA=LMA_e_mean,P50=as.vector(P50_e[,1]),TLP=TLP_e_mean,slope=slope_e_mean,LS = as.vector(LS_e[,1]),WD =WD_e_mean,Ks = Ks_e_mean))
+tt <- test_cor_signs(trait_plot,data.frame(LMA=LMA_e_mean,P50=as.vector(P50_e[,1]),TLP=TLP_e_mean,slope=slope_e_mean,LS = as.vector(LS_e[,1]),WD =WD_e_mean,Ks = Ks_e_mean))
 tt
 
 
@@ -469,6 +592,8 @@ traits_PCA$Ks  = log(traits_PCA$Ks)
 traits_PCA$LMA = log(traits_PCA$LMA)
 
 
+
+
 #PCA on optimised trait values and observations (0 = 5 to 7)
 opt.pca <- prcomp(traits_PCA[,c(1,3,4,6,10,12,17)], center = TRUE,scale. = TRUE)
 
@@ -490,17 +615,19 @@ if(spec_group_sel ==2){
 }
 
 # plot standardised, scaled PCA outputs
-dev.new()
-p_P50LS
+#dev.new()
+#p_P50LS
 
 
 ##DECISION: take P50LS as trait pair to generate parametersets using the network
 #----------------------------------------------------------------------------------------------------------------------
 # Trait sampling for .insfile
 #----------------------------------------------------------------------------------------------------------------------
+# hyper-volume sampled PFTs, alongside extreme-value outer edges:
+outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
 
 #display trait values that will be selected for PFTs(purple), show that their spread is across a wide range of values 
-opt_test_plots_LSP50_pfts(trait_plot,
+opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
                           Ks_e_mean,
                           Ks_e_5perc,
                           Ks_e_95perc,
@@ -521,9 +648,18 @@ opt_test_plots_LSP50_pfts(trait_plot,
                           slope_e_5perc,
                           slope_e_95perc,
                           slope_e,
-                          outs_LSP50_hv = outs_LSP50_lhc) 
+                          outs_LSP50_hv = outs_LSP50_hv) 
 
-traits_LPJG_LSP50 <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
+
+# to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
+# single objects, 
+list2env(outs_LSP50_hv$predictors , envir = .GlobalEnv) 
+list2env(outs_LSP50_hv$predicted , envir = .GlobalEnv)
+
+# Stats defining the uncertainty range for each point
+create_uncertainty_range_stats(outs_LSP50_hv)
+
+traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
                                       as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
                                       leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 LMA_e_mean
@@ -558,19 +694,19 @@ Ks_e_mean
 
 if(spec_group_sel==2){# evergreen
   # for traits_LPJG_LSP50
-  traits_LPJG_LSP50_BE <- traits_LPJG_LSP50
+  traits_LPJG_LSP50_BE <- traits_LPJG_LSP50_pft
   
   #save new PFT subset or load existing one: 
-  save(traits_LPJG_LSP50_BE, file = 'LPJGuessPFTS_BE.RData')
+  save(traits_LPJG_LSP50_BE, file = 'LPJGuessPFTS_BE10-03-2022.RData')
   #load('LPJGuessPFTS_BE.RData')
 }
 
 if(spec_group_sel==1){# deciduous
   # for traits_LPJG_LSP50
-  traits_LPJG_LSP50_BDT <- traits_LPJG_LSP50
+  traits_LPJG_LSP50_BDT <- traits_LPJG_LSP50_pft
   
   #save new PFT subset or load existing one: 
-  save(traits_LPJG_LSP50_BDT, file = 'LPJGuessPFTS_BDT.RData')
+  save(traits_LPJG_LSP50_BDT, file = 'LPJGuessPFTS_BDT10-03-2022.RData')
   #load('LPJGuessPFTS_BE.RData')
 }
 
@@ -580,9 +716,10 @@ if(spec_group_sel==1){# deciduous
 #output_fol="/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/uncer_test_KsLS/revised_PFTs_141220"
 #AHES commented out for now during testing
 #output_fol="/Users/annemarie/Documents/1_TreeMort/2_Analysis/1_Inputs"
+output_fol="/Users/annemarie/Desktop/"
 
 if(spec_group_sel==2){# broadleaf evergreen in TRY
-  output_fol="/Users/annemarie/Desktop/TrBE/lhs/"
+  output_fol="/Users/annemarie/Desktop/TrBE/plsr/"
   # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
   basePFT = 4  # tropical broadleaf evergreen PFT for LPJGuess
   # create .ins files for  LPJ-GUESS_hydro
@@ -592,7 +729,7 @@ if(spec_group_sel==2){# broadleaf evergreen in TRY
   write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_BE)
 }
 if(spec_group_sel==1){# 1 = TBD tropical and temperate broadleaf deciduous in TRY
-  output_fol="/Users/annemarie/Desktop/TrBR/lhs/"
+  output_fol="/Users/annemarie/Desktop/TrBR/plsr/"
   basePFT= 5 # tropical raingreen PFT for LPJGuess
   # create .ins files for  LPJ-GUESS_hydro
   #started with KSLS
@@ -605,4 +742,58 @@ if(spec_group_sel==1){# 1 = TBD tropical and temperate broadleaf deciduous in TR
 #write_LPJG_ins.file(output_fol,basePFT = 3 ,traits_LPJG)
 #write_LPJG_ins.file(output_fol,basePFT = 4 ,traits_LPJG)
 #write_LPJG_ins.file(output_fol,basePFT = 5 ,traits_LPJG)
+
+##Compare range of traits
+
+pcr_TrBE <- read.csv(file='~/Desktop/TrBE/pcr/LPJG_PFT_summary_TrBE.csv',header = TRUE)
+lm_TrBE <- read.csv(file='~/Desktop/TrBE/lm/LPJG_PFT_summary_TrBE.csv',header = TRUE)
+previous_TrBE <- read.csv(file='~/Documents/1_TreeMort/2_Analysis/1_Inputs/ins_files/LPJG_PFT_summary_TrBE_old.csv',header = TRUE)
+
+par(mfrow=c(4,4))
+
+for (n in names(pcr_TrBE)){
+  if(n %in% names(trait_plot)){
+    if(n=='WD'){
+      plot(rep(1,length(t(trait_plot[n]))),(t(trait_plot[n])*1000)/2,xlab='',ylab='',col='purple',xlim=c(0,5),main=n) 
+    }else if(n=='P50'){
+      plot(rep(1,length(t(trait_plot[n]))),-exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,5),main=n) 
+    }else if(n=='Ks'){
+      plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+    }else if(n=='TLP'){
+      plot(rep(1,length(t(trait_plot[n]))),-exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+    }else if (n=='LS'){
+      plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n]))*10000,xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+    }else if (n=='SLA'){# (1/LMA_e_mean_unlogged)*1000*2
+      plot(rep(1,length(t(trait_plot['LMA']))),(1/exp(t(trait_plot['LMA'])))*1000*2,xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+    }else if(n=='slope'){
+      plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+    }else{
+      plot(rep(1,length(t(trait_plot[n]))),t(trait_plot[n]),xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+    }
+    
+    
+    points(rep(2,28),t(previous_TrBE[n]))
+    }else{
+      plot(rep(2,28),t(previous_TrBE[n]),xlab='', ylim= c(min(c(t(previous_TrBE[n]),t(pcr_TrBE[n]),t(lm_TrBE[n]))),max(c(t(previous_TrBE[n]),t(pcr_TrBE[n]),t(lm_TrBE[n])))),main = n,xlim=c(0,5),ylab='')
+      }
+  points(rep(3,30),t(pcr_TrBE[n]), col='blue', pch=2)
+  points(rep(4,31),t(lm_TrBE[n]), col='orange', pch=5)
+}
+
+other <- c("DeltaPsiWW","lambda")
+
+plot(rep(1,length(t(trait_plot['WD']))), -0.5571 + (2.9748*(t(trait_plot['WD']))),xlab='',ylab='',col='purple',xlim=c(0,5),main="DeltaPsiWW") 
+points(rep(2,28),t(previous_TrBE["DeltaPsiWW"]))
+points(rep(3,30),t(pcr_TrBE["DeltaPsiWW"]), col='blue', pch=2)
+points(rep(4,31),t(lm_TrBE["DeltaPsiWW"]), col='orange', pch=5)
+
+plot(rep(1,length(t(trait_plot['TLP']))), -0.188+(-0.3*(-exp(t(trait_plot['TLP'])))),xlab='',ylab='',col='purple',xlim=c(0,5),main="lambda") 
+points(rep(2,28),t(previous_TrBE["lambda"]))
+points(rep(3,30),t(pcr_TrBE["lambda"]), col='blue', pch=2)
+points(rep(4,31),t(lm_TrBE["lambda"]), col='orange', pch=5)
+
+
+plot.new()
+legend('center',legend=c('obs','old','lm','pls'),col=c('purple','black','orange','blue'),pch=c(1,1,2,5),cex=0.8)
+
 

@@ -44,7 +44,9 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_
   mod <- sma_regress_multivar(vars[ind,],nbtstrp,T)
   }
   if(regression_type == 'pcr' | regression_type == 'plsr'){
-  mod <- pca_regress_multivar(vars[ind,],nbtstrp,T,regr_type = regression_type)
+  # scale predictor traits, assuming no NAs ( which should be true with abovestream indexing checks.) 
+  vars[ind,] <- scale_traits(vars[ind,], labels, nlabels, traits_mean, traits_sd)
+  mod <- pca_regress_multivar(vars[ind,], nbtstrp, T, regr_type = regression_type)
   }
 
   pearson_cor <- cor(vars[ind,])[1,2]
@@ -84,6 +86,7 @@ sma_plot_stats <- function(vars,labels,nbtstrp,makeplot=F,indin=NULL,regression_
   } else {
     stop('sma_plot_stats can only handle a maximum of 6 variables')
   }
+  
   
   var_est_L95=unname(apply(var_est_boot, 1, quantile,0.05))
   var_est_U95=unname(apply(var_est_boot, 1, quantile,0.95))
