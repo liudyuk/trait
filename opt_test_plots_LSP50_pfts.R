@@ -1,4 +1,3 @@
-
 opt_test_plots_LSP50_pfts <- function(trait,
                                  Ks_e_mean,
                                  Ks_e_5perc,

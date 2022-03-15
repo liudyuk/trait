@@ -105,6 +105,9 @@ source('write_LPJG_ins.file.R')
 # for sanity checking optimisation results
 source('test_cor_signs.R')
 
+# show PFT-variant location within observed trait space and sample space
+source('opt_test_plots_LSP50_pfts.R')
+
 # pretty plotting of PCA results
 source('pca_with_pretty_biplot.R')
 #---------------packages--------------------------
@@ -176,7 +179,7 @@ bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp, regr_type = 'lm')
 
 #--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
 # multivariate lm, sma, pc(r) or pls(r) regression possible. change option here:
-regr_type = 'pcr'
+regr_type = 'plsr'
 
 #if (regr_type == 'pcr' || regr_type == 'plsr'){
   
@@ -190,8 +193,12 @@ regr_type = 'pcr'
 #  trait_BE_sd =  apply(trait_BE,2,sd,na.rm=TRUE)
 #  trait_BE[13:44] = trait_BE[13:44] / trait_BE_sd[13:44]
   
-#  traits_sd = as.data.frame(t(apply(traits[13:44],2,sd,na.rm=TRUE)))
-#  traits_mean = as.data.frame(t(apply(traits[13:44],2,mean,na.rm=TRUE)))
+  traits_sd   = as.data.frame(t(apply(traits[13:44],2,sd,na.rm=TRUE)))
+  traits_mean_unscale = as.data.frame(t(apply(traits[13:44],2,mean,na.rm=TRUE)))
+  # now that centering is se to TRUE, and it is applied to all values, including Y, do not standardise using the mean, but only sd only.
+  #Test that this is the case, setting mean to 0 for now, so that 0 will be subtracted from every X
+  traits_mean = traits[1,13:44]
+  traits_mean[1,] <- 0
 #  traits[13:44] = traits[13:44] / traits_sd[13:44]
   
 #  trait_B_save = trait_B
@@ -208,6 +215,15 @@ regr_type = 'pcr'
 # for now here, in to its own file later:
 
 scale_traits <- function(varst, labels, nlabels, traits_mean, traits_sd){ 
+  # input:
+  # varst dataframe of which the first nlables-1 variables will be scaled
+  # labels =names of all traits in the dataframe
+  # nlabels number of traits in the dataframe
+  # traits_mean =  mean trait value from all traits in the dataset. will be subsetted for the correct one using 'labels'.
+  # straits_sd = standard deviation from all traits in the dataset. will be subsetted for the correct one using 'labels'.
+  # scaling is only performed on the explanatory variables X, because scale=TRUE only scales X variables. Therefore I do nlables-1
+  # as index nlabels contains Y.
+  
   # determine context in which the function is used ( e.g. in generating the model or predictions)
   # for scaling in generating the models, "varst" is multidimensional:
   if(!is.null(dim(varst))){ 
@@ -298,7 +314,7 @@ TLP_multivar <- TLP_multivar_test(trait_B, regr_type =  regr_type)
 # Separate for BE and BDT (BD + BT) on the basis that LMA has a very different range and set of bivariate relationships for these
 # two different groups, unlike the other traits here.
 
-LMA_multivar_BE <- LMA_multivar_test_BE(trait_BE, regr_type =  regr_type)
+LMA_multivar_BE  <- LMA_multivar_test_BE(trait_BE, regr_type =  regr_type)
 
 LMA_multivar_BDT <- LMA_multivar_test_BDT(trait_BDT, regr_type =  regr_type)
 
@@ -362,6 +378,7 @@ points(trait_B$LMA[leafN_from_LMA_limit$ind],leafN_from_LMA_limit$var1_pred_uppe
 # - avoid multicollinearity
 # - reduce dimensions, but keep most variability in predictors
 # - reduce risk of overfitting
+
 testing=FALSE
 if(testing==TRUE){
   set.seed (1234)
@@ -369,10 +386,61 @@ if(testing==TRUE){
   #TEST new function:
   
   #[TODO] scale + rescale manually
-  sdtraits  <- apply(trait_BDT[c("TLP","Ks","WD","P50")],2,sd,na.rm=TRUE)
-  mtraits =  apply(trait_BDT[c("TLP","Ks","WD","P50")],2,mean,na.rm=TRUE)
-  yy = (yy-mtraits)/sdtraits
-  pcr_model <- pcr(P50~., data = trait_BDT[c("TLP","Ks","WD","P50")], scale = sdtraits[1:3], validation = "CV", na.action = na.omit)
+  sdtraits  <- as.data.frame(t(apply(na.omit(trait_BDT[c("TLP","Ks","WD","P50")])[1:50,],2,sd,na.rm=TRUE)))
+  mtraits   <- as.data.frame(t(apply(na.omit(trait_BDT[c("TLP","Ks","WD","P50")])[1:50,],2,mean,na.rm=TRUE)))
+  
+  #training dataset:
+  train <- na.omit(trait_BDT[c("TLP","Ks","WD","P50")])[1:50,]
+  
+  # model construction and coefficient exctraction
+  pcr_model <- plsr(P50~., data = train[c("TLP","Ks","WD","P50")], scale = TRUE,center=TRUE, validation = "LOO",
+                     na.action = na.omit,x=TRUE,y=TRUE)
+  #opls_model = oscorespls.fit(X=as.matrix(train[c("TLP","Ks","WD")]) ,Y = as.matrix(train[c("P50")]),ncomp=3)
+  l_model <- lm(P50~., data = train[c("TLP","Ks","WD","P50")], na.action = na.omit)
+  l_coef   <- coef(l_model)
+  pcr_coef <- coef(pcr_model,intercept=TRUE,ncomp=3)
+  
+  #testing dataset:
+  test <- na.omit(trait_BDT[c("TLP","Ks","WD","P50")])[50:133,]
+  
+  #apply model for prediction
+  # Why does scaling TLP, Ks and WD with their sd not give better results? I thought the model was constructed with them scaled?
+  P50pred_pcr <- pcr_coef[1] + pcr_coef[2]*test$TLP + pcr_coef[3]*test$Ks + pcr_coef[4]*test$WD
+  P50pred_l   <-  l_coef[1] + l_coef[2]*test$TLP +  l_coef[3]*test$Ks +  l_coef[4]*test$WD
+  P50pred_pcr_auto <- predict(pcr_model,newdata = test,ncomp=1 )
+ 
+  # plot
+  plot(test$P50,P50pred_pcr_auto,pch=10,ylim=c(-0.5,2),xlim=c(-0.5,2))
+  # centering = TRUE is the default in pcr, applied to X and Ys.  # therefore,if center?TRUE I thought I must 'uncenter' Y ( by doing + mtraits$P50)
+  # or use centering= FALSE. I don't understand why 'uncentering' doesn't give the same result as the above though.
+  points(test$P50,P50pred_pcr,col='orange',pch=5) 
+  points(test$P50,P50pred_pcr+mtraits$P50,col='orange',pch=5) 
+  points(test$P50,P50pred_l,pch=11,col='blue',cex=0.8) 
+  legend("topleft",legend=c('lm','pcr manual','pcr+mean manual', 'pcr auto'),pch=c(11,5,5,10),col=c("black","orange","orange","blue"))
+  
+  #
+  plot(RMSEP(pcr_model)) # shows that 1 PC achieves a Root Mean Squared Error of Prediction of < 53%
+  #test individual points:
+  points(test$P50[1], predict(pcr_model,newdata = test[1,],ncomp=1),col='red' )
+  
+  #test impact of ncomps
+  points(test$P50, predict(pcr_model,newdata = test,ncomp=1), col ="grey" )
+  points(test$P50, predict(pcr_model,newdata = test,ncomp=2), col ="dark grey" )
+  points(test$P50, predict(pcr_model,newdata = test,ncomp=3), col ="yellow" )
+  
+  
+  # the same as LM. Why?
+  plot(test$P50,P50pred_l,pch=11,col='blue',cex=0.8) 
+  points(test$P50, predict(pcr_model,newdata = test,ncomp=3), col ="yellow" )
+  
+  
+  # what does predict() do that I don't understand
+  # why is predict() using the pcr model giving the same result as the linear model? I thought the pcr model would be somehow different.
+  # I thought the coefficients in the pcr model would consider the interactions between all Xes, and in the
+  
+  
+  
+  mod_boot <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale=FALSE,center=TRUE, data = bootsample,x=TRUE,y=TRUE)
   
   DF2formula(yy[varnames[c(nvars,1:nvars-1)]])
   
@@ -380,16 +448,24 @@ if(testing==TRUE){
   
   
   trait = trait_BDT
-  #P50_from_TLP_Ks_WD_plsr <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'plsr')
+  P50_from_TLP_Ks_WD_plsr <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'plsr')
   P50_from_TLP_Ks_WD_pca  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'pcr')
-  #P50_from_TLP_Ks_WD_lm   <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
+  P50_from_TLP_Ks_WD_lm   <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
   #P50_from_TLP_Ks_WD_sma  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'sma')
-  P50_from_TLP_Ks_WD_pca$mod$intercept_R
-  P50_from_TLP_Ks_WD_pca$mod$slope_R.y1
-  P50_from_TLP_Ks_WD_pca$mod$slope_R.y2
-  P50_from_TLP_Ks_WD_pca$mod$slope_R.y3
+ 
+  P50_from_TLP_Ks_WD_pca$mod$intercept_R ==  P50_from_TLP_Ks_WD_lm$mod$intercept_R
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y1  ==  P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y2  ==  P50_from_TLP_Ks_WD_lm$mod$slope_R.y2
+  P50_from_TLP_Ks_WD_pca$mod$slope_R.y3  ==  P50_from_TLP_Ks_WD_lm$mod$slope_R.y3
   
-  
+  P50_from_TLP_Ks_WD_lm$mod$intercept_R
+  P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
+  P50_from_TLP_Ks_WD_lm$mod$slope_R.y2
+  P50_from_TLP_Ks_WD_lm$mod$slope_R.y3
+  # 490
+  [1] 4.599416
+  [1] -0.324917
+  [1] "plsr"
   
   LS_multivar_BDT <- LS_multivar_test(LS~.,trait_BDT[c('P50','TLP','Ks','LS')], leaf_type ='BDT',regr_type = regr_type) # returns LS_from_TLP_Ks
   
@@ -498,9 +574,9 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 # lowest bivariate relationship in the trait network for evergreen subset: pearson cor = 0.23.
 # it is thought to have no functional relationship.
 # Attempt to iteratively converge on the best fit values of Ks, TLP ,slope, WD and LMA, given known LS and P50
-outs_LSP50     <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
-outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
-outs_LSP50_lhc <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = 4, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
+outs_LSP50     <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
+outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
+outs_LSP50_lhc <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = 4, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 
 # to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
 # single objects, 
@@ -592,11 +668,8 @@ traits_PCA$Ks  = log(traits_PCA$Ks)
 traits_PCA$LMA = log(traits_PCA$LMA)
 
 
-
-
 #PCA on optimised trait values and observations (0 = 5 to 7)
 opt.pca <- prcomp(traits_PCA[,c(1,3,4,6,10,12,17)], center = TRUE,scale. = TRUE)
-
 
 
 p_P50LS  <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2,circle=TRUE) +
@@ -624,7 +697,7 @@ if(spec_group_sel ==2){
 # Trait sampling for .insfile
 #----------------------------------------------------------------------------------------------------------------------
 # hyper-volume sampled PFTs, alongside extreme-value outer edges:
-outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
+outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 
 #display trait values that will be selected for PFTs(purple), show that their spread is across a wide range of values 
 opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
@@ -697,7 +770,7 @@ if(spec_group_sel==2){# evergreen
   traits_LPJG_LSP50_BE <- traits_LPJG_LSP50_pft
   
   #save new PFT subset or load existing one: 
-  save(traits_LPJG_LSP50_BE, file = 'LPJGuessPFTS_BE10-03-2022.RData')
+  save(traits_LPJG_LSP50_BE, file = 'LPJGuessPFTS_BE14-03-2022lm.RData')
   #load('LPJGuessPFTS_BE.RData')
 }
 
@@ -706,7 +779,7 @@ if(spec_group_sel==1){# deciduous
   traits_LPJG_LSP50_BDT <- traits_LPJG_LSP50_pft
   
   #save new PFT subset or load existing one: 
-  save(traits_LPJG_LSP50_BDT, file = 'LPJGuessPFTS_BDT10-03-2022.RData')
+  save(traits_LPJG_LSP50_BDT, file = 'LPJGuessPFTS_BDT14-03-2022lm.RData')
   #load('LPJGuessPFTS_BE.RData')
 }
 
@@ -719,7 +792,7 @@ if(spec_group_sel==1){# deciduous
 output_fol="/Users/annemarie/Desktop/"
 
 if(spec_group_sel==2){# broadleaf evergreen in TRY
-  output_fol="/Users/annemarie/Desktop/TrBE/plsr/"
+  output_fol="/Users/annemarie/Desktop/TrBE/pcr_new/"
   # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
   basePFT = 4  # tropical broadleaf evergreen PFT for LPJGuess
   # create .ins files for  LPJ-GUESS_hydro
@@ -729,7 +802,7 @@ if(spec_group_sel==2){# broadleaf evergreen in TRY
   write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_BE)
 }
 if(spec_group_sel==1){# 1 = TBD tropical and temperate broadleaf deciduous in TRY
-  output_fol="/Users/annemarie/Desktop/TrBR/plsr/"
+  output_fol="/Users/annemarie/Desktop/TrBR/pcr_new/"
   basePFT= 5 # tropical raingreen PFT for LPJGuess
   # create .ins files for  LPJ-GUESS_hydro
   #started with KSLS
@@ -744,7 +817,8 @@ if(spec_group_sel==1){# 1 = TBD tropical and temperate broadleaf deciduous in TR
 #write_LPJG_ins.file(output_fol,basePFT = 5 ,traits_LPJG)
 
 ##Compare range of traits
-
+pcr_TrBE_new <- read.csv(file='~/Desktop/TrBE/pcr_new/LPJG_PFT_summary_TrBE.csv',header = TRUE)
+plsr_TrBE_new <- read.csv(file='~/Desktop/TrBE/plsr_new/LPJG_PFT_summary_TrBE.csv',header = TRUE)
 pcr_TrBE <- read.csv(file='~/Desktop/TrBE/pcr/LPJG_PFT_summary_TrBE.csv',header = TRUE)
 lm_TrBE <- read.csv(file='~/Desktop/TrBE/lm/LPJG_PFT_summary_TrBE.csv',header = TRUE)
 previous_TrBE <- read.csv(file='~/Documents/1_TreeMort/2_Analysis/1_Inputs/ins_files/LPJG_PFT_summary_TrBE_old.csv',header = TRUE)
@@ -754,30 +828,31 @@ par(mfrow=c(4,4))
 for (n in names(pcr_TrBE)){
   if(n %in% names(trait_plot)){
     if(n=='WD'){
-      plot(rep(1,length(t(trait_plot[n]))),(t(trait_plot[n])*1000)/2,xlab='',ylab='',col='purple',xlim=c(0,5),main=n) 
+      plot(rep(1,length(t(trait_plot[n]))),(t(trait_plot[n])*1000)/2,xlab='',ylab='',col='purple',xlim=c(0,6),main=n) 
     }else if(n=='P50'){
-      plot(rep(1,length(t(trait_plot[n]))),-exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,5),main=n) 
+      plot(rep(1,length(t(trait_plot[n]))),-exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,6),main=n) 
     }else if(n=='Ks'){
-      plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+      plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,6),main=n)  
     }else if(n=='TLP'){
-      plot(rep(1,length(t(trait_plot[n]))),-exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+      plot(rep(1,length(t(trait_plot[n]))),-exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,6),main=n)  
     }else if (n=='LS'){
-      plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n]))*10000,xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+      plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n]))*10000,xlab='',ylab='',col='purple',xlim=c(0,6),main=n)  
     }else if (n=='SLA'){# (1/LMA_e_mean_unlogged)*1000*2
-      plot(rep(1,length(t(trait_plot['LMA']))),(1/exp(t(trait_plot['LMA'])))*1000*2,xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+      plot(rep(1,length(t(trait_plot['LMA']))),(1/exp(t(trait_plot['LMA'])))*1000*2,xlab='',ylab='',col='purple',xlim=c(0,6),main=n)  
     }else if(n=='slope'){
-      plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+      plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,6),main=n)  
     }else{
-      plot(rep(1,length(t(trait_plot[n]))),t(trait_plot[n]),xlab='',ylab='',col='purple',xlim=c(0,5),main=n)  
+      plot(rep(1,length(t(trait_plot[n]))),t(trait_plot[n]),xlab='',ylab='',col='purple',xlim=c(0,6),main=n)  
     }
     
     
     points(rep(2,28),t(previous_TrBE[n]))
     }else{
-      plot(rep(2,28),t(previous_TrBE[n]),xlab='', ylim= c(min(c(t(previous_TrBE[n]),t(pcr_TrBE[n]),t(lm_TrBE[n]))),max(c(t(previous_TrBE[n]),t(pcr_TrBE[n]),t(lm_TrBE[n])))),main = n,xlim=c(0,5),ylab='')
+      plot(rep(2,28),t(previous_TrBE[n]),xlab='', ylim= c(min(c(t(previous_TrBE[n]),t(pcr_TrBE[n]),t(lm_TrBE[n]))),max(c(t(previous_TrBE[n]),t(pcr_TrBE[n]),t(lm_TrBE[n])))),main = n,xlim=c(0,6),ylab='')
       }
   points(rep(3,30),t(pcr_TrBE[n]), col='blue', pch=2)
   points(rep(4,31),t(lm_TrBE[n]), col='orange', pch=5)
+  points(rep(5,31),t(pcr_TrBE_new[n]), col='green', pch=2)
 }
 
 other <- c("DeltaPsiWW","lambda")
@@ -785,6 +860,7 @@ other <- c("DeltaPsiWW","lambda")
 plot(rep(1,length(t(trait_plot['WD']))), -0.5571 + (2.9748*(t(trait_plot['WD']))),xlab='',ylab='',col='purple',xlim=c(0,5),main="DeltaPsiWW") 
 points(rep(2,28),t(previous_TrBE["DeltaPsiWW"]))
 points(rep(3,30),t(pcr_TrBE["DeltaPsiWW"]), col='blue', pch=2)
+points(rep(4,31),t(lm_TrBE["DeltaPsiWW"]), col='orange', pch=4)
 points(rep(4,31),t(lm_TrBE["DeltaPsiWW"]), col='orange', pch=5)
 
 plot(rep(1,length(t(trait_plot['TLP']))), -0.188+(-0.3*(-exp(t(trait_plot['TLP'])))),xlab='',ylab='',col='purple',xlim=c(0,5),main="lambda") 

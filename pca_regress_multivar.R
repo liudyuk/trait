@@ -35,18 +35,20 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
       # apply pcr/plsr model, DF2formula helps to remain flexible with input variables:
       varnames <- names(yy)
       if(regr_type =='pcr'){
+        print('in pcr_regress_multivar - pcr method')
         #sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
         #mintraits =  apply(yy[varnames],2,min,na.rm=TRUE) # Account for fact that some traits in their current transformation cluster around 0
         #yy = yy/sdtraits # scaling is done manually here, and then set to FALSE below. 
-        mod_tmp <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), scale = FALSE, data = yy)
+        mod_tmp <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),  data = yy, validation = "CV",method="svdpc",scale=FALSE,center=TRUE)
         # <- pcr(LS~., data = trait_BDT[c('P50','TLP','Ks','LS')], scale = TRUE, validation = "CV", na.action = na.omit)
 
       }
       if(regr_type =='plsr'){
+        print('in pcr_regress_multivar - plsr method')
         #sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
        # mintraits =  apply(yy[varnames],2,min,na.rm=TRUE)
         #yy = yy/sdtraits # scaling is done manually here, and then set to FALSE below.
-        mod_tmp <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale = FALSE, data = yy,na.action=na.omit)
+        mod_tmp <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), data = yy,na.action=na.omit, scale=FALSE,center=TRUE,method="oscorespls")
       }
       
       
@@ -97,13 +99,13 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
           #sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
           #mintraits =  apply(yy[varnames],2,min,na.rm=TRUE) # Account for fact that some traits in their current transformation cluster around 0
           #yy = yy/sdtraits # scaling is done manually here, and then set to FALSE below.
-          mod_boot <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale = FALSE, data = bootsample)
+          mod_boot <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale=FALSE,center=TRUE, data = bootsample,x=TRUE,y=TRUE)
         }
         if(regr_type =='plsr'){
          # sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
           #mintraits =  apply(yy[varnames],2,min,na.rm=TRUE) # Account for fact that some traits in their current transformation cluster around 0
          # yy = yy/sdtraits# scaling is done manually here, and then set to FALSE below.
-          mod_boot <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale = FALSE, data = bootsample)
+          mod_boot <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale=FALSE,center=TRUE, data = bootsample,x=TRUE,y=TRUE)
         }
         
         intercept_R.boot[i] = as.numeric(coef(mod_boot,intercept=TRUE)[1])

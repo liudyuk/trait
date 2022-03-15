@@ -36,7 +36,7 @@ lm_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F){
     # apply linear model, DF2formula helps to remain flexible with input variables:
   varnames <- names(yy)
   mod_tmp <- lm(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), data = yy)
-
+  # [TO DO] check definitely no interaction
   intercept_R <- as.numeric(mod_tmp$coefficients[1])
 
   slope_R.y1 <- as.numeric(mod_tmp$coefficients[2])
