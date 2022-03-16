@@ -124,6 +124,7 @@ library(gridExtra)
 library(olsrr)
 # for PCR regression models, now used in the network
 library(pls)
+source('coef.mvr.bugfix.R') # necessary as there was a bug in one of the pls package functions. Bug has been reported
 
 
 #--- Read in the trait data ---
@@ -197,8 +198,12 @@ regr_type = 'plsr'
   traits_mean_unscale = as.data.frame(t(apply(traits[13:44],2,mean,na.rm=TRUE)))
   # now that centering is se to TRUE, and it is applied to all values, including Y, do not standardise using the mean, but only sd only.
   #Test that this is the case, setting mean to 0 for now, so that 0 will be subtracted from every X
-  traits_mean = traits[1,13:44]
-  traits_mean[1,] <- 0
+   traits_mean = traits[1,13:44]
+   traits_mean[1,] <- 0  # legacy- set traits_mean to 0, as the centering is now done by the pcr() function itself.
+  # important, because centering is performed on Xes AND Y. Therefore, I must not do scaling and un-scaling functions (containing mean-centering) only on the
+  # Xes in the scale_ and unscale_ traits function, the mean is still passed in, but as it is 0, nothing gets changed. [TODO] simply remove mean from 
+  # the scaling function. and make sure to note somewhere that centering is done in pcr().
+  
 #  traits[13:44] = traits[13:44] / traits_sd[13:44]
   
 #  trait_B_save = trait_B
@@ -462,6 +467,7 @@ if(testing==TRUE){
   P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
   P50_from_TLP_Ks_WD_lm$mod$slope_R.y2
   P50_from_TLP_Ks_WD_lm$mod$slope_R.y3
+  
   # 490
   [1] 4.599416
   [1] -0.324917
@@ -792,7 +798,7 @@ if(spec_group_sel==1){# deciduous
 output_fol="/Users/annemarie/Desktop/"
 
 if(spec_group_sel==2){# broadleaf evergreen in TRY
-  output_fol="/Users/annemarie/Desktop/TrBE/pcr_new/"
+  output_fol="/Users/annemarie/Desktop/TrBE/plsr_new/"
   # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
   basePFT = 4  # tropical broadleaf evergreen PFT for LPJGuess
   # create .ins files for  LPJ-GUESS_hydro
@@ -852,24 +858,26 @@ for (n in names(pcr_TrBE)){
       }
   points(rep(3,30),t(pcr_TrBE[n]), col='blue', pch=2)
   points(rep(4,31),t(lm_TrBE[n]), col='orange', pch=5)
-  points(rep(5,31),t(pcr_TrBE_new[n]), col='green', pch=2)
+  points(rep(5,31),t(plsr_TrBE_new[n]), col='green', pch=2)
 }
 
-other <- c("DeltaPsiWW","lambda")
 
-plot(rep(1,length(t(trait_plot['WD']))), -0.5571 + (2.9748*(t(trait_plot['WD']))),xlab='',ylab='',col='purple',xlim=c(0,5),main="DeltaPsiWW") 
+
+plot(rep(1,length(t(trait_plot['WD']))), -0.5571 + (2.9748*(t(trait_plot['WD']))),xlab='',ylab='',col='purple',xlim=c(0,6),main="DeltaPsiWW") 
 points(rep(2,28),t(previous_TrBE["DeltaPsiWW"]))
 points(rep(3,30),t(pcr_TrBE["DeltaPsiWW"]), col='blue', pch=2)
 points(rep(4,31),t(lm_TrBE["DeltaPsiWW"]), col='orange', pch=4)
 points(rep(4,31),t(lm_TrBE["DeltaPsiWW"]), col='orange', pch=5)
+points(rep(5,31),t(plsr_TrBE_new["DeltaPsiWW"]), col='green', pch=2)
 
-plot(rep(1,length(t(trait_plot['TLP']))), -0.188+(-0.3*(-exp(t(trait_plot['TLP'])))),xlab='',ylab='',col='purple',xlim=c(0,5),main="lambda") 
+plot(rep(1,length(t(trait_plot['TLP']))), -0.188+(-0.3*(-exp(t(trait_plot['TLP'])))),xlab='',ylab='',col='purple',xlim=c(0,6),main="lambda") 
 points(rep(2,28),t(previous_TrBE["lambda"]))
 points(rep(3,30),t(pcr_TrBE["lambda"]), col='blue', pch=2)
 points(rep(4,31),t(lm_TrBE["lambda"]), col='orange', pch=5)
+points(rep(5,31),t(plsr_TrBE_new["lambda"]), col='green', pch=2)
 
 
 plot.new()
-legend('center',legend=c('obs','old','lm','pls'),col=c('purple','black','orange','blue'),pch=c(1,1,2,5),cex=0.8)
+legend('center',legend=c('obs','old','lm','pls','pls PCoptim'),col=c('purple','black','orange','blue','green'),pch=c(1,1,2,5),cex=0.65)
 
 

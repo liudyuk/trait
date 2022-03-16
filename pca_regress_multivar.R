@@ -39,7 +39,7 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
         #sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
         #mintraits =  apply(yy[varnames],2,min,na.rm=TRUE) # Account for fact that some traits in their current transformation cluster around 0
         #yy = yy/sdtraits # scaling is done manually here, and then set to FALSE below. 
-        mod_tmp <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),  data = yy, validation = "CV",method="svdpc",scale=FALSE,center=TRUE)
+        mod_tmp <- pcr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),  data = yy, validation = "LOO",method="svdpc",scale=FALSE,center=TRUE)
         # <- pcr(LS~., data = trait_BDT[c('P50','TLP','Ks','LS')], scale = TRUE, validation = "CV", na.action = na.omit)
 
       }
@@ -48,24 +48,31 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
         #sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
        # mintraits =  apply(yy[varnames],2,min,na.rm=TRUE)
         #yy = yy/sdtraits # scaling is done manually here, and then set to FALSE below.
-        mod_tmp <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), data = yy,na.action=na.omit, scale=FALSE,center=TRUE,method="oscorespls")
+        mod_tmp <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), validation = "LOO",data = yy,na.action=na.omit, scale=FALSE,center=TRUE,method="oscorespls")
       }
       
+      # decide on how many components to retain
+      ncomp.onesigma <- pls::selectNcomp(mod_tmp, method = "onesigma",plot=TRUE)
+      ncomp.permut   <- pls::selectNcomp(mod_tmp, method = "randomization",plot=TRUE)
+      #if(ncomp.onesigma != ncomp.permut){
+      #  print('manually decide which comps to chose by looking at graphs')
+      #  stop(ncomp.onesigma,ncomp.permut)
+      #}
       
-      intercept_R <- as.numeric(coef(mod_tmp,intercept=TRUE)[1])
+      intercept_R <- as.numeric(coef.mvr.bugfix(mod_tmp,intercept=TRUE,comps = ncomp.onesigma)[1])
       
-      slope_R.y1 <- as.numeric(coef(mod_tmp,intercept=TRUE)[2])
+      slope_R.y1  <- as.numeric(coef.mvr.bugfix(mod_tmp,intercept=TRUE,comps = ncomp.onesigma)[2])
       if(nvars > 2){
-        slope_R.y2 <- as.numeric(coef(mod_tmp,intercept=TRUE)[3])
+        slope_R.y2 <- as.numeric(coef.mvr.bugfix(mod_tmp,intercept=TRUE,comps = ncomp.onesigma)[3])
       }
       if(nvars > 3){
-        slope_R.y3 <- as.numeric(coef(mod_tmp,intercept=TRUE)[4])
+        slope_R.y3 <- as.numeric(coef.mvr.bugfix(mod_tmp,intercept=TRUE,comps = ncomp.onesigma)[4])
       }
       if(nvars > 4){
-        slope_R.y4 <-as.numeric(coef(mod_tmp,intercept=TRUE)[5])
+        slope_R.y4 <-as.numeric(coef.mvr.bugfix(mod_tmp,intercept=TRUE,comps = ncomp.onesigma)[5])
       }
       if(nvars > 5){
-        slope_R.y5 <-as.numeric(coef(mod_tmp,intercept=TRUE)[6])
+        slope_R.y5 <-as.numeric(coef.mvr.bugfix(mod_tmp,intercept=TRUE,comps = ncomp.onesigma)[6])
       }
       if(nvars > 6){
         stop('sma_regress_multivar cannot accept more than 6 variables')
@@ -108,20 +115,21 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
           mod_boot <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]),scale=FALSE,center=TRUE, data = bootsample,x=TRUE,y=TRUE)
         }
         
-        intercept_R.boot[i] = as.numeric(coef(mod_boot,intercept=TRUE)[1])
         
-        slope_R.y1.boot[i]  = as.numeric(coef(mod_boot,intercept=TRUE)[2])
+        intercept_R.boot[i] = as.numeric(coef.mvr.bugfix(mod_boot,intercept=TRUE,ncomp = ncomp.onesigma)[1])
+        
+        slope_R.y1.boot[i]  = as.numeric(coef.mvr.bugfix(mod_boot,intercept=TRUE,ncomp = ncomp.onesigma)[2])
         if (cc> 2) {
-          slope_R.y2.boot[i] =  as.numeric(coef(mod_boot,intercept=TRUE)[3])
+          slope_R.y2.boot[i] =  as.numeric(coef.mvr.bugfix(mod_boot,intercept=TRUE,ncomp = ncomp.onesigma)[3])
         }
         if(cc> 3){
-          slope_R.y3.boot[i] =  as.numeric(coef(mod_boot,intercept=TRUE)[4])
+          slope_R.y3.boot[i] =  as.numeric(coef.mvr.bugfix(mod_boot,intercept=TRUE,ncomp = ncomp.onesigma)[4])
         }
         if(cc> 4){
-          slope_R.y4.boot[i] =  as.numeric(coef(mod_boot,intercept=TRUE)[5])
+          slope_R.y4.boot[i] =  as.numeric(coef.mvr.bugfix(mod_boot,intercept=TRUE,ncomp = ncomp.onesigma)[5])
         }
         if(cc> 5){
-          slope_R.y5.boot[i] =  as.numeric(coef(mod_boot,intercept=TRUE)[6])
+          slope_R.y5.boot[i] =  as.numeric(coef.mvr.bugfix(mod_boot,intercept=TRUE,ncomp = ncomp.onesigma)[6])
         }
       }#bootstrap end
       
@@ -149,6 +157,8 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
         L95_R.y5=quantile(slope_R.y5.boot,0.025)
         U95_R.y5=quantile(slope_R.y5.boot,0.975)
       }
+      
+      #automatise PC selection
       
       
       # Create return values array

@@ -260,7 +260,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
      if(regr_type=='pcr' || regr_type=='plsr'){
        TLP_e_last <- unscale_traits(TLP_e_last, "TLP_e_last", nlabels, traits_mean, traits_sd)
        LS_e_start <- unscale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
-       LMA_e_last = LMA_e_last + as.numeric(traits_mean_unscale['LMA'])
+     #  LMA_e_last = LMA_e_last + as.numeric(traits_mean_unscale['LMA'])
   
      }
      ########
@@ -284,7 +284,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       #unscale
       if(regr_type=='pcr' || regr_type=='plsr'){
         TLP_e_last <- unscale_traits(TLP_e_last, "TLP_e_last", nlabels, traits_mean, traits_sd)
-        LMA_e_last = LMA_e_last + as.numeric(traits_mean_unscale['LMA'])
+       # LMA_e_last = LMA_e_last + as.numeric(traits_mean_unscale['LMA'])
       }
       ########
       
@@ -311,7 +311,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
     if(regr_type=='pcr' || regr_type=='plsr'){
       P50_e_start <- unscale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
       LS_e_start  <- unscale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
-      Ks_e_last = Ks_e_last + as.numeric(traits_mean_unscale['Ks'])
+     # Ks_e_last = Ks_e_last + as.numeric(traits_mean_unscale['Ks'])
   
     }
     ########
@@ -335,7 +335,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       P50_e_start <- unscale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
       LS_e_start  <- unscale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
       LMA_e_last  <- unscale_traits(LMA_e_last, "LMA_e_last", nlabels, traits_mean, traits_sd)
-      TLP_e_last = TLP_e_last + as.numeric(traits_mean_unscale['TLP'])
+     # TLP_e_last = TLP_e_last + as.numeric(traits_mean_unscale['TLP'])
     }
     ########
 
@@ -373,7 +373,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
           TLP_e_last  <- unscale_traits(TLP_e_last, "TLP_e_last", nlabels, traits_mean, traits_sd)
           LS_e_start  <- unscale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
         
-          LMA_e[ss] = LMA_e[ss] + as.numeric(traits_mean_unscale['LMA'])
+         # LMA_e[ss] = LMA_e[ss] + as.numeric(traits_mean_unscale['LMA'])
         }
         #######
         
@@ -398,7 +398,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
         #unscale
         if(regr_type=='pcr' || regr_type=='plsr'){
           TLP_e_last <- unscale_traits(TLP_e_last, "TLP_e_last", nlabels, traits_mean, traits_sd)
-          LMA_e[ss] = LMA_e[ss] + as.numeric(traits_mean_unscale['LMA'])
+         # LMA_e[ss] = LMA_e[ss] + as.numeric(traits_mean_unscale['LMA'])
         }
         ########
         # LS_e[ss] = mod_LS_intercept_sample + mod_LS_slope_y1_sample*TLP_e_last +
@@ -425,7 +425,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
         P50_e_start <- unscale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
         LS_e_start <- unscale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
         LMA_e_last <- unscale_traits(LMA_e_last, "LMA_e_last", nlabels, traits_mean, traits_sd)
-        TLP_e[ss] = TLP_e[ss] + as.numeric(traits_mean_unscale['TLP'])
+      #  TLP_e[ss] = TLP_e[ss] + as.numeric(traits_mean_unscale['TLP'])
       }
       ########
       
@@ -450,7 +450,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
         print('ks unscale')
         P50_e_start <- unscale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
         LS_e_start <- unscale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
-        Ks_e[ss] = Ks_e[ss] + as.numeric(traits_mean_unscale['Ks'])
+        #Ks_e[ss] = Ks_e[ss] + as.numeric(traits_mean_unscale['Ks'])
         }
   
         ########
@@ -547,7 +547,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
     if(regr_type=='pcr' || regr_type=='plsr'){
       P50_e_start <- unscale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
       Ks_e[ss]    <- unscale_traits(Ks_e[ss], "Ks_e", nlabels, traits_mean, traits_sd)
-      WD_e[ss] = WD_e[ss] + as.numeric(traits_mean_unscale['WD'])
+      #WD_e[ss] = WD_e[ss] + as.numeric(traits_mean_unscale['WD'])
     }
     ########
     #[TODO] check all this is triggered
@@ -568,7 +568,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       P50_e_start <- unscale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
       TLP_e[ss]   <- unscale_traits(TLP_e[ss], "TLP_e", nlabels, traits_mean, traits_sd)
       WD_e[ss]    <- unscale_traits(WD_e[ss], "WD_e", nlabels, traits_mean, traits_sd)
-      slope_e[ss] = slope_e[ss] + as.numeric(traits_mean_unscale['slope'])
+     # slope_e[ss] = slope_e[ss] + as.numeric(traits_mean_unscale['slope'])
     }
     ########
     
