@@ -51,24 +51,25 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
       mod_tmp <- plsr(DF2formula(yy[varnames[c(nvars,1:nvars-1)]]), validation = "LOO",data = yy,na.action=na.omit, scale=FALSE,center=TRUE,method="oscorespls")
     }
     
-    # coef() without specifying ncomp gets the coefficient from the most ncomp in the analysis, but that would just reflect an lm in its coefficients/predictions.
-    #
-    ncomp.onesigma <- pls::selectNcomp(mod_tmp, method = "onesigma",plot=TRUE) # throws error. and with more data throws out of bounds error, but not always. so hard to trace down.. something with coef.mvr() and the B object therein
-    ncomp.permut   <- selectNcomp(mod_tmp, method = "randomization",plot=TRUE)
+    # Select the number of principle components that are the best at reducing the predicted RMSE
+    # Use two methods for this, and if they do not agree on the result, choose the most largest PCs, just to be sure.
+    # if both methods predict 0 PCs, use 1 PC.
+    # else, use the results from the one sigma approach
+    ncomp.onesigma <- pls::selectNcomp(mod_tmp, method = "onesigma",plot=FALSE) # throws error. and with more data throws out of bounds error, but not always. so hard to trace down.. something with coef.mvr() and the B object therein
+    ncomp.permut   <- pls::selectNcomp(mod_tmp, method = "randomization",plot=FALSE)
     if(ncomp.onesigma != ncomp.permut ){
       ncomp <- max(ncomp.permut,ncomp.onesigma,1)
     }else if(ncomp.permut==0 && ncomp.onesigma==0 ){
       ncomp <-  1
     }else{
       ncomp <-ncomp.onesigma}
-    # not using these slope and intercept values, as coef.mvr(comps=) does something wrong. Using the predict() and ncomp therein instead.
-    # in theory it would be possible to select different intercepts and slopes etc values here depending on how many PCs should be selected, and then pass it into the network as done for sma and lm, but trouble-shooting is taking too long.
-    # the alternative is to pass out the object mod_tmp and use the predict() function, and feed them manually selected ncomps ( see trait_opt_bivar_startLSP50)
-    #
+
+    # coef() will use different model coefficients, depending on the number of principle components ( ncomp) 
+    # that are found to reduce RMSEP the most (see selectNcomp above)
     intercept_R <- as.numeric(coef(mod_tmp,intercept=TRUE,ncomp=ncomp)[1])
-    #print(intercept_R)
+
     slope_R.y1 <- as.numeric(coef(mod_tmp,intercept=TRUE,ncomp=ncomp)[2])
-    # print(slope_R.y1)
+
     if(nvars > 2){
       slope_R.y2 <- as.numeric(coef(mod_tmp,intercept=TRUE,ncomp=ncomp)[3])
     }

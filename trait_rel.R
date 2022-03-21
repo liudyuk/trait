@@ -110,10 +110,18 @@ source('opt_test_plots_LSP50_pfts.R')
 
 # pretty plotting of PCA results
 source('pca_with_pretty_biplot.R')
+source('pca_with_pretty_plot_PFTs.R')
+
 #---------------packages--------------------------
 # PCA plotting
 #install_github("vqv/ggbiplot") # must have devtools installed to use install_github
 library('ggbiplot')
+
+#other aesthetics:
+# to distinguish between PFTvariants
+library(RColorBrewer) # to plot the PFTs in different colours
+cols <- c(brewer.pal(9, "Set1") ,brewer.pal(8, "Set2"),brewer.pal(11, "Set3"),brewer.pal(3,'Paired'))
+
 #for plotting of hypercube sampling results:
 library(grid)
 library(ggplot2)
@@ -124,7 +132,7 @@ library(gridExtra)
 library(olsrr)
 # for PCR regression models, now used in the network
 library(pls)
-source('coef.mvr.bugfix.R') # necessary as there was a bug in one of the pls package functions. Bug has been reported
+
 
 
 #--- Read in the trait data ---
@@ -162,6 +170,9 @@ trait_BDT <- subset(traits,group=="BD" | group=="BT",drop = T)
 trait_BD <- subset(traits,group=="BD",drop = T)
 trait_BT <- subset(traits,group=="BT",drop = T)
 
+#----
+# stretch the TLP values
+
 #--- Bivariate plots and statistics with SMA regression ---
 # These are used to fill out the hypothesis framework plot with R
 
@@ -182,40 +193,15 @@ bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp, regr_type = 'lm')
 # multivariate lm, sma, pc(r) or pls(r) regression possible. change option here:
 regr_type = 'plsr'
 
-#if (regr_type == 'pcr' || regr_type == 'plsr'){
-  
-  # make data more normally distributed:
-  # e.g. log
-  # then normalise
-#  trait_BE_save = trait_BE
-#  traits_save = traits
-  #scale all trait here. If done in each individual function, the sd's are very different from each other. 
-  # this screws with the predictions in the network
-#  trait_BE_sd =  apply(trait_BE,2,sd,na.rm=TRUE)
-#  trait_BE[13:44] = trait_BE[13:44] / trait_BE_sd[13:44]
-  
+if (regr_type == 'pcr' || regr_type == 'plsr'){
+ 
   traits_sd   = as.data.frame(t(apply(traits[13:44],2,sd,na.rm=TRUE)))
   traits_mean_unscale = as.data.frame(t(apply(traits[13:44],2,mean,na.rm=TRUE)))
   # now that centering is se to TRUE, and it is applied to all values, including Y, do not standardise using the mean, but only sd only.
   #Test that this is the case, setting mean to 0 for now, so that 0 will be subtracted from every X
    traits_mean = traits[1,13:44]
    traits_mean[1,] <- 0  # legacy- set traits_mean to 0, as the centering is now done by the pcr() function itself.
-  # important, because centering is performed on Xes AND Y. Therefore, I must not do scaling and un-scaling functions (containing mean-centering) only on the
-  # Xes in the scale_ and unscale_ traits function, the mean is still passed in, but as it is 0, nothing gets changed. [TODO] simply remove mean from 
-  # the scaling function. and make sure to note somewhere that centering is done in pcr().
-  
-#  traits[13:44] = traits[13:44] / traits_sd[13:44]
-  
-#  trait_B_save = trait_B
-#  trait_B_sd      =  apply(trait_B,2,sd,na.rm=TRUE)
-#  trait_B[13:44]  =  trait_B[13:44] / trait_B_sd[13:44]
-  
-#  traits_norm <- (traits[13:44] - traits_mean ) /traits_sd
-#  traits_scaled <- log(traits[13:44]  /traits_sd)
-  
-  
-
-#}
+}
 
 # for now here, in to its own file later:
 
@@ -555,7 +541,7 @@ if(testing==TRUE){
 limitdataranges=T # Currently does not converge in uncertainty propagation if not set to T
 
 # Decide whether to run the uncertainty propagation (T) or not (F)
-propagate_uncer=F
+propagate_uncer= T
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
@@ -583,7 +569,7 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 outs_LSP50     <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 outs_LSP50_lhc <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = 4, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
-
+#save(outs_LSP50 , file= 'outs_LSP50.RData')
 # to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
 # single objects, 
 list2env(outs_LSP50$predictors , envir = .GlobalEnv) 
@@ -643,7 +629,6 @@ tt
 #----------------------------------------------------------------------------------------------------------------------
 # PCA
 #----------------------------------------------------------------------------------------------------------------------
-#trait_BE
 # perform PCA ------------------------------------------------------------
 # used as test to see whether starting from different trait combinations has an impact on the PFT-spread.
 
@@ -655,36 +640,19 @@ traits_PCA  <- traits_LSP50.df
 # translated into R Annemarie Eckes-Shephard May 2021
 
 ## Convert SLA to LMA
-#traits_BS.LMA=1./traits_BS.SLA;
 traits_PCA$LMA = 1./traits_PCA$SLA
 
 # transform some values:
 ## Log traits that are non-normal
-#traits_BS$P50 = log(-traits_BS$P50); 
 traits_PCA$P50 = log(-traits_PCA$P50)
-#traits_BS$P88 = log(-traits_BS$P88); 
 traits_PCA$P88 = log(-traits_PCA$P88)
-#traits_BS$TLP = log(-traits_BS$TLP); 
 traits_PCA$TLP = log(-traits_PCA$TLP)
-#traits_BS$LS=log(traits_BS$LS); 
 traits_PCA$LS  = log(traits_PCA$LS)
-#traits_BS$Ks=log(traits_BS$Ks); 
 traits_PCA$Ks  = log(traits_PCA$Ks)
-#traits_BS$LMA=log(traits_BS$LMA); 
 traits_PCA$LMA = log(traits_PCA$LMA)
 
-
-#PCA on optimised trait values and observations (0 = 5 to 7)
-opt.pca <- prcomp(traits_PCA[,c(1,3,4,6,10,12,17)], center = TRUE,scale. = TRUE)
-
-
-p_P50LS  <- ggbiplot(opt.pca,labels=1:dim(traits_PCA)[1],labels.size = 2,circle=TRUE) +
-  ggtitle('P50LS')
-
+#PCA on optimised trait values (0 = 5 to 7)
 pca_with_pretty_biplot(traits_PCA[,c(1,3,4,6,10,12,17)])
-##sign of correlations correct?
-test_cor_signs(trait_BE, traits_PCA)
-
 
 if(spec_group_sel==1){
   mtext(outer=TRUE, 'Broadleaf deciduous')
@@ -693,18 +661,15 @@ if(spec_group_sel ==2){
   mtext(outer=TRUE, 'Broadleaf evergreen')
 }
 
-# plot standardised, scaled PCA outputs
-#dev.new()
-#p_P50LS
-
-
 ##DECISION: take P50LS as trait pair to generate parametersets using the network
+
+
 #----------------------------------------------------------------------------------------------------------------------
 # Trait sampling for .insfile
 #----------------------------------------------------------------------------------------------------------------------
 # hyper-volume sampled PFTs, alongside extreme-value outer edges:
 outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
-
+save(outs_LSP50_hv,file='outs_LSP50_hv.RData')
 #display trait values that will be selected for PFTs(purple), show that their spread is across a wide range of values 
 opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
                           Ks_e_mean,
@@ -727,8 +692,8 @@ opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
                           slope_e_5perc,
                           slope_e_95perc,
                           slope_e,
-                          outs_LSP50_hv = outs_LSP50_hv) 
-
+                          outs_LSP50_hv = outs_LSP50_hv,
+                          cols=cols) 
 
 # to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
 # single objects, 
@@ -741,11 +706,32 @@ create_uncertainty_range_stats(outs_LSP50_hv)
 traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
                                       as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
                                       leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
-LMA_e_mean
-TLP_e_mean
-slope_e_mean
-WD_e_mean
-Ks_e_mean
+
+# create data frame of traits for another PCA only on the PFT subvariants below -------
+traits_LSP50.df <- data.frame(matrix(unlist(traits_LPJG_LSP50_pft), ncol=length(traits_LPJG_LSP50_pft), byrow=FALSE))
+names(traits_LSP50.df) <- names(traits_LPJG_LSP50_pft)
+
+traits_PCA  <- traits_LSP50.df
+
+# T. Pugh
+# 25.10.20
+# original file: lpjg_strat_mapping_comb.m
+# translated into R Annemarie Eckes-Shephard May 2021
+
+## Convert SLA to LMA
+traits_PCA$LMA = 1./traits_PCA$SLA
+
+# transform some values:
+## Log traits that are non-normal
+traits_PCA$P50 = log(-traits_PCA$P50)
+traits_PCA$P88 = log(-traits_PCA$P88)
+traits_PCA$TLP = log(-traits_PCA$TLP)
+traits_PCA$LS  = log(traits_PCA$LS)
+traits_PCA$Ks  = log(traits_PCA$Ks)
+traits_PCA$LMA = log(traits_PCA$LMA)
+
+#PCA on optimised trait values (0 = 5 to 7)
+pca_with_pretty_biplot_Pfts(traits_PCA[,c(1,3,4,6,10,12,17)])
 
 #----------------------------------------------------------------------------------------------------------------------
 # Write out LPJGuess .ins files
@@ -776,7 +762,7 @@ if(spec_group_sel==2){# evergreen
   traits_LPJG_LSP50_BE <- traits_LPJG_LSP50_pft
   
   #save new PFT subset or load existing one: 
-  save(traits_LPJG_LSP50_BE, file = 'LPJGuessPFTS_BE14-03-2022lm.RData')
+  save(traits_LPJG_LSP50_BE, file = 'LPJGuessPFTS_BE21-03-2022plsr.RData')
   #load('LPJGuessPFTS_BE.RData')
 }
 
@@ -798,7 +784,7 @@ if(spec_group_sel==1){# deciduous
 output_fol="/Users/annemarie/Desktop/"
 
 if(spec_group_sel==2){# broadleaf evergreen in TRY
-  output_fol="/Users/annemarie/Desktop/TrBE/plsr_new/"
+  output_fol="/Users/annemarie/Desktop/TrBE/plsr/"
   # Select which base PFT to use: TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
   basePFT = 4  # tropical broadleaf evergreen PFT for LPJGuess
   # create .ins files for  LPJ-GUESS_hydro
@@ -808,7 +794,7 @@ if(spec_group_sel==2){# broadleaf evergreen in TRY
   write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_BE)
 }
 if(spec_group_sel==1){# 1 = TBD tropical and temperate broadleaf deciduous in TRY
-  output_fol="/Users/annemarie/Desktop/TrBR/pcr_new/"
+  output_fol="/Users/annemarie/Desktop/TrBR/plsr/"
   basePFT= 5 # tropical raingreen PFT for LPJGuess
   # create .ins files for  LPJ-GUESS_hydro
   #started with KSLS
@@ -824,19 +810,22 @@ if(spec_group_sel==1){# 1 = TBD tropical and temperate broadleaf deciduous in TR
 
 ##Compare range of traits
 pcr_TrBE_new <- read.csv(file='~/Desktop/TrBE/pcr_new/LPJG_PFT_summary_TrBE.csv',header = TRUE)
-plsr_TrBE_new <- read.csv(file='~/Desktop/TrBE/plsr_new/LPJG_PFT_summary_TrBE.csv',header = TRUE)
-pcr_TrBE <- read.csv(file='~/Desktop/TrBE/pcr/LPJG_PFT_summary_TrBE.csv',header = TRUE)
+plsr_TrBE<- read.csv(file='~/Desktop/TrBE/plsr_new/LPJG_PFT_summary_TrBE.csv',header = TRUE)
+#pcr_TrBE <- read.csv(file='~/Desktop/TrBE/pcr/LPJG_PFT_summary_TrBE.csv',header = TRUE)
 lm_TrBE <- read.csv(file='~/Desktop/TrBE/lm/LPJG_PFT_summary_TrBE.csv',header = TRUE)
 previous_TrBE <- read.csv(file='~/Documents/1_TreeMort/2_Analysis/1_Inputs/ins_files/LPJG_PFT_summary_TrBE_old.csv',header = TRUE)
 
 par(mfrow=c(4,4))
 
+if(testing==TRUE){
 for (n in names(pcr_TrBE)){
   if(n %in% names(trait_plot)){
     if(n=='WD'){
-      plot(rep(1,length(t(trait_plot[n]))),(t(trait_plot[n])*1000)/2,xlab='',ylab='',col='purple',xlim=c(0,6),main=n) 
+      df <- data.frame(Obs=c(na.omit(trait_plot[n]))
+      boxplot(as.matrix(data.frame(Obs=c(max(na.omit(trait_plot[n])),min(na.omit(trait_plot[n]))),PFTs=c(NA,NA))), boxfill = NA, border = NA)
+      boxplot(at="Obs",t(trait_plot[n]),xlab='',ylab='',col='purple',xlim=c(0,6),main=n) 
     }else if(n=='P50'){
-      plot(rep(1,length(t(trait_plot[n]))),-exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,6),main=n) 
+      boxplot(add=TRUE, rep(1,length(t(trait_plot[n]))),t(trait_plot[n]),xlab='',ylab='',col='purple',xlim=c(0,6),main=n) 
     }else if(n=='Ks'){
       plot(rep(1,length(t(trait_plot[n]))),exp(t(trait_plot[n])),xlab='',ylab='',col='purple',xlim=c(0,6),main=n)  
     }else if(n=='TLP'){
@@ -852,16 +841,79 @@ for (n in names(pcr_TrBE)){
     }
     
     
-    points(rep(2,28),t(previous_TrBE[n]))
+    boxplot(add=TRUE,2,t(previous_TrBE[n]))
     }else{
       plot(rep(2,28),t(previous_TrBE[n]),xlab='', ylim= c(min(c(t(previous_TrBE[n]),t(pcr_TrBE[n]),t(lm_TrBE[n]))),max(c(t(previous_TrBE[n]),t(pcr_TrBE[n]),t(lm_TrBE[n])))),main = n,xlim=c(0,6),ylab='')
       }
-  points(rep(3,30),t(pcr_TrBE[n]), col='blue', pch=2)
-  points(rep(4,31),t(lm_TrBE[n]), col='orange', pch=5)
-  points(rep(5,31),t(plsr_TrBE_new[n]), col='green', pch=2)
+ # points(rep(3,30),t(pcr_TrBE[n]), col='blue', pch=2)
+  boxplot(add=TRUE,4,t(lm_TrBE[n]), col='orange', pch=5)
+  boxplot(add=TRUE,(5,31),t(plsr_TrBE_new[n]), col='green', pch=2)
+}
 }
 
-
+par(mfrow=c(3,2))
+for (n in names(pcr_TrBE)){
+  if(n %in% names(trait_plot)){
+    if(n=='WD'){
+      df <- data.frame(Obs      = c(na.omit(trait_plot[[n]])),
+                       lm   = c(t(lm_TrBE[n])/1000*2, rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(lm_TrBE[n]))))), 
+                       plsr = c(t(plsr_TrBE[n])/1000*2, rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(plsr_TrBE[n]))))))
+                       
+      boxplot(df,xlab='',ylab='',col=2:4,xlim=c(0,4),main=n) 
+      points(rep(3,length(df$plsr)),df$plsr)
+      points(rep(2,length(df$lm)),df$lm)
+    }else if(n=='P50'){
+      df <- data.frame(Obs      = c(-exp(na.omit(trait_plot[[n]]))),
+                       lm   = c((t(lm_TrBE[n])), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(lm_TrBE[n]))))), 
+                       plsr = c((t(plsr_TrBE[n])), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(plsr_TrBE[n]))))))
+      
+      boxplot(df,xlab='',ylab='',col=2:4,xlim=c(0,4),main=n) 
+      points(rep(3,length(df$plsr)),df$plsr)
+      points(rep(2,length(df$lm)),df$lm)
+    }else if(n=='Ks'){
+      df <- data.frame(Obs      = c((na.omit(trait_plot[[n]]))),
+                       lm   = c(log((t(lm_TrBE[n]))), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(lm_TrBE[n]))))), 
+                       plsr = c(log((t(plsr_TrBE[n]))), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(plsr_TrBE[n]))))))
+      
+      boxplot(df,xlab='',ylab='',col=2:4,xlim=c(0,4),main=paste0('log(',n,')')) 
+      points(rep(3,length(df$plsr)),df$plsr)
+      points(rep(2,length(df$lm)),df$lm) 
+    }else if(n=='TLP'){
+      df <- data.frame(Obs      = c((na.omit(trait_plot[[n]]))),
+                       lm   = c(log(-(t(lm_TrBE[n]))), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(lm_TrBE[n]))))), 
+                       plsr = c(log(-(t(plsr_TrBE[n]))), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(plsr_TrBE[n]))))))
+      
+      boxplot(df,xlab='',ylab='',col=2:4,xlim=c(0,4),main=paste0('log(-',n,')')) 
+      points(rep(3,length(df$plsr)),df$plsr)
+      points(rep(2,length(df$lm)),df$lm) 
+    }else if (n=='LS'){
+      df <- data.frame(Obs      = c((na.omit(trait_plot[[n]]))),
+                       lm   = c(log((t(lm_TrBE[n])/10000)), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(lm_TrBE[n]))))), 
+                       plsr = c(log((t(plsr_TrBE[n])/10000)), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(plsr_TrBE[n]))))))
+      
+      boxplot(df,xlab='',ylab='',col=2:4,xlim=c(0,4),main=paste0('log(',n,')')) # m2 (leaf) cm-2 (sap)
+      points(rep(3,length(df$plsr)),df$plsr)
+      points(rep(2,length(df$lm)),df$lm) 
+    }else if (n=='SLA'){
+      df <- data.frame(Obs      = c( (1/exp(na.omit(trait_plot[['LMA']]))*1000*2) ),
+                       lm   = c( (t(lm_TrBE[n]) ), rep(NA,length(c(na.omit(trait_plot[['LMA']])))-length(c(t(lm_TrBE[n]))))), 
+                       plsr = c( (t(plsr_TrBE[n]) ), rep(NA,length(c(na.omit(trait_plot[['LMA']])))-length(c(t(plsr_TrBE[n]))))))
+      
+      boxplot(df,xlab='',ylab='',col=2:4,xlim=c(0,4),main=paste0(n)) # m2 kgC-1
+      points(rep(3,length(df$plsr)),df$plsr)
+      points(rep(2,length(df$lm)),df$lm) 
+    }else if(n=='slope'){
+      df <- data.frame(Obs      = c(na.omit(trait_plot[[n]]) ),
+                       lm   = c( log((t(lm_TrBE[n]) )), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(lm_TrBE[n]))))), 
+                       plsr = c( log((t(plsr_TrBE[n]) )), rep(NA,length(c(na.omit(trait_plot[[n]])))-length(c(t(plsr_TrBE[n]))))))
+      
+      boxplot(df,xlab='',ylab='',col=2:4,xlim=c(0,4),main=paste0('log(',n,')')) # m2 kgC-1
+      points(rep(3,length(df$plsr)),df$plsr)
+      points(rep(2,length(df$lm)),df$lm) 
+      
+    }
+  }
+}
 
 plot(rep(1,length(t(trait_plot['WD']))), -0.5571 + (2.9748*(t(trait_plot['WD']))),xlab='',ylab='',col='purple',xlim=c(0,6),main="DeltaPsiWW") 
 points(rep(2,28),t(previous_TrBE["DeltaPsiWW"]))

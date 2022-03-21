@@ -19,7 +19,8 @@ opt_test_plots_LSP50_pfts <- function(trait,
                                  slope_e_5perc,
                                  slope_e_95perc,
                                  slope_e,
-                                 outs_LSP50_hv) {
+                                 outs_LSP50_hv,
+                                 cols) {
   # Make plots which show the quality of the fit between the optimised values and the original data
   #
   # original version:
@@ -30,7 +31,7 @@ opt_test_plots_LSP50_pfts <- function(trait,
   # Code heavily based on T. Pugh's function in opt_test_plots.R
   # Small adaptations related to LS and P50 variable and their summary stats.
   # January 2021
-  # Add PFT-samples to plot, so see whether all trait spaces are adequately covered
+  # Add PFT-samples to plot, so see whether all trait spaces are adequately covered, alongisde individual pfts colours
   
   # created dataframe with strategically sampled trait-network traits (from hv-sampling)
   df <- data.frame( TLP_e =rowMeans(outs_LSP50_hv$predicted$TLP_e),Ks_e =rowMeans(outs_LSP50_hv$predicted$Ks_e),
@@ -49,14 +50,14 @@ opt_test_plots_LSP50_pfts <- function(trait,
   points(P50_e[,1],LS_e[,1],col="red",pch=16,cex=0.4) # Using mean of all bootstrapped estimates 
   points(P50_e[,1],LS_e[,1],col="green",pch=16,cex=0.4)
   points(P50_e[,1],LS_e[,1],col="green",pch=16,cex=0.4)
-  points(df$P50_start,df$LS_start, col="purple",pch=9)
+  points(df$P50_start,df$LS_start, col=cols,pch=20)
 
   plot(trait$P50,trait$Ks,pch=16,xlab="P50",ylab="Ls",main="P50 vs Ks",xlim=c(-2,3))
   points(P50_e[,1],Ks_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(P50_e[,1],Ks_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(P50_e[,1],Ks_e_5perc,col="green",pch=16)
   points(P50_e[,1],Ks_e_95perc,col="green",pch=16)
-  points(df$P50_start,df$Ks_e, col="purple",pch=9)
+  points(df$P50_start,df$Ks_e, col=cols,pch=20)
   
   
   plot(trait$P50,trait$TLP,pch=16,xlab="P50",ylab="TLP",main="P50 vs TLP")
@@ -64,49 +65,49 @@ opt_test_plots_LSP50_pfts <- function(trait,
   points(P50_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(P50_e[,1],TLP_e_5perc,col="green",pch=16)
   points(P50_e[,1],TLP_e_95perc,col="green",pch=16)
-  points(df$P50_start,df$TLP_e, col="purple",pch=9)
+  points(df$P50_start,df$TLP_e, col=cols,pch=20)
   
   plot(trait$P50,trait$slope,pch=16,xlab="P50",ylab="slope",main="P50 vs slope")
   points(P50_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(P50_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(P50_e[,1],slope_e_5perc,col="green",pch=16)
   points(P50_e[,1],slope_e_95perc,col="green",pch=16)
-  points(df$P50_start,df$slope_e, col="purple",pch=9)
+  points(df$P50_start,df$slope_e, col=cols,pch=20)
   
   plot(trait$P50,trait$WD,pch=16,xlab="P50",ylab="WD",main="P50 vs WD")
   points(P50_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(P50_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(P50_e[,1],WD_e_5perc,col="green",pch=16)
   points(P50_e[,1],WD_e_95perc,col="green",pch=16)
-  points(df$P50_start,df$WD_e, col="purple",pch=9)
+  points(df$P50_start,df$WD_e, col=cols,pch=20)
   
   plot(trait$TLP,trait$slope,pch=16,xlab="TLP",ylab="slope",main="TLP vs slope")
   points(TLP_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(TLP_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(TLP_e[,1],slope_e_5perc,col="green",pch=16)
   points(TLP_e[,1],slope_e_95perc,col="green",pch=16)
-  points(df$TLP_e,df$slope_e, col="purple",pch=9)
+  points(df$TLP_e,df$slope_e, col=cols,pch=20)
   
   plot(trait$TLP,trait$WD,pch=16,xlab="TLP",ylab="WD",main="TLP vs WD")
   points(TLP_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(TLP_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(TLP_e[,1],WD_e_5perc,col="green",pch=16)
   points(TLP_e[,1],WD_e_95perc,col="green",pch=16)
-  points(df$TLP_e,df$WD_e, col="purple",pch=9)
+  points(df$TLP_e,df$WD_e, col=cols,pch=20)
   
   plot(trait$WD,trait$TLP,pch=16,xlab="WD",ylab="TLP",main="WD vs TLP")
   points(WD_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(WD_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(WD_e[,1],TLP_e_5perc,col="green",pch=16)
   points(WD_e[,1],TLP_e_95perc,col="green",pch=16)
-  points(df$WD_e,df$TLP_e, col="purple",pch=9)
+  points(df$WD_e,df$TLP_e, col=cols,pch=20)
   
   plot(trait$TLP,trait$LMA,pch=16,xlab="TLP",ylab="LMA",main="TLP vs LMA")
   points(TLP_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(TLP_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(TLP_e[,1],LMA_e_5perc,col="green",pch=16)
   points(TLP_e[,1],LMA_e_95perc,col="green",pch=16)
-  points(df$TLP_e,df$LMA_e, col="purple",pch=9)
+  points(df$TLP_e,df$LMA_e, col=cols,pch=20)
   
   
   plot(trait$LS,trait$LMA,pch=16,xlab="LS",ylab="LMA",main="LS vs LMA")
@@ -114,70 +115,70 @@ opt_test_plots_LSP50_pfts <- function(trait,
   points(LS_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(LS_e[,1],LMA_e_5perc,col="green",pch=16)
   points(LS_e[,1],LMA_e_95perc,col="green",pch=16)
-  points(df$LS_start,df$LMA_e, col="purple",pch=9)
+  points(df$LS_start,df$LMA_e, col=cols,pch=20)
   
   plot(trait$LS,trait$WD,pch=16,xlab="LS",ylab="WD",main="LS vs WD")
   points(LS_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(LS_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(LS_e[,1],WD_e_5perc,col="green",pch=16)
   points(LS_e[,1],WD_e_95perc,col="green",pch=16)
-  points(df$LS_start,df$WD_e, col="purple",pch=9)
+  points(df$LS_start,df$WD_e, col=cols,pch=20)
   
   plot(trait$LS,trait$TLP,pch=16,xlab="LS",ylab="TLP",main="LS vs TLP",xlim=c(-3.5,2.5))
   points(LS_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(LS_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(LS_e[,1],TLP_e_5perc,col="green",pch=16)
   points(LS_e[,1],TLP_e_95perc,col="green",pch=16)
-  points(df$LS_start,df$TLP_e, col="purple",pch=9)
+  points(df$LS_start,df$TLP_e, col=cols,pch=20)
   
   plot(trait$Ks,trait$slope,pch=16,xlab="Ks",ylab="slope",main="Ks vs slope")
   points(Ks_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(Ks_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(Ks_e[,1],slope_e_5perc,col="green",pch=16)
   points(Ks_e[,1],slope_e_95perc,col="green",pch=16)
-  points(df$Ks_e,df$slope_e, col="purple",pch=9)
+  points(df$Ks_e,df$slope_e, col=cols,pch=20)
   
   plot(trait$Ks,trait$WD,pch=16,xlab="Ks",ylab="WD",main="Ks vs WD")
   points(Ks_e[,1],WD_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(Ks_e[,1],WD_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(Ks_e[,1],WD_e_5perc,col="green",pch=16)
   points(Ks_e[,1],WD_e_95perc,col="green",pch=16)
-  points(df$Ks_e,df$WD_e, col="purple",pch=9)
+  points(df$Ks_e,df$WD_e, col=cols,pch=20)
   
   plot(trait$Ks,trait$TLP,pch=16,xlab="Ks",ylab="TLP",main="Ks vs TLP")
   points(Ks_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(Ks_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(Ks_e[,1],TLP_e_5perc,col="green",pch=16)
   points(Ks_e[,1],TLP_e_95perc,col="green",pch=16)
-  points(df$Ks_e,df$TLP_e, col="purple",pch=9)
+  points(df$Ks_e,df$TLP_e, col=cols,pch=20)
   
   plot(trait$Ks,trait$LMA,pch=16,xlab="Ks",ylab="LMA",main="Ks vs LMA")
   points(Ks_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(Ks_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(Ks_e[,1],LMA_e_5perc,col="green",pch=16)
   points(Ks_e[,1],LMA_e_95perc,col="green",pch=16)
-  points(df$Ks_e,df$LMA_e, col="purple",pch=9)
+  points(df$Ks_e,df$LMA_e, col=cols,pch=20)
   
   plot(trait$WD,trait$slope,pch=16,xlab="WD",ylab="slope",main="WD vs slope")
   points(WD_e[,1],slope_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(WD_e[,1],slope_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(WD_e[,1],slope_e_5perc,col="green",pch=16)
   points(WD_e[,1],slope_e_95perc,col="green",pch=16)
-  points(df$WD_e,df$slope_e, col="purple",pch=9)
+  points(df$WD_e,df$slope_e, col=cols,pch=20)
   
   plot(trait$WD,trait$LMA,pch=16,xlab="WD",ylab="LMA",main="WD vs LMA")
   points(WD_e[,1],LMA_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(WD_e[,1],LMA_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(WD_e[,1],LMA_e_5perc,col="green",pch=16)
   points(WD_e[,1],LMA_e_95perc,col="green",pch=16)
-  points(df$WD_e,df$LMA_e, col="purple",pch=9)
+  points(df$WD_e,df$LMA_e, col=cols,pch=20)
   
   plot(trait$slope,trait$TLP,pch=16,xlab="slope",ylab="TLP",main="slope vs TLP")
   points(slope_e[,1],TLP_e[,1],col="blue",pch=16) # Using central estimate coefficients
   points(slope_e[,1],TLP_e_mean,col="red",pch=16) # Using mean of all bootstrapped estimates 
   points(slope_e[,1],TLP_e_5perc,col="green",pch=16)
   points(slope_e[,1],TLP_e_95perc,col="green",pch=16)
-  points(df$slope_e,df$TLP_e, col="purple",pch=9)
+  points(df$slope_e,df$TLP_e, col=cols,pch=20)
   
   
   #Set back to single plot
