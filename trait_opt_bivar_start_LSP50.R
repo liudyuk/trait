@@ -49,20 +49,20 @@ trait_opt_bivar_start_LSP50 <- function(P50,
   tol=0.00001
   
   #Calculate minimum and maximum values
-  maxP50=max(P50,na.rm=T)+0.1*max(P50,na.rm=T)
-  minP50=min(P50,na.rm=T)-0.1*min(P50,na.rm=T)
-  maxTLP=max(TLP,na.rm=T)+0.1*max(TLP,na.rm=T)
-  minTLP=min(TLP,na.rm=T)-0.1*min(TLP,na.rm=T)
-  maxLMA=max(LMA,na.rm=T)+0.1*max(LMA,na.rm=T)
-  minLMA=min(LMA,na.rm=T)-0.1*min(LMA,na.rm=T)
-  maxWD=max(WD,na.rm=T)+0.1*max(WD,na.rm=T)
-  minWD=min(WD,na.rm=T)- 0.1*min(WD,na.rm=T)
-  maxslope=max(slope,na.rm=T) +0.1*max(slope,na.rm=T)
-  minslope=min(slope,na.rm=T) -0.1*min(slope,na.rm=T)
-  maxLS=max(LS,na.rm=T)+ 0.1*max(LS,na.rm=T)
-  minLS=min(LS,na.rm=T)- 0.1*min(LS,na.rm=T)
-  maxKs=max(Ks,na.rm=T)+ 0.1*max(Ks,na.rm=T)
-  minKs=min(Ks,na.rm=T)+ 0.1*min(Ks,na.rm=T)
+  maxP50=max(P50,na.rm=T) + abs(0.1*max(P50,na.rm=T))
+  minP50=min(P50,na.rm=T) - abs(0.1*min(P50,na.rm=T))
+  maxTLP=max(TLP,na.rm=T) + abs(0.1*max(TLP,na.rm=T))
+  minTLP=min(TLP,na.rm=T) - abs(0.1*min(TLP,na.rm=T))
+  maxLMA=max(LMA,na.rm=T) + abs(0.1*max(LMA,na.rm=T))
+  minLMA=min(LMA,na.rm=T) - abs(0.1*min(LMA,na.rm=T))
+  maxWD=max(WD,na.rm=T)   + abs(0.1*max(WD,na.rm=T))
+  minWD=min(WD,na.rm=T)   - abs(0.1*min(WD,na.rm=T))
+  maxslope=max(slope,na.rm=T) + abs(0.1*max(slope,na.rm=T))
+  minslope=min(slope,na.rm=T) - abs(0.1*min(slope,na.rm=T))
+  maxLS=max(LS,na.rm=T)   + abs(0.1*max(LS,na.rm=T))
+  minLS=min(LS,na.rm=T)   - abs(0.1*min(LS,na.rm=T))
+  maxKs=max(Ks,na.rm=T)   + abs(0.1*max(Ks,na.rm=T))
+  minKs=min(Ks,na.rm=T)   + abs(0.1*min(Ks,na.rm=T))
   
   
   P50_e   <- matrix(NA, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
