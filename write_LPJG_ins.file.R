@@ -73,7 +73,7 @@ for (nn in 1:length(traits_LPJG$Ks)) {
 # Write out to a set of LPJ-GUESS instruction files, 1 per PFT
 for (nn in 1:length(traits_LPJG$Ks)) {
   LPJG_outfile_pft <- paste(LPJG_outfile,".PFT",nn,sep="")
-  file.copy("global_cf_base.ins",LPJG_outfile_pft,overwrite=T)
+  file.copy("global_cf_base_Tom.ins",LPJG_outfile_pft,overwrite=T)
   PFTfile <- file(LPJG_outfile_pft,open="append")
   
   Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
