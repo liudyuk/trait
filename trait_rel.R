@@ -125,6 +125,15 @@ library('ggbiplot')
 library(RColorBrewer) # to plot the PFTs in different colours
 cols <- c(brewer.pal(9, "Set1") ,brewer.pal(8, "Set2"),brewer.pal(11, "Set3"),brewer.pal(3,'Paired'))
 
+# function to make observations slightly transparent, 
+# to better show where the observed traits cluser (= will appear darker on the plots)
+#note: always pass alpha on the 0-255 scale
+makeTransparent<-function(someColor, alpha=100){
+  newColor<-col2rgb(someColor)
+  apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2],
+                                              blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
+}
+
 #for plotting of hypercube sampling results:
 library(grid)
 library(ggplot2)
@@ -318,7 +327,7 @@ LMA_multivar_BDT <- LMA_multivar_test_BDT(trait_BDT, regr_type =  regr_type)
 
 #WD_multivar_BDT <- WD_multivar_test(trait_BE,leaf_type='BDT',regr_type = regr_type)
 
-#WD_multivar_BE <- WD_multivar_test(trait_BE,leaf_type='BE',regr_type = regr_type)
+WD_multivar_BE <- WD_multivar_test(trait_BE,leaf_type='BE',regr_type = regr_type)
 
 WD_multivar <- WD_multivar_test(trait_B,leaf_type=NULL,regr_type = regr_type)
 
@@ -574,7 +583,7 @@ propagate_uncer= F
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
-trait_sel= F
+trait_sel= T
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or set = 4 for a predefined (above) hypercube sample.
@@ -598,6 +607,19 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 outs_LSP50     <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 #outs_LSP50_lhc <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = 4, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
+
+if(spec_group_sel==1){
+  save(outs_LSP50 , file= 'data/outs_LSP50_BDT_2203.RData')
+}
+if(spec_group_sel==2){
+  save(outs_LSP50 , file= 'data/outs_LSP50_BE_2203.RData')
+}
+if(spec_group_sel==3){
+  save(outs_LSP50 , file= 'data/outs_LSP50_BT_2203.RData')
+}
+if(spec_group_sel==4){
+  save(outs_LSP50 , file= 'data/outs_LSP50_BD_2203.RData')
+}
 #save(outs_LSP50 , file= 'data/outs_LSP50_BD.RData')
 # to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
 # single objects, 
@@ -693,9 +715,34 @@ if(spec_group_sel ==2){
 #----------------------------------------------------------------------------------------------------------------------
 # Trait sampling for .insfile
 #----------------------------------------------------------------------------------------------------------------------
+
+# do network sampling for all different phenology types
+# Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
+for(spec_group_sel in c(1:4)){
+
+#Based on the above decision, determine trait dataset to use for plotting against optimised data later
+if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
+  trait_plot = trait_BDT
+} else if (spec_group_sel==2) {
+  trait_plot = trait_BE
+}
+
+
 # hyper-volume sampled PFTs, alongside extreme-value outer edges:
 outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
-save(outs_LSP50_hv,file='data/outs_LSP50_hv_BDT.RData')
+# (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4).
+if(spec_group_sel==1){
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_2203.RData')
+}
+if(spec_group_sel==2){
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_2203.RData')
+}
+if(spec_group_sel==3){
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_2203.RData')
+}
+if(spec_group_sel==4){
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BD_2203.RData')
+}
 #display trait values that will be selected for PFTs(purple), show that their spread is across a wide range of values 
 opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
                           Ks_e_mean,
@@ -733,6 +780,8 @@ traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_
                                       as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
                                       leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
+}# stop sampling all different phenology types
+
 # create data frame of traits for another PCA only on the PFT subvariants below -------
 traits_LSP50.df <- data.frame(matrix(unlist(traits_LPJG_LSP50_pft), ncol=length(traits_LPJG_LSP50_pft), byrow=FALSE))
 names(traits_LSP50.df) <- names(traits_LPJG_LSP50_pft)
@@ -757,7 +806,7 @@ traits_PCA$Ks  = log(traits_PCA$Ks)
 traits_PCA$LMA = log(traits_PCA$LMA)
 
 #PCA on optimised trait values (0 = 5 to 7)
-pca_with_pretty_biplot_Pfts(traits_PCA[,c(1,3,4,6,10,12,17)])
+pca_with_pretty_biplot_Pfts(traits_PCA[,c(1,3,4,6,10,12,13,17)])
 
 #----------------------------------------------------------------------------------------------------------------------
 # Write out LPJGuess .ins files
@@ -804,7 +853,8 @@ print(basePFT)
                                             as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
                                             leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
   # write output
-  output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles/"
+ # output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles/"
+  output_fol="~/Desktop/PFTs/"
   write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_pft)
   
 }
@@ -821,20 +871,20 @@ TrBR <- read.csv(file='/Users/annemarie/Library/CloudStorage/OneDrive-LundUniver
 
 par(mfrow=c(4,4))
 
-lm_TrBE = IBS
-plsr_TrBE = TeBE
+lm_TrBE = IBS # representing deciduous spread
+plsr_TrBE = TeBE  # representing evergreen spread
 
 # automatically set Boxplot properties here:
-boxplot_cols = c('dark grey','light grey','dark grey','lightgrey')
-boxplot_names = c('Obs','PFTs','Obs','PFTs')
+boxplot_cols  = c('dark grey','light grey','dark grey','lightgrey')
 
 if(testing==TRUE){
-  names(IBS)
-par(mfrow=c(3,2),mar=c(0.5,0.5,1,0.5))
+
+par(mfrow=c(3,4),mar=c(0.8,0.5,1.1,0.5),oma=c(2,2,0.1,0))
 for (n in names(IBS)){
   if(n %in% names(trait_BE)){
     if(n=='WD'){
-      # looks very messy, is used to have a dataframe of the same length, to mane the boxplotting easier:
+      
+      # looks very messy, is used to have a dataframe of the same length, to make the boxplotting easier:
       df <- data.frame(BDT_o = c( na.omit(trait_BDT[[n]]), rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) ) ),
                        BDT_m = c(t(lm_TrBE[n])/1000*2, rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE[n]))))), 
                        BE_o  = c(na.omit(trait_BE[[n]])),
@@ -844,18 +894,19 @@ for (n in names(IBS)){
       axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
       points(rep(2,length(df$BDT_m)),df$BDT_m)
       points(rep(4,length(df$BE_m)),df$BE_m)
-    }else #
-      if(n=='P50'){
-      df <- data.frame(BDT_o = c( na.omit(trait_BDT[[n]]), rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) ) ),
+      mtext(paste0("n = ", length(c(na.omit(trait_BE[[n]])) )),side= 1, line =-7.5,adj= 0.05,cex=0.5 )
+            
+    }else if(n=='P50'){
+      df <- data.frame(BDT_o = c(-exp(na.omit(trait_BDT[[n]])), rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) ) ),
                        BDT_m = c((t(lm_TrBE[n])), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE[n]))))), 
-                       BE_o  = c(na.omit(trait_BE[[n]])),
+                       BE_o  = c(-exp(na.omit(trait_BE[[n]]))),
                        BE_m  = c((t(plsr_TrBE[n])), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(plsr_TrBE[n]))))))
       
       boxplot(df,xlab = '',ylab = '',col = boxplot_cols,xaxt='n',xlim = c(0,5),main = n, names = boxplot_names) 
       axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
       points(rep(2,length(df$BDT_m)),df$BDT_m)
       points(rep(4,length(df$BE_m)),df$BE_m)
-    }#else if(n=='Ks'){
+    }else if(n=='Ks'){
       df <- data.frame(BDT_o = c( na.omit(trait_BDT[[n]]), rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) ) ),
                        BDT_m = c(log((t(lm_TrBE[n]))), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE[n]))))), 
                        BE_o  = c(na.omit(trait_BE[[n]])),
@@ -893,19 +944,19 @@ for (n in names(IBS)){
       
     }else if (n=='SLA'){
       
-      df <- data.frame(BDT_o = c( (1/exp(na.omit(trait_BDT[['LMA']]))*1000*2),rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) ) ), # From log g m-2 to m2 kgC-1
+      df <- data.frame(BDT_o = c( (1/exp(na.omit(trait_BDT[['LMA']]))*1000*2), rep(NA, length(c(na.omit(trait_BE[['LMA']])))-length(na.omit(trait_BDT[['LMA']])) ) ), # From log g m-2 to m2 kgC-1
                        BDT_m = c( (t(lm_TrBE[n]) ), rep(NA,length(c(na.omit(trait_BE[['LMA']])))-length(c(t(lm_TrBE[n]))))), 
                        BE_o  = c( (1/exp(na.omit(trait_BE[['LMA']]))*1000*2) ),      # From log g m-2 to m2 kgC-1
-                       BE_m  = c( (t(plsr_TrBE[n]) ), rep(NA,length(c(na.omit(trait_BE[['LMA']])))-length(c(t(plsr_TrBE[n]))))))
+                       BE_m  = c( (t(plsr_TrBE[n]) ), rep(NA,length(c(na.omit(trait_BE[['LMA']])))-length(c(t(plsr_TrBE[n]))))) )
       
       boxplot(df,xlab = '',ylab = '',col = boxplot_cols,xaxt='n',xlim = c(0,5),
-              main = main=paste0(n), names = boxplot_names)  # m2 kgC-1
+               main=paste0(n), names = boxplot_names)  # m2 kgC-1
       axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
       points(rep(2,length(df$BDT_m)),df$BDT_m)
       points(rep(4,length(df$BE_m)),df$BE_m) 
       
     }else if(n=='slope'){
-      
+      print(n)
       df <- data.frame(BDT_o = c(na.omit(trait_BDT[[n]]) ,rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) )),
                        BDT_m = c( log((t(lm_TrBE[n]) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE[n]))))), 
                        BE_o  = c(na.omit(trait_BE[[n]]) ),
@@ -917,25 +968,38 @@ for (n in names(IBS)){
       points(rep(2,length(df$BDT_m)),df$BDT_m)
       points(rep(4,length(df$BE_m)),df$BE_m)
       
+    }else if(n == 'leafN'){
+      print(n)
+      df <- data.frame(BDT_o = c(na.omit(trait_BDT[[n]]) ,rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) )),
+                       BDT_m = c( log((t(lm_TrBE['leafN_LPJG']) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE['leafN_LPJG']))))), 
+                       BE_o  = c(na.omit(trait_BE[[n]]) ),
+                       BE_m  = c( log((t(plsr_TrBE['leafN_LPJG']) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(plsr_TrBE['leafN_LPJG']))))))
+      
+      boxplot(df,xlab = '',ylab = '',col = boxplot_cols,xaxt='n',xlim = c(0,5),main = paste0('log(leafN)'), 
+              names = boxplot_names) # m2 kgC-1
+      axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
+      points(rep(2,length(df$BDT_m)),df$BDT_m)
+      points(rep(4,length(df$BE_m)),df$BE_m)
     }
   }
 }
+}
 
-plot(rep(1,length(t(trait_plot['WD']))), -0.5571 + (2.9748*(t(trait_plot['WD']))),xlab='',ylab='',col='purple',xlim=c(0,6),main="DeltaPsiWW") 
-points(rep(2,28),t(previous_TrBE["DeltaPsiWW"]))
-points(rep(3,30),t(pcr_TrBE["DeltaPsiWW"]), col='blue', pch=2)
-points(rep(4,31),t(lm_TrBE["DeltaPsiWW"]), col='orange', pch=4)
-points(rep(4,31),t(lm_TrBE["DeltaPsiWW"]), col='orange', pch=5)
-points(rep(5,31),t(plsr_TrBE_new["DeltaPsiWW"]), col='green', pch=2)
+plot(rep(2,31),t(lm_TrBE["DeltaPsiWW"]), ylim=c(min(t(plsr_TrBE["DeltaPsiWW"]), t(lm_TrBE["DeltaPsiWW"]) ) , max(t(plsr_TrBE["DeltaPsiWW"]),t(lm_TrBE["DeltaPsiWW"])  )),
+     col='black', pch=1,main = expression( Delta~Psi[WW]), xlab='',xaxt='n' ,xlim=c(0,5)) 
+points(rep(4,31),t(plsr_TrBE["DeltaPsiWW"]), col='black', pch=1)
+axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
 
-plot(rep(1,length(t(trait_plot['TLP']))), -0.188+(-0.3*(-exp(t(trait_plot['TLP'])))),xlab='',ylab='',col='purple',xlim=c(0,6),main="lambda") 
-points(rep(2,28),t(previous_TrBE["lambda"]))
-points(rep(3,30),t(pcr_TrBE["lambda"]), col='blue', pch=2)
-points(rep(4,31),t(lm_TrBE["lambda"]), col='orange', pch=5)
-points(rep(5,31),t(plsr_TrBE_new["lambda"]), col='green', pch=2)
-
+plot(rep(2,31),t(lm_TrBE["lambda"]), col='black', pch=1, 
+     ylim=c( min(t(lm_TrBE["lambda"]),t(plsr_TrBE["lambda"]) ), max(t(lm_TrBE["lambda"]),t(plsr_TrBE["lambda"]) )), 
+     main = expression(lambda), xlab='',xaxt='n' ,xlim=c(0,5))
+points(rep(4,31),t(plsr_TrBE["lambda"]), col='black', pch=1)
+axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
 
 plot.new()
-legend('center',legend=c('obs','old','lm','pls','pls PCoptim'),col=c('purple','black','orange','blue','green'),pch=c(1,1,2,5),cex=0.65)
+legend('center',legend=c('observed','estimated','individual\nPFT variants'),col=c(boxplot_cols[1:2],'black'),pch=c(15,15,1),cex=1.2,bty='n',border='white')
+
+
+#legend('center',legend=c('obs','old','lm','pls','pls PCoptim'),col=c('purple','black','orange','blue','green'),pch=c(1,1,2,5),cex=0.65)
 
 
