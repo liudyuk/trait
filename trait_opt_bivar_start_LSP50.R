@@ -6,7 +6,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
                       LS,
                       Ks,
                       LMA_from_TLP,
-                      LMA_from_TLP_LS,
+                      LMA_from_TLP_LS_WD,
                       LS_from_P50_TLP_Ks_LMA,
                       LS_from_P50_TLP_Ks,
                       Ks_from_P50_LS,
@@ -14,7 +14,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
                       P50_from_TLP_Ks,
                       slope_from_P50_TLP_WD,
                       WD_from_P50_Ks,
-                      #WD_from_P50_LMA_Ks,
+                      WD_from_P50_LMA_Ks,
                       LMA_from_LS,
                       P50_from_Ks,
                       TLP_from_P50,
@@ -25,14 +25,14 @@ trait_opt_bivar_start_LSP50 <- function(P50,
                       P50_e_start,
                       LS_e_start,
                       n_uncer,
-                      use_LMA_from_TLP_LS,
+                      use_LMA_from_TLP_LS_WD,
                       regr_type) {
   # Input
   # The following are just used for calculating maximum and minimum values of each trait, beyond which the optimisation should not extend:
   # - P50,TLP,LMA,WD,slope
   # The following are the relationships on which the optimisation and associated trait estimates are based:
   # (note that if the relationships used are changed, these need to be updated)
-  # - LMA_from_TLP or LMA_from_TLP_LS (choice of which is used is based on use_LMA_from_TLP_LS)
+  # - LMA_from_TLP or LMA_from_TLP_LS (choice of which is used is based on use_LMA_from_TLP_LS_WD)
   # - TLP_from_LS_LMA_P50
   # - P50_from_TLP_Ks,
   # - slope_from_P50_TLP_Ks
@@ -72,8 +72,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
   slope_e <- matrix(NA, ncol = n_uncer)
   LS_e    <- matrix(NA, ncol = n_uncer)
   Ks_e    <- matrix(NA, ncol = n_uncer)
-  WD_e    <- matrix(NA, ncol = n_uncer)
-  slope_e    <- matrix(NA, ncol = n_uncer)
+  slope_e <- matrix(NA, ncol = n_uncer)
   
   # New outer loop which randomly samples regression coefficients from within their uncertainty bounds
   # The random sampling comes from the bootstrap sampling done in the calculations of the SMA regressions themselves. This approach has the big advantages of 
@@ -83,11 +82,11 @@ trait_opt_bivar_start_LSP50 <- function(P50,
     # For now, make samples for the following:
     # (ensure equation choices are consistent with decisions above)
     if (ss==1) { #First pass always calculates the best estimate
-      if(use_LMA_from_TLP_LS) {  # BE:
-        mod_LMA_intercept_sample <- LMA_from_TLP_LS$mod$intercept_R #LMA_from_TLP_LS
-        mod_LMA_slope_y1_sample  <- LMA_from_TLP_LS$mod$slope_R.y1
-        mod_LMA_slope_y2_sample  <- LMA_from_TLP_LS$mod$slope_R.y2
-       
+      if(use_LMA_from_TLP_LS_WD) {  # BE:
+        mod_LMA_intercept_sample <- LMA_from_TLP_LS_WD$mod$intercept_R #LMA_from_TLP_LS_WD
+        mod_LMA_slope_y1_sample  <- LMA_from_TLP_LS_WD$mod$slope_R.y1
+        mod_LMA_slope_y2_sample  <- LMA_from_TLP_LS_WD$mod$slope_R.y2
+        mod_LMA_slope_y3_sample  <- LMA_from_TLP_LS_WD$mod$slope_R.y3
         
         mod_LS_intercept_sample  <- LS_from_P50_TLP_Ks_LMA$mod$intercept_R #LS_from_LMA TLP_Ks
         mod_LS_slope_y1_sample   <- LS_from_P50_TLP_Ks_LMA$mod$slope_R.y1 
@@ -95,12 +94,10 @@ trait_opt_bivar_start_LSP50 <- function(P50,
         mod_LS_slope_y3_sample   <- LS_from_P50_TLP_Ks_LMA$mod$slope_R.y3 
         mod_LS_slope_y4_sample   <- LS_from_P50_TLP_Ks_LMA$mod$slope_R.y4 
         
-      
-        #no longer BE or BDT -specific: 
-      #  mod_WD_intercept_sample   <- WD_from_P50_LMA_Ks$mod$intercept_R #WD_from_P50_LMA_Ks
-      #  mod_WD_slope_y1_sample    <- WD_from_P50_LMA_Ks$mod$slope_R.y1
-      #  mod_WD_slope_y2_sample    <- WD_from_P50_LMA_Ks$mod$slope_R.y2
-      #  mod_WD_slope_y3_sample    <- WD_from_P50_LMA_Ks$mod$slope_R.y3
+        mod_WD_intercept_sample   <- WD_from_P50_LMA_Ks$mod$intercept_R #WD_from_P50_LMA_Ks
+        mod_WD_slope_y1_sample    <- WD_from_P50_LMA_Ks$mod$slope_R.y1
+        mod_WD_slope_y2_sample    <- WD_from_P50_LMA_Ks$mod$slope_R.y2
+        mod_WD_slope_y3_sample    <- WD_from_P50_LMA_Ks$mod$slope_R.y3
        
         
       } else {  # BDT:
@@ -111,16 +108,17 @@ trait_opt_bivar_start_LSP50 <- function(P50,
         mod_LS_slope_y1_sample   <- LS_from_P50_TLP_Ks$mod$slope_R.y1 
         mod_LS_slope_y2_sample   <- LS_from_P50_TLP_Ks$mod$slope_R.y2 
         
-        #no longer BE or BDT -specific:
-      # mod_WD_intercept_sample   <- WD_from_P50_Ks$mod$intercept_R #WD_from_P50_Ks
-      #  mod_WD_slope_y1_sample    <- WD_from_P50_Ks$mod$slope_R.y1
-      #  mod_WD_slope_y2_sample    <- WD_from_P50_Ks$mod$slope_R.y2
+       
+        mod_WD_intercept_sample   <- WD_from_P50_Ks$mod$intercept_R #WD_from_P50_Ks
+        mod_WD_slope_y1_sample    <- WD_from_P50_Ks$mod$slope_R.y1
+        mod_WD_slope_y2_sample    <- WD_from_P50_Ks$mod$slope_R.y2
       
       }
       
-      mod_WD_intercept_sample   <- WD_from_P50_Ks$mod$intercept_R #WD_from_P50_Ks
-      mod_WD_slope_y1_sample    <- WD_from_P50_Ks$mod$slope_R.y1
-      mod_WD_slope_y2_sample    <- WD_from_P50_Ks$mod$slope_R.y2
+      # now made BE or BDT -specific
+     # mod_WD_intercept_sample   <- WD_from_P50_Ks$mod$intercept_R #WD_from_P50_Ks
+     # mod_WD_slope_y1_sample    <- WD_from_P50_Ks$mod$slope_R.y1
+     # mod_WD_slope_y2_sample    <- WD_from_P50_Ks$mod$slope_R.y2
       
       mod_Ks_intercept_sample    <- Ks_from_P50_LS$mod$intercept #Ks_from_P50_LS
       mod_Ks_slope_y1_sample     <- Ks_from_P50_LS$mod$slope_R.y1
@@ -141,11 +139,12 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       mod_slope_slope_y3_sample <-  slope_from_P50_TLP_WD$mod$slope_R.y3
    
       
-    } else {
-      if(use_LMA_from_TLP_LS) {
-        mod_LMA_intercept_sample <- LMA_from_TLP_LS$mod$boot.intercept[ss] #LMA_from_TLP_LS
-        mod_LMA_slope_y1_sample <- LMA_from_TLP_LS$mod$boot.y1[ss]
-        mod_LMA_slope_y2_sample <- LMA_from_TLP_LS$mod$boot.y2[ss]
+    } else { # ss > 1
+      if(use_LMA_from_TLP_LS_WD) { # BE:
+        mod_LMA_intercept_sample <- LMA_from_TLP_LS_WD$mod$boot.intercept[ss] #LMA_from_TLP_LS_WD
+        mod_LMA_slope_y1_sample <- LMA_from_TLP_LS_WD$mod$boot.y1[ss]
+        mod_LMA_slope_y2_sample <- LMA_from_TLP_LS_WD$mod$boot.y2[ss]
+        mod_LMA_slope_y3_sample <- LMA_from_TLP_LS_WD$mod$boot.y3[ss]
 
         mod_LS_intercept_sample  <- LS_from_P50_TLP_Ks_LMA$mod$intercept_R[ss] #LS_from_LMA TLP_Ks
         mod_LS_slope_y1_sample   <- LS_from_P50_TLP_Ks_LMA$mod$slope_R.y1[ss] 
@@ -153,13 +152,13 @@ trait_opt_bivar_start_LSP50 <- function(P50,
         mod_LS_slope_y3_sample   <- LS_from_P50_TLP_Ks_LMA$mod$slope_R.y3[ss] 
         mod_LS_slope_y4_sample   <- LS_from_P50_TLP_Ks_LMA$mod$slope_R.y4[ss] 
         
-        #no longer BE or BDT -specific:
-       # mod_WD_intercept_sample   <- WD_from_P50_LMA_Ks$mod$boot.intercept[ss] #WD_from_P50_LMA_Ks
-      #  mod_WD_slope_y1_sample    <- WD_from_P50_LMA_Ks$mod$boot.y1[ss]
-      #  mod_WD_slope_y2_sample    <- WD_from_P50_LMA_Ks$mod$boot.y2[ss]
-      #  mod_WD_slope_y3_sample    <- WD_from_P50_LMA_Ks$mod$boot.y3[ss]
      
-      } else {
+        mod_WD_intercept_sample   <- WD_from_P50_LMA_Ks$mod$boot.intercept[ss] #WD_from_P50_LMA_Ks
+        mod_WD_slope_y1_sample    <- WD_from_P50_LMA_Ks$mod$boot.y1[ss]
+        mod_WD_slope_y2_sample    <- WD_from_P50_LMA_Ks$mod$boot.y2[ss]
+        mod_WD_slope_y3_sample    <- WD_from_P50_LMA_Ks$mod$boot.y3[ss]
+     
+      } else { #BDT
         mod_LMA_intercept_sample <- LMA_from_TLP$mod$boot.intercept[ss] #LMA_from_TLP
         mod_LMA_slope_y1_sample  <- LMA_from_TLP$mod$boot.y1[ss]
         
@@ -167,16 +166,16 @@ trait_opt_bivar_start_LSP50 <- function(P50,
         mod_LS_slope_y1_sample   <- LS_from_P50_TLP_Ks$mod$boot.y1[ss] 
         mod_LS_slope_y2_sample   <- LS_from_P50_TLP_Ks$mod$boot.y2[ss] 
         
-        #no longer BE or BDT -specific:
-       # mod_WD_intercept_sample   <- WD_from_P50_Ks$mod$boot.intercept[ss] # WD_from_P50_slope_Ks#WD_from_slope_P50slope
-      #  mod_WD_slope_y1_sample    <- WD_from_P50_Ks$mod$boot.y1[ss]
-      #  mod_WD_slope_y2_sample    <- WD_from_P50_Ks$mod$boot.y2[ss]
+      
+        mod_WD_intercept_sample   <- WD_from_P50_Ks$mod$boot.intercept[ss] # WD_from_P50_slope_Ks#WD_from_slope_P50slope
+        mod_WD_slope_y1_sample    <- WD_from_P50_Ks$mod$boot.y1[ss]
+        mod_WD_slope_y2_sample    <- WD_from_P50_Ks$mod$boot.y2[ss]
        
       }
-      
-      mod_WD_intercept_sample   <- WD_from_P50_Ks$mod$boot.intercept[ss] # WD_from_P50_slope_Ks#WD_from_slope_P50slope
-      mod_WD_slope_y1_sample    <- WD_from_P50_Ks$mod$boot.y1[ss]
-      mod_WD_slope_y2_sample    <- WD_from_P50_Ks$mod$boot.y2[ss]
+      # now  BE or BDT -specific:
+      #mod_WD_intercept_sample   <- WD_from_P50_Ks$mod$boot.intercept[ss] # WD_from_P50_slope_Ks#WD_from_slope_P50slope
+      #mod_WD_slope_y1_sample    <- WD_from_P50_Ks$mod$boot.y1[ss]
+      #mod_WD_slope_y2_sample    <- WD_from_P50_Ks$mod$boot.y2[ss]
       
       mod_Ks_intercept_sample <- Ks_from_P50_LS$mod$boot.intercept[ss] #Ks_from_P50_LS
       mod_Ks_slope_y1_sample  <- Ks_from_P50_LS$mod$boot.y1[ss]
@@ -239,7 +238,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
     
     # Do the first iteration with the starting trait pair ('_start'). 
     # In the optimisation below, these traits also turn into predicted variables.
-    if(use_LMA_from_TLP_LS) {
+    if(use_LMA_from_TLP_LS_WD) {
       
       ########
       #LMA_from_TLP_LS
@@ -247,17 +246,20 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       if(regr_type=='pcr' || regr_type=='plsr'){
       TLP_e_last <- scale_traits(TLP_e_last, "TLP_e_last", nlabels, traits_mean, traits_sd)
       LS_e_start <- scale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
- 
+      WD_e_last <- scale_traits(WD_e_last, "WD_e_last", nlabels, traits_mean, traits_sd)
+      
       }
       
      LMA_e_last = mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last +
-        mod_LMA_slope_y2_sample*LS_e_start 
+        mod_LMA_slope_y2_sample*LS_e_start  + mod_LMA_slope_y3_sample* WD_e_last
 
      #unscale
      if(regr_type=='pcr' || regr_type=='plsr'){
        TLP_e_last <- unscale_traits(TLP_e_last, "TLP_e_last", nlabels, traits_mean, traits_sd)
        LS_e_start <- unscale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
-     #  LMA_e_last = LMA_e_last + as.numeric(traits_mean_unscale['LMA'])
+       WD_e_last  <- unscale_traits(WD_e_last, "WD_e_last", nlabels, traits_mean, traits_sd)
+       
+       #  LMA_e_last = LMA_e_last + as.numeric(traits_mean_unscale['LMA'])
   
      }
      ########
@@ -266,7 +268,27 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       # LS_e_last = mod_LS_intercept_sample + mod_LS_slope_y1_sample*LMA_e_last +  mod_LS_slope_y2_sample*TLP_e_last +
       #   mod_LS_slope_y3_sample * Ks_e_start
       
-      
+     #WD_from_P50_LMA_Ks  moved out of loop
+     # WD_e[ss] = mod_WD_intercept_sample  + mod_WD_slope_y1_sample*P50_e_start  + 
+     #   mod_WD_slope_y2_sample*LMA_e_last + mod_WD_slope_y3_sample*Ks_e_last
+     #WD_from_P50_Ks
+     #scale
+     if(regr_type=='pcr' || regr_type=='plsr'){
+       P50_e_start <- scale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
+       Ks_e_last    <- scale_traits(Ks_e_last, "Ks_e_last", nlabels, traits_mean, traits_sd)
+       LMA_e_last  <- scale_traits(LMA_e_last, "LMA_e_last", nlabels, traits_mean, traits_sd)
+     }
+     
+     WD_e_last = mod_WD_intercept_sample  + mod_WD_slope_y1_sample*P50_e_start  + 
+       mod_WD_slope_y2_sample*LMA_e_last +  mod_WD_slope_y3_sample*Ks_e_last
+     
+     #unscale
+     if(regr_type=='pcr' || regr_type=='plsr'){
+       P50_e_start <- unscale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
+       Ks_e_last   <- unscale_traits(Ks_e_last, "Ks_e_last", nlabels, traits_mean, traits_sd)
+       LMA_e_last  <- unscale_traits(LMA_e_last, "LMA_e_last", nlabels, traits_mean, traits_sd)
+       #WD_e[ss] = WD_e[ss] + as.numeric(traits_mean_unscale['WD'])
+     }
     } else {
       
       ########
@@ -349,25 +371,27 @@ trait_opt_bivar_start_LSP50 <- function(P50,
     
       # Make estimates of trait values based on the best SMA regressions (probably multivariate in most cases)
       # The estimates of traits in each iteration are based on the estimates of their predictor traits from the previous iteration
-      if(use_LMA_from_TLP_LS) {
+      if(use_LMA_from_TLP_LS_WD) { #BE:
         
         ########
-        #LMA_from_TLP_LS
+        #LMA_from_TLP_LS_WD
         #scale
         if(regr_type=='pcr' || regr_type=='plsr'){
           TLP_e_last <- scale_traits(TLP_e_last, "TLP_e_last", nlabels, traits_mean, traits_sd)
-          LS_e_start  <- scale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
-        
+          LS_e_start <- scale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
+          WD_e_last  <- scale_traits(WD_e_last, "WD_e_last", nlabels, traits_mean, traits_sd)
+          
         }
         
         LMA_e[ss]= mod_LMA_intercept_sample + mod_LMA_slope_y1_sample*TLP_e_last +
-          mod_LMA_slope_y2_sample*LS_e_start 
+          mod_LMA_slope_y2_sample*LS_e_start +  mod_LMA_slope_y3_sample*WD_e_last
     
         #unscale
         if(regr_type=='pcr' || regr_type=='plsr'){
           TLP_e_last  <- unscale_traits(TLP_e_last, "TLP_e_last", nlabels, traits_mean, traits_sd)
           LS_e_start  <- unscale_traits(LS_e_start, "LS_e_start", nlabels, traits_mean, traits_sd)
-        
+          WD_e_last   <- unscale_traits(WD_e_last, "WD_e_last", nlabels, traits_mean, traits_sd)
+          
          # LMA_e[ss] = LMA_e[ss] + as.numeric(traits_mean_unscale['LMA'])
         }
         #######
@@ -378,8 +402,25 @@ trait_opt_bivar_start_LSP50 <- function(P50,
         #WD_from_P50_LMA_Ks  moved out of loop
        # WD_e[ss] = mod_WD_intercept_sample  + mod_WD_slope_y1_sample*P50_e_start  + 
        #   mod_WD_slope_y2_sample*LMA_e_last + mod_WD_slope_y3_sample*Ks_e_last
+        #WD_from_P50_Ks
+        #scale
+        if(regr_type=='pcr' || regr_type=='plsr'){
+          P50_e_start <- scale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
+          Ks_e_last   <- scale_traits(Ks_e_last, "Ks_e_last", nlabels, traits_mean, traits_sd)
+          LMA_e[ss]   <- scale_traits(LMA_e[ss], "LMA_e", nlabels, traits_mean, traits_sd)
+        }
         
-      } else {
+        WD_e[ss] = mod_WD_intercept_sample  + mod_WD_slope_y1_sample*P50_e_start  + 
+          mod_WD_slope_y2_sample*LMA_e[ss] +  mod_WD_slope_y3_sample*Ks_e_last
+        
+        #unscale
+        if(regr_type=='pcr' || regr_type=='plsr'){
+          P50_e_start <- unscale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
+          Ks_e_last    <- unscale_traits(Ks_e_last, "Ks_e_last", nlabels, traits_mean, traits_sd)
+          LMA_e[ss]   <- unscale_traits(LMA_e[ss], "LMA_e", nlabels, traits_mean, traits_sd)
+          #WD_e[ss] = WD_e[ss] + as.numeric(traits_mean_unscale['WD'])
+        }
+      } else { # BDT
         
         ########
         #LMA_from_TLP
@@ -460,8 +501,8 @@ trait_opt_bivar_start_LSP50 <- function(P50,
          if (Ks_e[ss]<minKs | is.na(Ks_e[ss])) {Ks_e[ss]=NA; break}
       #  if (slope_e[ss]>maxslope | is.na(slope_e[ss])) {slope_e[ss]=NA; break}
       #  if (slope_e[ss]<minslope | is.na(slope_e[ss])) {slope_e[ss]=NA; break}
-       # if (WD_e[ss]>maxWD | is.na(WD_e[ss])) {WD_e[ss]=NA; break}
-       # if (WD_e[ss]<minWD | is.na(WD_e[ss])) {WD_e[ss]=NA; break}
+        if (WD_e[ss]>maxWD | is.na(WD_e[ss])) {WD_e[ss]=NA; break}
+        if (WD_e[ss]<minWD | is.na(WD_e[ss])) {WD_e[ss]=NA; break}
       }
       
       # Save the values for this iteration to the output array (only for debugging, can be commented out)
@@ -479,7 +520,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       diff_TLP = TLP_e[ss]-TLP_e_last
       #  diff_LS  = LS_e[ss] -LS_e_last
       diff_Ks  = Ks_e[ss] -Ks_e_last
-    #  diff_WD  = WD_e[ss] -WD_e_last
+      diff_WD  = WD_e[ss] -WD_e_last
     #  diff_slope  = slope_e[ss] -slope_e_last
       
       # Now we test if the difference between trait estimates on this iteration and between trait estimates on
@@ -488,8 +529,8 @@ trait_opt_bivar_start_LSP50 <- function(P50,
           abs(diff_LMA-diff_LMA_last)<tol &&
           abs(diff_TLP-diff_TLP_last)<tol &&
          # abs(diff_LS-diff_LS_last)<tol &&
-          abs(diff_Ks-diff_Ks_last)<tol
-        #  abs(diff_WD-diff_WD_last)<tol 
+          abs(diff_Ks-diff_Ks_last)<tol &&
+          abs(diff_WD-diff_WD_last)<tol 
         #  abs(diff_slope-diff_slope_last)<tol 
         ) {
         break
@@ -501,7 +542,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       diff_TLP_last=diff_TLP
       # diff_LS_last=diff_LS
       diff_Ks_last=diff_Ks
-    #  diff_WD_last=diff_WD
+      diff_WD_last=diff_WD
      # diff_slope_last=diff_slope
       
       # Save the "_e" values ready for the next iteration
@@ -510,7 +551,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       TLP_e_last=TLP_e[ss]
       # LS_e_last =LS_e[ss]
       Ks_e_last =Ks_e[ss]
-    #  WD_e_last =WD_e[ss]
+      WD_e_last =WD_e[ss]
      # slope_e_last =slope_e[ss]
     }
     
@@ -524,6 +565,8 @@ trait_opt_bivar_start_LSP50 <- function(P50,
     
     
     ########
+    # only outside the loop for BDT, so test this here:
+    if(use_LMA_from_TLP_LS_WD ==F ) {
     #WD_from_P50_Ks
     #scale
     if(regr_type=='pcr' || regr_type=='plsr'){
@@ -540,8 +583,9 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       Ks_e[ss]    <- unscale_traits(Ks_e[ss], "Ks_e", nlabels, traits_mean, traits_sd)
       #WD_e[ss] = WD_e[ss] + as.numeric(traits_mean_unscale['WD'])
     }
+    }
     ########
-    #[TODO] check all this is triggered
+    
     ########
     #slope_from_P50_TLP_WD
     #scale
