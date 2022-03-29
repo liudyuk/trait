@@ -297,6 +297,10 @@ LMA_multivar_test_BE <- function(trait_BE,view_stats=FALSE, regr_type = 'lm' ) {
   LMA_from_TLP_LS_WD <- sma_plot_stats(vars=data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$WD,trait_BE$LMA),labels=c("TLP","LS","WD","LMA"),nbtstrp, regression_type =  regr_type)
   plot(trait_BE$LMA[LMA_from_TLP_LS_WD$dataused],LMA_from_TLP_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
+  # LMA from TLP, LS, Ks and WD
+  LMA_from_TLP_LS_WD_Ks <- sma_plot_stats(vars=data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$WD,trait_BE$Ks,trait_BE$LMA),labels=c("TLP","LS","WD","Ks","LMA"),nbtstrp, regression_type =  regr_type)
+  plot(trait_BE$LMA[LMA_from_TLP_LS_WD_Ks$dataused],LMA_from_TLP_LS_WD_Ks$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  
   # LMA from TLP and LS
   LMA_from_TLP_LS <- sma_plot_stats(vars=data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$LMA),labels=c("TLP","LS","LMA"),nbtstrp,T, regression_type =  regr_type)
   plot(trait_BE$LMA[LMA_from_TLP_LS$dataused],LMA_from_TLP_LS$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
@@ -333,12 +337,17 @@ LMA_multivar_test_BE <- function(trait_BE,view_stats=FALSE, regr_type = 'lm' ) {
   LMA_from_TLP_LS_limitTLPLSWD <- sma_plot_stats(data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$LMA),c("TLP","LS","LMA"),nbtstrp,F,indin = LMA_from_TLP_LS_WD$dataused, regression_type =  regr_type)
   plot(trait_BE$LMA[LMA_from_TLP_LS_limitTLPLSWD$dataused],LMA_from_TLP_LS_limitTLPLSWD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
+  # LMA from TLP, LS and WD limited by the data subset of TLP, LS Ks, and WD 
+  LMA_from_TLP_LS_WD_limitTLPLSKsWD <- sma_plot_stats(vars=data.frame(trait_BE$TLP,trait_BE$LS,trait_BE$WD,trait_BE$LMA),labels=c("TLP","LS","WD","LMA"),nbtstrp, indin=LMA_from_TLP_LS_WD_Ks$dataused,regression_type =  regr_type)
+  plot(trait_BE$LMA[LMA_from_TLP_LS_WD_limitTLPLSKsWD$dataused],LMA_from_TLP_LS_WD_limitTLPLSKsWD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  
+  
   # Summarise statistics
-  all_testnames_LMA <- c("LMA_from_TLP_LS_WD","LMA_from_TLP_LS","LMA_from_TLP_WD","LMA_from_LS_WD","LMA_from_TLP","LMA_from_LS","LMA_from_WD","LMA_from_LS_WD_limitTLPLSWD","LMA_from_TLP_WD_limitTLPLSWD","LMA_from_TLP_LS_limitTLPLSWD")
-  all_R2_LMA <- c(LMA_from_TLP_LS_WD$R2,LMA_from_TLP_LS$R2,LMA_from_TLP_WD$R2,LMA_from_LS_WD$R2,LMA_from_TLP$R2,LMA_from_LS$R2,LMA_from_WD$R2,LMA_from_LS_WD_limitTLPLSWD$R2,LMA_from_TLP_WD_limitTLPLSWD$R2,LMA_from_TLP_LS_limitTLPLSWD$R2adj)
-  all_R2adj_LMA <- c(LMA_from_TLP_LS_WD$R2adj,LMA_from_TLP_LS$R2adj,LMA_from_TLP_WD$R2adj,LMA_from_LS_WD$R2adj,LMA_from_TLP$R2adj,LMA_from_LS$R2adj,LMA_from_WD$R2adj,LMA_from_LS_WD_limitTLPLSWD$R2adj,LMA_from_TLP_WD_limitTLPLSWD$R2adj,LMA_from_TLP_LS_limitTLPLSWD$R2adj)
-  all_rmse_LMA <- c(LMA_from_TLP_LS_WD$rmse,LMA_from_TLP_LS$rmse,LMA_from_TLP_WD$rmse,LMA_from_LS_WD$rmse,LMA_from_TLP$rmse,LMA_from_LS$rmse,LMA_from_WD$rmse,LMA_from_LS_WD_limitTLPLSWD$rmse,LMA_from_TLP_WD_limitTLPLSWD$rmse,LMA_from_TLP_LS_limitTLPLSWD$rmse)
-  all_ndata_LMA <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata,LMA_from_LS_WD_limitTLPLSWD$ndata,LMA_from_TLP_WD_limitTLPLSWD$ndata,LMA_from_TLP_LS_limitTLPLSWD$ndata)
+  all_testnames_LMA<- c("LMA_from_TLP_LS_WD",    "LMA_from_TLP_LS_WD_Ks",     "LMA_from_TLP_LS","LMA_from_TLP_WD","LMA_from_LS_WD","LMA_from_TLP","LMA_from_LS","LMA_from_WD","LMA_from_LS_WD_limitTLPLSWD","LMA_from_TLP_WD_limitTLPLSWD","LMA_from_TLP_LS_limitTLPLSWD", "LMA_from_TLP_LS_WD_limitTLPLSKsWD")
+  all_R2_LMA       <- c(LMA_from_TLP_LS_WD$R2,   LMA_from_TLP_LS_WD_Ks$R2,   LMA_from_TLP_LS$R2,LMA_from_TLP_WD$R2,LMA_from_LS_WD$R2,LMA_from_TLP$R2,LMA_from_LS$R2,LMA_from_WD$R2,LMA_from_LS_WD_limitTLPLSWD$R2,LMA_from_TLP_WD_limitTLPLSWD$R2,LMA_from_TLP_LS_limitTLPLSWD$R2,LMA_from_TLP_LS_WD_limitTLPLSKsWD$R2)
+  all_R2adj_LMA    <- c(LMA_from_TLP_LS_WD$R2adj,LMA_from_TLP_LS_WD_Ks$R2adj,LMA_from_TLP_LS$R2adj,LMA_from_TLP_WD$R2adj,LMA_from_LS_WD$R2adj,LMA_from_TLP$R2adj,LMA_from_LS$R2adj,LMA_from_WD$R2adj,LMA_from_LS_WD_limitTLPLSWD$R2adj,LMA_from_TLP_WD_limitTLPLSWD$R2adj,LMA_from_TLP_LS_limitTLPLSWD$R2adj,LMA_from_TLP_LS_WD_limitTLPLSKsWD$R2adj)
+  all_rmse_LMA     <- c(LMA_from_TLP_LS_WD$rmse, LMA_from_TLP_LS_WD_Ks$rmse, LMA_from_TLP_LS$rmse,LMA_from_TLP_WD$rmse,LMA_from_LS_WD$rmse,LMA_from_TLP$rmse,LMA_from_LS$rmse,LMA_from_WD$rmse,LMA_from_LS_WD_limitTLPLSWD$rmse,LMA_from_TLP_WD_limitTLPLSWD$rmse,LMA_from_TLP_LS_limitTLPLSWD$rmse,LMA_from_TLP_LS_WD_limitTLPLSKsWD$rmse)
+  all_ndata_LMA    <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS_WD_Ks$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata,LMA_from_LS_WD_limitTLPLSWD$ndata,LMA_from_TLP_WD_limitTLPLSWD$ndata,LMA_from_TLP_LS_limitTLPLSWD$ndata,LMA_from_TLP_LS_WD_limitTLPLSKsWD$ndata)
   
   all_LMA <- data.frame(all_testnames_LMA,all_R2_LMA,all_R2adj_LMA,all_rmse_LMA,all_ndata_LMA)
    if(view_stats==TRUE)View(all_LMA)
@@ -348,6 +357,7 @@ LMA_multivar_test_BE <- function(trait_BE,view_stats=FALSE, regr_type = 'lm' ) {
   
   # Test MAT and PPT coverage of species for chosen model
   plot(trait_BE$MAT[LMA_from_TLP_LS_WD$dataused],trait_BE$MAP[LMA_from_TLP_LS_WD$dataused])
+  plot(trait_BE$MAT[LMA_from_TLP_LS_WD_Ks$dataused],trait_BE$MAP[LMA_from_TLP_LS_WD_Ks$dataused])
   # RESULT: WIDE CLIMATE COVERAGE
   
   # DECISION: LMA_from_TLP_LS_WD # HIGHEST R2 
