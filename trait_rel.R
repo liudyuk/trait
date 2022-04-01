@@ -312,7 +312,6 @@ coeff_P50_from_TLP_Ks <- data.frame(coeffnames_P50_from_TLP_Ks,intercept_P50_fro
 
 TLP_multivar <- TLP_multivar_test(trait_B, regr_type =  regr_type)
 
-
 # LMA fits -----------------------------------------------------------------
 # Separate for BE and BDT (BD + BT) on the basis that LMA has a very different range and set of bivariate relationships for these
 # two different groups, unlike the other traits here.
@@ -322,10 +321,9 @@ LMA_multivar_BE  <- LMA_multivar_test_BE(trait_BE, regr_type =  regr_type)
 LMA_multivar_BDT <- LMA_multivar_test_BDT(trait_BDT, regr_type =  regr_type)
 
 
-
 # WD fits -----------------------------------------------------------------
 
-#WD_multivar_BDT <- WD_multivar_test(trait_BE,leaf_type='BDT',regr_type = regr_type)
+WD_multivar_BDT <- WD_multivar_test(trait_BDT,leaf_type='BDT',regr_type = regr_type)
 
 WD_multivar_BE <- WD_multivar_test(trait_BE,leaf_type='BE',regr_type = regr_type)
 
@@ -334,6 +332,7 @@ WD_multivar <- WD_multivar_test(trait_B,leaf_type=NULL,regr_type = regr_type)
 # slope fits --------------------------------------------------------------
 
 slope_multivar <- slope_multivar_test(trait_B,regr_type = regr_type)
+#[TO DO] trouble-shoot why are 13 points still marked as NA here?
 #AHES hist(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est,xlab ="slope-slope_est", main=paste(" distribution of residuals; model: ", Ks_multivar$Ks_from_P50_L$`regression_type (lm or sma)` ))
 #AHES shapiro.test(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est)
 
@@ -353,33 +352,42 @@ LS_multivar_BDT <- LS_multivar_test(trait_BDT, leaf_type ='BDT',regr_type = regr
 
 # Make plots showing quality of fits and climate coverage -----------------
 
-MATp1 <- trait_B$MAT[P50_multivar$P50_from_TLP_Ks$dataused]
-MAPp1 <- trait_B$MAP[P50_multivar$P50_from_TLP_Ks$dataused]/10
-name1 <- rep("P50",length(MATp1))
+#deprecated: used as start values
+#MATp1 <- trait_B$MAT[P50_multivar$P50_from_TLP_Ks$dataused]
+#MAPp1 <- trait_B$MAP[P50_multivar$P50_from_TLP_Ks$dataused]/10
+#name1 <- rep("P50",length(MATp1))
+
+MATp1 <- trait_B$MAT[Ks_multivar$Ks_from_P50_LS_WD$dataused]
+MAPp1 <- trait_B$MAP[Ks_multivar$Ks_from_P50_LS_WD$dataused]/10
+name1 <- rep("Ks",length(MATp1))
 
 MATp2 <- trait_B$MAT[TLP_multivar$TLP_from_LS_LMA_P50$dataused]
 MAPp2 <- trait_B$MAP[TLP_multivar$TLP_from_LS_LMA_P50$dataused]/10
 name2 <- rep("TLP",length(MATp2))
 
-MATp3 <- trait_B$MAT[WD_multivar$WD_from_slope_P50slope$dataused]
-MAPp3 <- trait_B$MAP[WD_multivar$WD_from_slope_P50slope$dataused]/10
-name3 <- rep("WD",length(MATp3))
+MATp3 <- trait_BE$MAT[WD_multivar_BE$WD_from_P50_LMA_Ks$dataused]
+MAPp3 <- trait_BE$MAP[WD_multivar_BE$WD_from_P50_LMA_Ks$dataused]/10
+name3 <- rep("WD (BE)",length(MATp3))
 
-MATp4 <- trait_B$MAT[slope_multivar$slope_from_P50_TLP_Ks$dataused]
-MAPp4 <- trait_B$MAP[slope_multivar$slope_from_P50_TLP_Ks$dataused]/10
-name4 <- rep("Slope",length(MATp4))
+MATp4 <- trait_BDT$MAT[WD_multivar_BDT$WD_from_P50_Ks$dataused]
+MAPp4 <- trait_BDT$MAP[WD_multivar_BDT$WD_from_P50_Ks$dataused]/10
+name4 <- rep("WD (BDT)",length(MATp4))
 
-MATp5 <- trait_BE$MAT[LMA_multivar_BE$LMA_from_TLP$dataused]
-MAPp5 <- trait_BE$MAP[LMA_multivar_BE$LMA_from_TLP$dataused]/10
-name5 <- rep("LMA (BE)",length(MATp5))
+MATp5 <- trait_B$MAT[slope_multivar$slope_from_P50_TLP_WD$dataused]
+MAPp5 <- trait_B$MAP[slope_multivar$slope_from_P50_TLP_WD$dataused]/10
+name5 <- rep("Slope",length(MATp5))
 
-MATp6 <- trait_BDT$MAT[LMA_multivar_BDT$LMA_from_TLP$dataused]
-MAPp6 <- trait_BDT$MAP[LMA_multivar_BDT$LMA_from_TLP$dataused]/10
-name6 <- rep("LMA (BD)",length(MATp6))
+MATp6 <- trait_BE$MAT[LMA_multivar_BE$LMA_from_TLP_LS_WD$dataused]
+MAPp6 <- trait_BE$MAP[LMA_multivar_BE$LMA_from_TLP_LS_WD$dataused]/10
+name6 <- rep("LMA (BE)",length(MATp6))
 
-data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6),
-                             "MAPp"=c(MAPp1,MAPp2,MAPp3,MAPp4,MAPp5,MAPp6),
-                             "name"=c(name1,name2,name3,name4,name5,name6))
+MATp7 <- trait_BDT$MAT[LMA_multivar_BDT$LMA_from_TLP$dataused]
+MAPp7 <- trait_BDT$MAP[LMA_multivar_BDT$LMA_from_TLP$dataused]/10
+name7 <- rep("LMA (BDT)",length(MATp7))
+
+data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6,MATp7),
+                             "MAPp"=c(MAPp1,MAPp2,MAPp3,MAPp4,MAPp5,MAPp6,MAPp7),
+                             "name"=c(name1,name2,name3,name4,name5,name6,name7))
 
 whittaker_biomes_plot(data_MATp_MAPp)
 # Derive traits that are not subject to optimisation--------------------------
@@ -583,14 +591,14 @@ propagate_uncer= F
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
-trait_sel= T
+trait_sel= F
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or set = 4 for a predefined (above) hypercube sample.
 n_trait_sel= 28
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 1
+spec_group_sel = 3
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data later
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
@@ -605,7 +613,7 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 # it is thought to have no functional relationship.
 # Attempt to iteratively converge on the best fit values of Ks, TLP ,slope, WD and LMA, given known LS and P50
 outs_LSP50     <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
-outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
+#outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 #outs_LSP50_lhc <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = 4, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 
 if(spec_group_sel==1){
