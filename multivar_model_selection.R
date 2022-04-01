@@ -202,14 +202,18 @@ TLP_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm' )  {
   TLP_from_P50_limitLSLMAP50 <- sma_plot_stats(data.frame(trait$P50,trait$TLP),c("P50","TLP"),nbtstrp,F,indin = TLP_from_LS_LMA_P50$dataused,regression_type = regr_type)
   
   # TLP from P50 and LMA (same species as for LS, LMA and P50)
-  TLP_from_P50_LMA_limitLALMAP50 <- sma_plot_stats(data.frame(trait$P50,trait$LMA,trait$TLP),c("P50","LMA","TLP"),nbtstrp,F,indin = TLP_from_LS_LMA_P50$dataused,regression_type = regr_type)
+  TLP_from_P50_LMA_limitLSLMAP50 <- sma_plot_stats(data.frame(trait$P50,trait$LMA,trait$TLP),c("P50","LMA","TLP"),nbtstrp,F,indin = TLP_from_LS_LMA_P50$dataused,regression_type = regr_type)
+  
+  # TLP from LS, LMA, P50  (with data limited from TLP from LS, LMA, P50 , WD)
+  TLP_from_LS_LMA_P50_limitLSLMAP50WD <- sma_plot_stats(data.frame(trait$LS,trait$LMA,trait$P50,trait$TLP),c("LS","LMA","P50","TLP"),nbtstrp,indin= TLP_from_LS_LMA_P50_WD$dataused, regression_type = regr_type)
+  #plot(trait$TLP[TLP_from_LS_LMA_P50_limitLSLMAP50WD$dataused],TLP_from_LS_LMA_P50_limitLSLMAP50WD$var_est,pch=16,xlab="TLP",ylab="TLP_est",main="TLP vs TLP_est")
   
   # Summarise statistics
-  all_testnames_TLP <- c("TLP_from_LS_LMA_P50_WD","TLP_from_LS_LMA_P50_slope","TLP_from_LS_LMA_P50","TLP_from_LS_LMA","TLP_from_P50_LMA","TLP_from_P50_LMA_limitLALMAP50","TLP_from_P50_LS","TLP_from_LS","TLP_from_P50","TLP_from_LMA","TLP_from_P50_limitLSLMAP50")
-  all_R2_TLP <- c(TLP_from_LS_LMA_P50_WD$R2,TLP_from_LS_LMA_P50_slope$R2,TLP_from_LS_LMA_P50$R2,TLP_from_LS_LMA$R2,TLP_from_P50_LMA$R2,TLP_from_P50_LMA_limitLALMAP50$R2,TLP_from_P50_LS$R2,TLP_from_LS$R2,TLP_from_P50$R2,TLP_from_LMA$R2,TLP_from_P50_limitLSLMAP50$R2)
-  all_R2adj_TLP <- c(TLP_from_LS_LMA_P50_WD$R2adj,TLP_from_LS_LMA_P50_slope$R2adj,TLP_from_LS_LMA_P50$R2adj,TLP_from_LS_LMA$R2adj,TLP_from_P50_LMA$R2adj,TLP_from_P50_LMA_limitLALMAP50$R2adj,TLP_from_P50_LS$R2adj,TLP_from_LS$R2adj,TLP_from_P50$R2adj,TLP_from_LMA$R2adj,TLP_from_P50_limitLSLMAP50$R2adj)
-  all_rmse_TLP <- c(TLP_from_LS_LMA_P50_WD$rmse,TLP_from_LS_LMA_P50_slope$rmse,TLP_from_LS_LMA_P50$rmse,TLP_from_LS_LMA$rmse,TLP_from_P50_LMA$rmse,TLP_from_P50_LMA_limitLALMAP50$rmse,TLP_from_P50_LS$rmse,TLP_from_LS$rmse,TLP_from_P50$rmse,TLP_from_LMA$rmse,TLP_from_P50_limitLSLMAP50$rmse)
-  all_ndata_TLP <- c(TLP_from_LS_LMA_P50_WD$ndata,TLP_from_LS_LMA_P50_slope$ndata,TLP_from_LS_LMA_P50$ndata,TLP_from_LS_LMA$ndata,TLP_from_P50_LMA$ndata,TLP_from_P50_LMA_limitLALMAP50$ndata,TLP_from_P50_LS$ndata,TLP_from_LS$ndata,TLP_from_P50$ndata,TLP_from_LMA$ndata,TLP_from_P50_limitLSLMAP50$ndata)
+  all_testnames_TLP <- c("TLP_from_LS_LMA_P50_WD","TLP_from_LS_LMA_P50_slope","TLP_from_LS_LMA_P50","TLP_from_LS_LMA","TLP_from_P50_LMA","TLP_from_P50_LMA_limitLSLMAP50","TLP_from_P50_LS","TLP_from_LS","TLP_from_P50","TLP_from_LMA","TLP_from_P50_limitLSLMAP50",                                        "TLP_from_LS_LMA_P50_limitLSLMAP50WD")
+  all_R2_TLP <- c(TLP_from_LS_LMA_P50_WD$R2,TLP_from_LS_LMA_P50_slope$R2,TLP_from_LS_LMA_P50$R2,TLP_from_LS_LMA$R2,TLP_from_P50_LMA$R2,TLP_from_P50_LMA_limitLSLMAP50$R2,TLP_from_P50_LS$R2,TLP_from_LS$R2,TLP_from_P50$R2,TLP_from_LMA$R2,TLP_from_P50_limitLSLMAP50$R2,                                    TLP_from_LS_LMA_P50_limitLSLMAP50WD$R2)
+  all_R2adj_TLP <- c(TLP_from_LS_LMA_P50_WD$R2adj,TLP_from_LS_LMA_P50_slope$R2adj,TLP_from_LS_LMA_P50$R2adj,TLP_from_LS_LMA$R2adj,TLP_from_P50_LMA$R2adj,TLP_from_P50_LMA_limitLSLMAP50$R2adj,TLP_from_P50_LS$R2adj,TLP_from_LS$R2adj,TLP_from_P50$R2adj,TLP_from_LMA$R2adj,TLP_from_P50_limitLSLMAP50$R2adj,TLP_from_LS_LMA_P50_limitLSLMAP50WD$R2adj)
+  all_rmse_TLP <- c(TLP_from_LS_LMA_P50_WD$rmse,TLP_from_LS_LMA_P50_slope$rmse,TLP_from_LS_LMA_P50$rmse,TLP_from_LS_LMA$rmse,TLP_from_P50_LMA$rmse,TLP_from_P50_LMA_limitLSLMAP50$rmse,TLP_from_P50_LS$rmse,TLP_from_LS$rmse,TLP_from_P50$rmse,TLP_from_LMA$rmse,TLP_from_P50_limitLSLMAP50$rmse,            TLP_from_LS_LMA_P50_limitLSLMAP50WD$rmse)
+  all_ndata_TLP <- c(TLP_from_LS_LMA_P50_WD$ndata,TLP_from_LS_LMA_P50_slope$ndata,TLP_from_LS_LMA_P50$ndata,TLP_from_LS_LMA$ndata,TLP_from_P50_LMA$ndata,TLP_from_P50_LMA_limitLSLMAP50$ndata,TLP_from_P50_LS$ndata,TLP_from_LS$ndata,TLP_from_P50$ndata,TLP_from_LMA$ndata,TLP_from_P50_limitLSLMAP50$ndata,TLP_from_LS_LMA_P50_limitLSLMAP50WD$ndata)
   
   all_TLP <- data.frame(all_testnames_TLP,all_R2_TLP,all_R2adj_TLP,all_rmse_TLP,all_ndata_TLP)
    if(view_stats==TRUE)View(all_TLP)
@@ -245,9 +249,17 @@ LMA_multivar_test_BDT <- function(trait_BDT,view_stats=FALSE, regr_type = 'lm' )
   LMA_from_TLP_LS_WD <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$WD,trait_BDT$LMA),c("TLP","LS","WD","LMA"),nbtstrp,regression_type = regr_type)
   plot(trait_BDT$LMA[LMA_from_TLP_LS_WD$dataused],LMA_from_TLP_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
+  # LMA from TLP, LS, Ks and WD
+  LMA_from_TLP_LS_WD_Ks <- sma_plot_stats(vars=data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$WD,trait_BDT$Ks,trait_BDT$LMA),labels=c("TLP","LS","WD","Ks","LMA"),nbtstrp, regression_type =  regr_type)
+  plot(trait_BDT$LMA[LMA_from_TLP_LS_WD_Ks$dataused],LMA_from_TLP_LS_WD_Ks$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  
   # LMA from TLP and LS
   LMA_from_TLP_LS <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$LMA),c("TLP","LS","LMA"),nbtstrp,regression_type = regr_type)
   plot(trait_BDT$LMA[LMA_from_TLP_LS$dataused],LMA_from_TLP_LS$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  
+  # LMA from Ks and LS
+  LMA_from_Ks_LS <- sma_plot_stats(data.frame(trait_BDT$Ks,trait_BDT$LS,trait_BDT$LMA),c("Ks","LS","LMA"),nbtstrp,regression_type = regr_type)
+  plot(trait_BDT$LMA[LMA_from_Ks_LS$dataused],LMA_from_Ks_LS$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
   # LMA from TLP and WD
   LMA_from_TLP_WD <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$WD,trait_BDT$LMA),c("TLP","WD","LMA"),nbtstrp,regression_type = regr_type)
@@ -257,22 +269,35 @@ LMA_multivar_test_BDT <- function(trait_BDT,view_stats=FALSE, regr_type = 'lm' )
   LMA_from_LS_WD <- sma_plot_stats(data.frame(trait_BDT$LS,trait_BDT$WD,trait_BDT$LMA),c("LS","WD","LMA"),nbtstrp,regression_type = regr_type)
   plot(trait_BDT$LMA[LMA_from_LS_WD$dataused],LMA_from_LS_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
+  # LMA from LS,Ks and WD
+  LMA_from_LS_Ks_WD <- sma_plot_stats(data.frame(trait_BDT$LS,trait_BDT$Ks,trait_BDT$WD,trait_BDT$LMA),c("LS","Ks","WD","LMA"),nbtstrp,regression_type = regr_type)
+  plot(trait_BDT$LMA[LMA_from_LS_Ks_WD$dataused],LMA_from_LS_Ks_WD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  
   # LMA from TLP
   LMA_from_TLP <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LMA),c("TLP","LMA"),nbtstrp,regression_type = regr_type)
   plot(trait_BDT$LMA[LMA_from_TLP$dataused],LMA_from_TLP$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
   
+  # LMA from TLP limited by data from LMA from TLP and WD:
+  LMA_from_TLP_limitTLPWD <- sma_plot_stats(data.frame(trait_BDT$TLP,trait_BDT$LMA),c("TLP","LMA"),nbtstrp,indin=LMA_from_TLP_WD$dataused,regression_type = regr_type)
+  plot(trait_BDT$LMA[LMA_from_TLP_limitTLPWD$dataused],LMA_from_TLP_limitTLPWD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+
   # LMA from LS
   LMA_from_LS <- sma_plot_stats(data.frame(trait_BDT$LS,trait_BDT$LMA),c("LS","LMA"),nbtstrp,regression_type = regr_type)
   
   # LMA from WD
   LMA_from_WD <- sma_plot_stats(data.frame(trait_BDT$WD,trait_BDT$LMA),c("WD","LMA"),nbtstrp,regression_type = regr_type)
   
+  # LMA from TLP, LS and WD limited by the data subset of TLP, LS Ks, and WD 
+  LMA_from_TLP_LS_WD_limitTLPLSKsWD <- sma_plot_stats(vars=data.frame(trait_BDT$TLP,trait_BDT$LS,trait_BDT$WD,trait_BDT$LMA),labels=c("TLP","LS","WD","LMA"),nbtstrp, indin=LMA_from_TLP_LS_WD_Ks$dataused,regression_type =  regr_type)
+  plot(trait_BDT$LMA[LMA_from_TLP_LS_WD_limitTLPLSKsWD$dataused],LMA_from_TLP_LS_WD_limitTLPLSKsWD$var_est,pch=16,xlab="LMA",ylab="LMA_est",main="LMA vs LMA_est")
+  
+  
   # Summarise statistics
-  all_testnames_LMA <- c("LMA_from_TLP_LS_WD","LMA_from_TLP_LS","LMA_from_TLP_WD","LMA_from_LS_WD","LMA_from_TLP","LMA_from_LS","LMA_from_WD")
-  all_R2_LMA <- c(LMA_from_TLP_LS_WD$R2,LMA_from_TLP_LS$R2,LMA_from_TLP_WD$R2,LMA_from_LS_WD$R2,LMA_from_TLP$R2,LMA_from_LS$R2,LMA_from_WD$R2)
-  all_R2adj_LMA <- c(LMA_from_TLP_LS_WD$R2adj,LMA_from_TLP_LS$R2adj,LMA_from_TLP_WD$R2adj,LMA_from_LS_WD$R2adj,LMA_from_TLP$R2adj,LMA_from_LS$R2adj,LMA_from_WD$R2adj)
-  all_rmse_LMA <- c(LMA_from_TLP_LS_WD$rmse,LMA_from_TLP_LS$rmse,LMA_from_TLP_WD$rmse,LMA_from_LS_WD$rmse,LMA_from_TLP$rmse,LMA_from_LS$rmse,LMA_from_WD$rmse)
-  all_ndata_LMA <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata,LMA_from_LS_WD$ndata,LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata)
+  all_testnames_LMA <- c("LMA_from_TLP_LS_WD",   "LMA_from_TLP_LS_WD_Ks",    "LMA_from_LS_Ks_WD",    "LMA_from_Ks_LS","LMA_from_TLP_LS",        "LMA_from_TLP_WD",     "LMA_from_LS_WD",     "LMA_from_TLP_limitTLPWD", "LMA_from_TLP","LMA_from_LS","LMA_from_WD",                         "LMA_from_TLP_LS_WD_limitTLPLSKsWD")
+  all_R2_LMA        <- c(LMA_from_TLP_LS_WD$R2,   LMA_from_TLP_LS_WD_Ks$R2,   LMA_from_LS_Ks_WD$R2,  LMA_from_Ks_LS$R2, LMA_from_TLP_LS$R2,      LMA_from_TLP_WD$R2,    LMA_from_LS_WD$R2,   LMA_from_TLP_limitTLPWD$R2, LMA_from_TLP$R2,LMA_from_LS$R2,LMA_from_WD$R2,                  LMA_from_TLP_LS_WD_limitTLPLSKsWD$R2)
+  all_R2adj_LMA     <- c(LMA_from_TLP_LS_WD$R2adj,LMA_from_TLP_LS_WD_Ks$R2adj,LMA_from_LS_Ks_WD$R2adj,LMA_from_Ks_LS$R2adj,LMA_from_TLP_LS$R2adj,LMA_from_TLP_WD$R2adj, LMA_from_LS_WD$R2adj,LMA_from_TLP_limitTLPWD$R2adj, LMA_from_TLP$R2adj,LMA_from_LS$R2adj,LMA_from_WD$R2adj,LMA_from_TLP_LS_WD_limitTLPLSKsWD$R2adj)
+  all_rmse_LMA      <- c(LMA_from_TLP_LS_WD$rmse, LMA_from_TLP_LS_WD_Ks$rmse, LMA_from_LS_Ks_WD$rmse, LMA_from_Ks_LS$rmse,LMA_from_TLP_LS$rmse,  LMA_from_TLP_WD$rmse,  LMA_from_LS_WD$rmse, LMA_from_TLP_limitTLPWD$rmse, LMA_from_TLP$rmse,LMA_from_LS$rmse,LMA_from_WD$rmse,      LMA_from_TLP_LS_WD_limitTLPLSKsWD$rmse)
+  all_ndata_LMA     <- c(LMA_from_TLP_LS_WD$ndata,LMA_from_TLP_LS_WD_Ks$ndata,LMA_from_LS_Ks_WD$ndata,LMA_from_Ks_LS$ndata,LMA_from_TLP_LS$ndata,LMA_from_TLP_WD$ndata, LMA_from_LS_WD$ndata,LMA_from_TLP_limitTLPWD$ndata, LMA_from_TLP$ndata,LMA_from_LS$ndata,LMA_from_WD$ndata,LMA_from_TLP_LS_WD_limitTLPLSKsWD$ndata)
   
   all_LMA <- data.frame(all_testnames_LMA,all_R2_LMA,all_R2adj_LMA,all_rmse_LMA,all_ndata_LMA)
    if(view_stats==TRUE)View(all_LMA)
@@ -437,9 +462,45 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   WD_from_slope <- sma_plot_stats(data.frame(trait$slope,trait$WD),c("slope","WD"),nbtstrp,regression_type = regr_type)
   plot(trait$WD[WD_from_slope$dataused],WD_from_slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
+  # WD from P50, limited by data from P50 and slope
+  WD_from_P50_limitP50slope <- sma_plot_stats(data.frame(trait$P50,trait$WD),c("P50","WD"),nbtstrp,indin= WD_from_P50_slope$dataused,regression_type = regr_type)
+  plot(trait$WD[WD_from_P50_limitP50slope$dataused],WD_from_P50_limitP50slope$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
   # WD from Ks P50
   WD_from_Ks_P50 <- sma_plot_stats(data.frame(trait$Ks,trait$P50,trait$WD),c("Ks","P50","WD"),nbtstrp,regression_type = regr_type)
   plot(trait$WD[WD_from_Ks_P50$dataused],WD_from_Ks_P50$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
+  # WD from P50, limited by data from P50 and Ks
+  WD_from_P50_limitP50Ks <- sma_plot_stats(data.frame(trait$P50,trait$WD),c("P50","WD"),nbtstrp,indin= WD_from_Ks_P50$dataused,regression_type = regr_type)
+  plot(trait$WD[WD_from_P50_limitP50Ks$dataused],WD_from_P50_limitP50Ks$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
+  # WD from LMA P50
+  WD_from_LMA_P50 <- sma_plot_stats(data.frame(trait$LMA,trait$P50,trait$WD),c("LMA","P50","WD"),nbtstrp,regression_type = regr_type)
+  plot(trait$WD[WD_from_LMA_P50$dataused],WD_from_LMA_P50$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
+  # WD from LMA
+  WD_from_LMA <- sma_plot_stats(data.frame(trait$LMA,trait$WD),c("LMA","WD"),nbtstrp,regression_type = regr_type)
+  plot(trait$WD[WD_from_LMA$dataused],WD_from_LMA$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
+  # WD from Ks P50  (limited by data from P50,Ks and LMA)
+  WD_from_Ks_P50_limitP50KsLMA <- sma_plot_stats(data.frame(trait$Ks,trait$P50,trait$WD),c("Ks","P50","WD"),nbtstrp,indin=WD_from_P50_LMA_Ks$dataused,regression_type = regr_type)
+  plot(trait$WD[WD_from_Ks_P50_limitP50KsLMA$dataused],WD_from_Ks_P50_limitP50KsLMA$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
+  # WD from Ks P50  (limited by data from P50,Ks,slope and LMA)
+  WD_from_Ks_P50_limitP50slopeKsLMA <- sma_plot_stats(data.frame(trait$Ks,trait$P50,trait$WD),c("Ks","P50","WD"),nbtstrp, indin=WD_from_P50_slope_Ks_LMA$dataused,regression_type = regr_type)
+  plot(trait$WD[WD_from_Ks_P50_limitP50slopeKsLMA$dataused],WD_from_Ks_P50_limitP50slopeKsLMA$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
+  #WD_from_P50_slope limited by data from (WD_from_P50_slope_Ks)
+  WD_from_P50_slope_limitP50slopeKs <- sma_plot_stats(data.frame(trait$P50,trait$slope,trait$WD),c("P50","slope","WD"),nbtstrp, indin=WD_from_P50_slope_Ks$dataused, regression_type = regr_type)
+  plot(trait$WD[WD_from_P50_slope_limitP50slopeKs$dataused],WD_from_P50_slope_limitP50slopeKs$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
+  # WD from slope limited by data from P50, slope and Ks
+  WD_from_slope_limitP50slopeKs <- sma_plot_stats(data.frame(trait$slope,trait$WD),c("slope","WD"),nbtstrp,indin=WD_from_P50_slope_Ks$dataused,regression_type = regr_type)
+  plot(trait$WD[WD_from_slope_limitP50slopeKs$dataused],WD_from_slope_limitP50slopeKs$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
+  
+  # WD from P50 and slope limited by data from P50, slope and Ks
+  WD_from_P50_slope_limitP50slopeKs <- sma_plot_stats(data.frame(trait$P50,trait$slope,trait$WD),c("P50","slope","WD"),nbtstrp,indin=WD_from_P50_slope_Ks$dataused,regression_type = regr_type)
+  plot(trait$WD[WD_from_slope_limitP50slopeKs$dataused],WD_from_slope_limitP50slopeKs$var_est,pch=16,xlab="WD",ylab="WD_est",main="WD vs WD_est")
   
   # WD_from P50 and Ks data limited to WD_from_P50slopeKs
   if(regr_type == 'lm' |regr_type == 'sma'){
@@ -450,11 +511,11 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
   }
   
   # Summarise statistics
-  all_testnames_WD <- c("WD_from_P50_slope_Ks_LMA","WD_from_P50_Ks_LMA_limitP50slopeKsLMA","WD_from_P50_slope_Ks" ,  "WD_from_P50_LMA_Ks"          ,"WD_from_P50_slope",    "WD_from_slope_P50slope"," WD_from_slope_Ks_P50slope",     "WD_from_P50_P50slope"                ,"WD_from_P50_Ks"    ,"WD_from_P50"     ,"WD_from_slope",     "WD_from_Ks_P50","WD_from_P50_Ks_limitP50slopeKs")
-  all_R2_WD <- c(WD_from_P50_slope_Ks_LMA$R2       ,WD_from_P50_Ks_LMA_limitP50slopeKsLMA$R2,WD_from_P50_slope_Ks$R2,  WD_from_P50_LMA_Ks$R2        ,WD_from_P50_slope$R2,         WD_from_slope_P50slope$R2, WD_from_slope_Ks_P50slope$R2,      WD_from_P50_P50slope$R2, WD_from_P50_Ks$R2   ,WD_from_P50$R2    ,WD_from_slope$R2,    WD_from_Ks_P50$R2,WD_from_P50_Ks_limitP50slopeKs$R2)
-  all_R2adj_WD <- c(WD_from_P50_slope_Ks_LMA$R2adj,WD_from_P50_Ks_LMA_limitP50slopeKsLMA$R2adj,WD_from_P50_slope_Ks$R2adj,WD_from_P50_LMA_Ks$R2adj     ,WD_from_P50_slope$R2adj,WD_from_slope_P50slope$R2adj,  WD_from_slope_Ks_P50slope$R2adj, WD_from_P50_P50slope$R2adj    ,WD_from_P50_Ks$R2adj ,WD_from_P50$R2adj ,WD_from_slope$R2adj, WD_from_Ks_P50$R2adj,WD_from_P50_Ks_limitP50slopeKs$R2adj)
-  all_rmse_WD <- c(WD_from_P50_slope_Ks_LMA$rmse,  WD_from_P50_Ks_LMA_limitP50slopeKsLMA$rmse,WD_from_P50_slope_Ks$rmse, WD_from_P50_LMA_Ks$rmse      ,WD_from_P50_slope$rmse,   WD_from_slope_P50slope$rmse, WD_from_slope_Ks_P50slope$rmse,   WD_from_P50_P50slope$rmse    , WD_from_P50_Ks$rmse, WD_from_P50$rmse   ,WD_from_slope$rmse,  WD_from_Ks_P50$rmse,WD_from_P50_Ks_limitP50slopeKs$rmse)
-  all_ndata_WD <- c(WD_from_P50_slope_Ks_LMA$ndata,WD_from_P50_Ks_LMA_limitP50slopeKsLMA$ndata,WD_from_P50_slope_Ks$ndata,WD_from_P50_LMA_Ks$ndata     , WD_from_P50_slope$ndata,WD_from_slope_P50slope$ndata, WD_from_slope_Ks_P50slope$ndata,  WD_from_P50_P50slope$ndata , WD_from_P50_Ks$ndata  ,WD_from_P50$ndata  ,WD_from_slope$ndata, WD_from_Ks_P50$ndata,WD_from_P50_Ks_limitP50slopeKs$ndata)
+  all_testnames_WD <- c("WD_from_P50_slope_Ks_LMA","WD_from_P50_Ks_LMA_limitP50slopeKsLMA",      "WD_from_P50_slope_limitP50slopeKs","WD_from_Ks_P50_limitP50slopeKsLMA",    "WD_from_P50_slope_Ks" ,  "WD_from_P50_LMA_Ks"              ,"WD_from_P50_slope",    "WD_from_slope_P50slope"," WD_from_slope_Ks_P50slope",     "WD_from_P50_P50slope"                ,"WD_from_P50_Ks"   ,"WD_from_LMA_P50"    ,"WD_from_P50"     ,"WD_from_P50_limitP50Ks","WD_from_LMA","WD_from_P50_limitP50slope",     "WD_from_slope",     "WD_from_slope_limitP50slopeKs",  "WD_from_Ks_P50","WD_from_P50_Ks_limitP50slopeKs",         "WD_from_Ks_P50_limitP50KsLMA")
+  all_R2_WD <- c(WD_from_P50_slope_Ks_LMA$R2       ,WD_from_P50_Ks_LMA_limitP50slopeKsLMA$R2,    WD_from_P50_slope_limitP50slopeKs$R2,WD_from_Ks_P50_limitP50slopeKsLMA$R2,   WD_from_P50_slope_Ks$R2,  WD_from_P50_LMA_Ks$R2            ,WD_from_P50_slope$R2,   WD_from_slope_P50slope$R2, WD_from_slope_Ks_P50slope$R2,      WD_from_P50_P50slope$R2,          WD_from_P50_Ks$R2   ,WD_from_LMA_P50$R2    ,WD_from_P50$R2    ,WD_from_P50_limitP50Ks$R2 ,WD_from_LMA$R2  ,WD_from_P50_limitP50slope$R2     ,WD_from_slope$R2,    WD_from_slope_limitP50slopeKs$R2,       WD_from_Ks_P50$R2,WD_from_P50_Ks_limitP50slopeKs$R2,      WD_from_Ks_P50_limitP50KsLMA$R2)
+  all_R2adj_WD <- c(WD_from_P50_slope_Ks_LMA$R2adj,WD_from_P50_Ks_LMA_limitP50slopeKsLMA$R2adj,  WD_from_P50_slope_limitP50slopeKs$R2adj,WD_from_Ks_P50_limitP50slopeKsLMA$R2adj,WD_from_P50_slope_Ks$R2adj,WD_from_P50_LMA_Ks$R2adj     ,WD_from_P50_slope$R2adj,WD_from_slope_P50slope$R2adj,  WD_from_slope_Ks_P50slope$R2adj, WD_from_P50_P50slope$R2adj    ,WD_from_P50_Ks$R2adj ,WD_from_LMA_P50$R2adj ,WD_from_P50$R2adj ,WD_from_P50_limitP50Ks$R2adj,WD_from_LMA$R2adj ,WD_from_P50_limitP50slope$R2adj  ,WD_from_slope$R2adj, WD_from_slope_limitP50slopeKs$R2adj, WD_from_Ks_P50$R2adj,WD_from_P50_Ks_limitP50slopeKs$R2adj,WD_from_Ks_P50_limitP50KsLMA$R2adj)
+  all_rmse_WD <- c(WD_from_P50_slope_Ks_LMA$rmse,  WD_from_P50_Ks_LMA_limitP50slopeKsLMA$rmse,   WD_from_P50_slope_limitP50slopeKs$rmse,WD_from_Ks_P50_limitP50slopeKsLMA$rmse ,WD_from_P50_slope_Ks$rmse, WD_from_P50_LMA_Ks$rmse      ,WD_from_P50_slope$rmse,   WD_from_slope_P50slope$rmse, WD_from_slope_Ks_P50slope$rmse,   WD_from_P50_P50slope$rmse    , WD_from_P50_Ks$rmse  ,WD_from_LMA_P50$rmse  ,WD_from_P50$rmse  ,WD_from_P50_limitP50Ks$rmse,WD_from_LMA$rmse   ,WD_from_P50_limitP50slope$rmse,   WD_from_slope$rmse,  WD_from_slope_limitP50slopeKs$rmse, WD_from_Ks_P50$rmse,WD_from_P50_Ks_limitP50slopeKs$rmse,WD_from_Ks_P50_limitP50KsLMA$rmse)
+  all_ndata_WD <- c(WD_from_P50_slope_Ks_LMA$ndata,WD_from_P50_Ks_LMA_limitP50slopeKsLMA$ndata,  WD_from_P50_slope_limitP50slopeKs$ndata,WD_from_Ks_P50_limitP50slopeKsLMA$ndata ,WD_from_P50_slope_Ks$ndata,WD_from_P50_LMA_Ks$ndata     , WD_from_P50_slope$ndata,WD_from_slope_P50slope$ndata, WD_from_slope_Ks_P50slope$ndata,  WD_from_P50_P50slope$ndata , WD_from_P50_Ks$ndata  ,WD_from_LMA_P50$ndata,WD_from_P50$ndata ,WD_from_P50_limitP50Ks$ndata,WD_from_LMA$ndata ,WD_from_P50_limitP50slope$ndata, WD_from_slope$ndata,WD_from_slope_limitP50slopeKs$ndata, WD_from_Ks_P50$ndata,WD_from_P50_Ks_limitP50slopeKs$ndata,WD_from_Ks_P50_limitP50KsLMA$ndata)
   
   all_WD <- data.frame(all_testnames_WD,all_R2_WD,all_R2adj_WD,all_rmse_WD,all_ndata_WD)
   if(view_stats==TRUE)View(all_WD)
@@ -485,6 +546,10 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
     # DECISION for BDT: WD_from_P50_Ks
     return_vals <- list("all_WD"=all_WD,
                         "WD_from_P50_Ks"= WD_from_P50_Ks)  # WD_from_P50_Ks 
+    # [TO DO] remove later, just for testing (31.03.2022)
+    #WD_from_Ks_P50_limitP50KsLMA
+   # return_vals <- list("all_WD"= all_WD,
+    #                    "WD_from_P50_slope_Ks"= WD_from_P50_slope_Ks)
   }
   
   if(leaf_type == 'BE'){
@@ -496,6 +561,10 @@ WD_multivar_test <- function(trait,view_stats=FALSE, leaf_type = NULL,regr_type 
     
     return_vals <- list("all_WD"= all_WD,
                         "WD_from_P50_LMA_Ks"= WD_from_P50_LMA_Ks) # WD_from_P50_LMA_Ks
+    # [TO DO] remove after testing 31-03-2022
+   # return_vals <- list("all_WD"= all_WD,
+  #                      "WD_from_P50_slope_Ks_LMA"= WD_from_P50_slope_Ks_LMA)
+    
   }
   } # check whether leaftype is selected for or not.
 
@@ -612,7 +681,9 @@ slope_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm') {
   
   return_vals <- list("all_slope"=all_slope,
                       "slope_from_P50_TLP_WD" = slope_from_P50_TLP_WD)
-  
+  #[TO DO] change after testing 31.03.2022
+  #return_vals <- list("all_slope"=all_slope,
+  #                    "slope_from_P50_TLP_WD_KS" = slope_from_P50_TLP_WD_Ks)
   return(return_vals)
 }
   
