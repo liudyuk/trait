@@ -1,4 +1,4 @@
- -m 'opt_test_plots_LSP50 <- function(trait,
+opt_test_plots_LSP50 <- function(trait,
                                  Ks_e_mean,
                                  Ks_e_5perc,
                                  Ks_e_95perc,
@@ -94,20 +94,22 @@
   plot_scatter(trait_plot,'P50','TLP')
   plot_scatter(trait_plot,'P50','Ks')
   plot_scatter(trait_plot,'P50','LMA')
- 
-  plot_scatter(trait_plot,'TLP','slope')
-  plot_scatter(trait_plot,'TLP','WD')
-  plot_scatter(trait_plot,'TLP','LMA')
-  #plot_scatter(trait_plot,'TLP','P50')
-
+  
   plot_scatter(trait_plot,'LS','slope')
   plot_scatter(trait_plot,'LS','WD')
   plot_scatter(trait_plot,'LS','TLP')
   plot_scatter(trait_plot,'LS','LMA')
+  plot_scatter(trait_plot,'LS','Ks')
+ 
+  plot_scatter(trait_plot,'TLP','slope')
+  plot_scatter(trait_plot,'TLP','WD')
+  plot_scatter(trait_plot,'TLP','LMA')
+  plot_scatter(trait_plot,'TLP','Ks')
+  #plot_scatter(trait_plot,'TLP','P50')
   
   plot_scatter(trait_plot,'Ks','slope')
   plot_scatter(trait_plot,'Ks','WD')
-  plot_scatter(trait_plot,'Ks','TLP')
+  #plot_scatter(trait_plot,'Ks','TLP')
   plot_scatter(trait_plot,'Ks','LMA')
   
   plot_scatter(trait_plot,'WD','slope')
