@@ -598,7 +598,7 @@ trait_sel= F
 n_trait_sel= 28
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 3
+spec_group_sel = 1
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data later
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
@@ -612,10 +612,11 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 # lowest bivariate relationship in the trait network for evergreen subset: pearson cor = 0.23.
 # it is thought to have no functional relationship.
 # Attempt to iteratively converge on the best fit values of Ks, TLP ,slope, WD and LMA, given known LS and P50
-outs_LSP50     <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
+outs_LSP50      <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 #outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 #outs_LSP50_lhc <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = 4, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 
+if(testing==TRUE){
 if(spec_group_sel==1){
   save(outs_LSP50 , file= 'data/outs_LSP50_BDT_2203.RData')
 }
@@ -627,6 +628,7 @@ if(spec_group_sel==3){
 }
 if(spec_group_sel==4){
   save(outs_LSP50 , file= 'data/outs_LSP50_BD_2203.RData')
+}
 }
 #save(outs_LSP50 , file= 'data/outs_LSP50_BD.RData')
 # to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
@@ -668,7 +670,7 @@ if(trait_sel==F) {
   
   # provide list of trait names which are the predicted traits
   trait_names = c('Ks','TLP','LMA','WD','slope')
-  RMSE_withLSP50_start <- opt_rmse(traits,trait_names,ind)
+  RMSE_withLSP50_start <- opt_rmse(traits,trait_names,ind,spec_group_sel) # previous
 }
 
 # Convert to the values needed in LPJ-GUESS -----------------
