@@ -12,7 +12,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
                       Ks_from_P50_LS_WD,
                       TLP_from_LS_LMA_P50,
                       P50_from_TLP_Ks,
-                      slope_from_P50_TLP_WD,
+                      slope_from_P50_TLP_WD_Ks,
                       WD_from_P50_Ks,
                       WD_from_P50_LMA_Ks,
                       LMA_from_LS,
@@ -128,11 +128,11 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       mod_P50_slope_y1_sample    <- P50_from_TLP_Ks$mod$slope_R.y1
       mod_P50_slope_y2_sample    <- P50_from_TLP_Ks$mod$slope_R.y2
 
-      mod_slope_intercept_sample <-  slope_from_P50_TLP_WD$mod$intercept_R # slope_from_P50_TLP_WD
-      mod_slope_slope_y1_sample <-  slope_from_P50_TLP_WD$mod$slope_R.y1
-      mod_slope_slope_y2_sample <-  slope_from_P50_TLP_WD$mod$slope_R.y2
-      mod_slope_slope_y3_sample <-  slope_from_P50_TLP_WD$mod$slope_R.y3
-   
+      mod_slope_intercept_sample <-  slope_from_P50_TLP_WD_Ks$mod$intercept_R # slope_from_P50_TLP_WD_Ks
+      mod_slope_slope_y1_sample <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y1
+      mod_slope_slope_y2_sample <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y2
+      mod_slope_slope_y3_sample <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y3
+      mod_slope_slope_y4_sample <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y4
       
     } else { # ss > 1
       if(use_LMA_from_TLP_LS_WD) { # BE:
@@ -185,11 +185,11 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       mod_P50_slope_y1_sample  <- P50_from_TLP_Ks$mod$boot.y1[ss]
       mod_P50_slope_y2_sample  <- P50_from_TLP_Ks$mod$boot.y2[ss]
 
-      mod_slope_intercept_sample <- slope_from_P50_TLP_WD$mod$boot.intercept[ss] #slope_from_P50_TLP_Ks
-      mod_slope_slope_y1_sample <- slope_from_P50_TLP_WD$mod$boot.y1[ss]
-      mod_slope_slope_y2_sample <- slope_from_P50_TLP_WD$mod$boot.y2[ss]
-      mod_slope_slope_y3_sample <- slope_from_P50_TLP_WD$mod$boot.y3[ss]
-     
+      mod_slope_intercept_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.intercept[ss] #slope_from_P50_TLP_Ks
+      mod_slope_slope_y1_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y1[ss]
+      mod_slope_slope_y2_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y2[ss]
+      mod_slope_slope_y3_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y3[ss]
+      mod_slope_slope_y4_sample <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y4[ss]
       
     }
     # These regression coefficients will now be used in the optimisation calculations
@@ -598,22 +598,25 @@ trait_opt_bivar_start_LSP50 <- function(P50,
     #    mod_WD_slope_y2_sample*Ks_e[ss] 
     
     ########
-    #slope_from_P50_TLP_WD
+    #slope_from_P50_TLP_WD_Ks
     #scale
     if(regr_type=='pcr' || regr_type=='plsr'){
       P50_e_start <- scale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
       TLP_e[ss]   <- scale_traits(TLP_e[ss], "TLP_e", nlabels, traits_mean, traits_sd)
       WD_e[ss]    <- scale_traits(WD_e[ss], "WD_e", nlabels, traits_mean, traits_sd)
+      Ks_e[ss]    <- scale_traits(Ks_e[ss], "Ks_e", nlabels, traits_mean, traits_sd)
     }
     
     slope_e[ss] = mod_slope_intercept_sample + mod_slope_slope_y1_sample*P50_e_start + 
-      mod_slope_slope_y2_sample*TLP_e[ss]  + mod_slope_slope_y3_sample*WD_e[ss] 
+      mod_slope_slope_y2_sample*TLP_e[ss]  + mod_slope_slope_y3_sample*WD_e[ss] +
+      mod_slope_slope_y4_sample*Ks_e[ss]
     
     #unscale
     if(regr_type=='pcr' || regr_type=='plsr'){
       P50_e_start <- unscale_traits(P50_e_start, "P50_e_start", nlabels, traits_mean, traits_sd)
       TLP_e[ss]   <- unscale_traits(TLP_e[ss], "TLP_e", nlabels, traits_mean, traits_sd)
       WD_e[ss]    <- unscale_traits(WD_e[ss], "WD_e", nlabels, traits_mean, traits_sd)
+      Ks_e[ss]    <- unscale_traits(Ks_e[ss], "Ks_e", nlabels, traits_mean, traits_sd)
      # slope_e[ss] = slope_e[ss] + as.numeric(traits_mean_unscale['slope'])
     }
     ########

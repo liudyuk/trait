@@ -598,7 +598,7 @@ trait_sel= F
 n_trait_sel= 28
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 1
+spec_group_sel = 2
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data later
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
@@ -670,7 +670,7 @@ if(trait_sel==F) {
   
   # provide list of trait names which are the predicted traits
   trait_names = c('Ks','TLP','LMA','WD','slope')
-  RMSE_withLSP50_start <- opt_rmse(traits,trait_names,ind,spec_group_sel) # previous
+  RMSE_withLSP50_start <- opt_rmse(traits,trait_names,ind,spec_group_sel) 
 }
 
 # Convert to the values needed in LPJ-GUESS -----------------
@@ -713,7 +713,7 @@ traits_PCA$Ks  = log(traits_PCA$Ks)
 traits_PCA$LMA = log(traits_PCA$LMA)
 
 #PCA on optimised trait values (0 = 5 to 7)
-pca_with_pretty_biplot(traits_PCA[,c(1,3,4,6,10,12,17)])
+pca_with_pretty_biplot(traits_PCA[,c(1,3,4,6,10,12,13,17)])
 
 if(spec_group_sel==1){
   mtext(outer=TRUE, 'Broadleaf deciduous')

@@ -682,8 +682,8 @@ slope_multivar_test <- function(trait,view_stats=FALSE, regr_type = 'lm') {
   return_vals <- list("all_slope"=all_slope,
                       "slope_from_P50_TLP_WD" = slope_from_P50_TLP_WD)
   #[TO DO] change after testing 31.03.2022
-  #return_vals <- list("all_slope"=all_slope,
-  #                    "slope_from_P50_TLP_WD_KS" = slope_from_P50_TLP_WD_Ks)
+  return_vals <- list("all_slope"=all_slope,
+                      "slope_from_P50_TLP_WD_Ks" = slope_from_P50_TLP_WD_Ks)
   return(return_vals)
 }
   
