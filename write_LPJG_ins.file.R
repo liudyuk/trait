@@ -4,7 +4,7 @@
 # output_fol : specify output folder location as string
 # basePFT: number between 1 and 5, to reflect PFTs:  'TeBE'(1),'TeBS'(2),'IBS'(3),'TrBE'(4),'TrBR'(5)
 # traits_LPJG: list object of traits derived from function  lpjg_traits_conv()
-write_LPJG_ins.file <- function(output_fol,basePFT,traits_LPJG){
+write_LPJG_ins.file <- function(output_fol,basePFT,traits_LPJG,insfile_template="global_cf_base_Tom.ins"){
   basePFT_names <- c('TeBE','TeBS','IBS','TrBE','TrBR')
 # Set the name for the output file  
 if (basePFT==1) {
@@ -73,7 +73,7 @@ for (nn in 1:length(traits_LPJG$Ks)) {
 # Write out to a set of LPJ-GUESS instruction files, 1 per PFT
 for (nn in 1:length(traits_LPJG$Ks)) {
   LPJG_outfile_pft <- paste(LPJG_outfile,".PFT",nn,sep="")
-  file.copy("global_cf_base_Tom.ins",LPJG_outfile_pft,overwrite=T)
+  file.copy(insfile_template,LPJG_outfile_pft,overwrite=T)
   PFTfile <- file(LPJG_outfile_pft,open="append")
   
   Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
