@@ -1,8 +1,10 @@
-determine_lambda_from_TLP <- function(TLP_unlogged, plot=FALSE){
-  #input: TLP_unlogged  network-predicted TLP parameters
-  #output: lambdas åredicted lambdas, generated in this function
+determine_lambda_from_TLP <- function(TLP_unlogged, plot=FALSE,single=FALSE){
+  #input: TLP_unlogged  list; network-predicted TLP parameters
+  #input single, default = FALSE, treating TLP_unlogged like a list, and determining min max lambda from there. However,
+  # if TLP_unlogged not treated as list, lambda will be derived as was done before, using an empirical relationship between it and TLP_unlogged 
+  #output: lambdas predicted lambdas, generated in this function
   
-  ## create linear relationship between lambda and TLP with predicted values only, 
+  ## create linear relationship between lambda and TLP with predicted values only, ranging between max and min value of lamba, 
   ##to make sure they spread across the whole range of (model-) possible lambda parameters
   # * knowing that there is a relationship between TLP and lambda
   # * using upper and lower ranges of isohydricity as permitted by the updated LPJ-GUESS-HYD model
@@ -11,21 +13,25 @@ determine_lambda_from_TLP <- function(TLP_unlogged, plot=FALSE){
   #upper and lower ranges for network-predicted parameters for TLP (y) and lambda (x)
   # to create slope using max and min values - upon which to project all TLPs, and then derive our lambdas
   
-  # negative relationship between TLP and Lambda, therefore match max TLP with minlambda
-  y1 =  1.0  # extreme isohydric
-  y2 =  -0.3 # anisohydric
+  # positive relationship between TLP and Lambda, therefore match min TLP with minlambda
+  #(see Fu et al=:
+  # large hydroscapes are associated with more anisohydric behaviour, and figure 3 a) shows that anisohydric behaviour is associated with low TLP)
+  # https://academic-oup-com.ludwig.lub.lu.se/treephys/article/39/1/122/5107063
+  y2 =  1.0  # extreme isohydric
+  y1 =  -0.3 # anisohydric
   x1 =  min(TLP_unlogged)
   x2 =  max(TLP_unlogged)
   
   m = (y2-y1) / (x2-x1) 
 
-  b = y2 - m * x2
+  b = y2 - m * x2 
   
-  if(plot==TRUE){
-    points( -exp(TLP_e_mean),(m * -exp(TLP_e_mean) + b),col='purple')
+  lambdas = b + m * (TLP_unlogged) 
+
+ if(single==TRUE){
+   print("single set to true, using empirical relationship")
+     lambdas =  -0.188+(-0.3*TLP_unlogged) # Based on https://docs.google.com/spreadsheets/d/1KvB97vt6OVdy3GPUdOdlxd8c9TdjEk9z4qIl2mcfPHk/edit#gid=51069844
   }
-  
-  lambdas = b + m * -exp(TLP_e_mean) 
   return(lambdas)
 }
 
