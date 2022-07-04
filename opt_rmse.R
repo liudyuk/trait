@@ -1,4 +1,4 @@
-opt_rmse.R#-------------------------------------  
+#-------------------------------------  
 # Original code from T.Pugh
 # Enabling of more flexible handling of inputs by Annemarie Eckes-Shephard May 2021
 #trait: trait dataaframe from which to extract the observed trait values
