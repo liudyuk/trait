@@ -52,8 +52,8 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   
   leafNmax_LPJG <- exp(leafN_from_LMA_limit$intercept_upper + leafN_from_LMA_limit$slope*LMA_e_mean) # mg N per g leaf
   CtoNmin_LPJG <- 1000/(leafNmax_LPJG*2) #Assume 0.5 g C per g leaf
-  
-  lambda_LPJG <- determine_lambda_from_TLP(TLP_e_mean_unlogged,plot = TRUE) # see function for infos
+
+  lambda_LPJG <- determine_lambda_from_TLP(TLP_e_mean_unlogged) # see function for infos
   DeltaPsiWW_LPJG <- -0.5571 + (2.9748*WD_e_mean) # Based on https://docs.google.com/spreadsheets/d/1KvB97vt6OVdy3GPUdOdlxd8c9TdjEk9z4qIl2mcfPHk/edit#gid=51069844
   Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged) #### [TODO] Check relationship between TLP and Kleaf using other regression methods
   
@@ -99,8 +99,8 @@ TeBE_header <- c("\t ! Temperate broadleaved evergreen tree",
                  "\t fireresist 0.3",
                  "\t eps_iso 24.0",
                  "\t seas_iso 0",
-                 "\t eps_mon 1.6",
-                 "\t storfrac_mon 0.",
+                 "\t eps_mon 0.74 0.2 0.2 0.09 0.13 0.08 0.02 0.08 0.08",
+                 "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
                  "")
 
 TeBS_header <- c(  "\t ! Shade-tolerant temperate broadleaved summergreen tree",
@@ -120,8 +120,8 @@ TeBS_header <- c(  "\t ! Shade-tolerant temperate broadleaved summergreen tree",
                    "\t fireresist 0.1",
                    "\t eps_iso 45.0",
                    "\t seas_iso 1",
-                   "\t eps_mon 1.6",
-                   "\t storfrac_mon 0.",
+                   "\t eps_mon 0.52 0.14 0.1 0.04 0.49 0.01 0.04 0.18 0.08",
+                   "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
                    "")
 
 IBS_header <- c(  "\t ! Shade-intolerant broadleaved summergreen tree",
@@ -141,8 +141,9 @@ IBS_header <- c(  "\t ! Shade-intolerant broadleaved summergreen tree",
                   "\t fireresist 0.1",
                   "\t eps_iso 45.0",
                   "\t seas_iso 1",
-                  "\t eps_mon 1.6",
-                  "\t storfrac_mon 0.",
+                  "\t eps_mon 0.52 0.14 0.1 0.04 0.49 0.01 0.04 0.18 0.08",
+                  "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.",
+                  "\t greff_min 0.135 		! Version 4.1 update. Improves B(I)NE/IBS balance in boreal regions.",
                   "")
 
 TrBE_header <- c(  "\t ! Tropical broadleaved evergreen tree",
@@ -159,8 +160,8 @@ TrBE_header <- c(  "\t ! Tropical broadleaved evergreen tree",
                    "\t fireresist 0.1",
                    "\t eps_iso 24.0",
                    "\t seas_iso 0",
-                   "\t eps_mon 0.8",
-                   "\t storfrac_mon 0.",
+                   "\t eps_mon 0.32 0.09 0.07 0.06 0.06 0.04 0.04 0.07 0.05",
+                   "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
                    "")
 
 TrBR_header <- c(  "\t ! Tropical broadleaved raingreen tree",
@@ -178,6 +179,6 @@ TrBR_header <- c(  "\t ! Tropical broadleaved raingreen tree",
                    "\t fireresist 0.3",
                    "\t eps_iso 45.0",
                    "\t seas_iso 0",
-                   "\t eps_mon 2.4",
-                   "\t storfrac_mon 0.",
+                   "\t eps_mon 0.95 0.26 0.22 0.18 0.18 0.13 0.12 0.22 0.14",
+                   "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
                    "")

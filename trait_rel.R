@@ -591,14 +591,14 @@ propagate_uncer= F
 
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
-trait_sel= F
+trait_sel= F # set to F for network verification. Set to T for PFT selection
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or set = 4 for a predefined (above) hypercube sample.
 n_trait_sel= 28
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
-spec_group_sel = 2
+spec_group_sel = 1
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data later
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
@@ -618,16 +618,17 @@ outs_LSP50      <- trait_optim_bivar_start_LSP50(limitdataranges = limitdatarang
 
 if(testing==TRUE){
 if(spec_group_sel==1){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BDT_2203.RData')
+  #save(outs_LSP50 , file= 'data/outs_LSP50_BDTManuscript29042022.RData')
 }
 if(spec_group_sel==2){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BE_2203.RData')
-}
+ # save(outs_LSP50 , file= 'data/outs_LSP50_BEManuscript29042022.RData')
+   #load('data/outs_LSP50_BEManuscript29042022.RData')
+  }
 if(spec_group_sel==3){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BT_2203.RData')
+  save(outs_LSP50 , file= 'data/outs_LSP50_BTManuscript29042022.RData')
 }
 if(spec_group_sel==4){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BD_2203.RData')
+  save(outs_LSP50 , file= 'data/outs_LSP50_BDManuscript29042022.RData')
 }
 }
 #save(outs_LSP50 , file= 'data/outs_LSP50_BD.RData')
@@ -671,6 +672,12 @@ if(trait_sel==F) {
   # provide list of trait names which are the predicted traits
   trait_names = c('Ks','TLP','LMA','WD','slope')
   RMSE_withLSP50_start <- opt_rmse(traits,trait_names,ind,spec_group_sel) 
+  if(spec_group_sel==2){
+    save(RMSE_withLSP50_start, file="data/BE/RMSE_withLSP50_start.RData")
+  }
+  if(spec_group_sel==1){
+    save(RMSE_withLSP50_start, file="data/BDT/RMSE_withLSP50_start.RData")
+  }
 }
 
 # Convert to the values needed in LPJ-GUESS -----------------
@@ -684,7 +691,15 @@ names(traits_LSP50.df) <- names(traits_LPJG_LSP50)
 
 # # create correlation table to report and test for sign in correlation being correct --------
 tt <- test_cor_signs(trait_plot,data.frame(LMA=LMA_e_mean,P50=as.vector(P50_e[,1]),TLP=TLP_e_mean,slope=slope_e_mean,LS = as.vector(LS_e[,1]),WD =WD_e_mean,Ks = Ks_e_mean))
-tt
+
+if(spec_group_sel==2){
+save(tt, file="data/BE/correlation_table.RData")
+}
+if(spec_group_sel==1){
+  save(tt, file="data/BDT/correlation_table.RData")
+}
+
+
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -713,14 +728,21 @@ traits_PCA$Ks  = log(traits_PCA$Ks)
 traits_PCA$LMA = log(traits_PCA$LMA)
 
 #PCA on optimised trait values (0 = 5 to 7)
-pca_with_pretty_biplot(traits_PCA[,c(1,3,4,6,10,12,13,17)])
+pca_with_pretty_biplot(traits_PCA[,c(1,3,4,6,10,12,13,17)], labels = c("WD","-P50","-P88","LS","Ks","TLP","slope","LMA" ))
 
 if(spec_group_sel==1){
-  mtext(outer=TRUE, 'Broadleaf deciduous')
+  mtext(side=3, 'Broadleaf deciduous')
 }
 if(spec_group_sel ==2){
-  mtext(outer=TRUE, 'Broadleaf evergreen')
+  mtext( side=3,'Broadleaf evergreen')
 }
+#
+# superimpose PCA from observations on top. Observations are v. scarce, which is why we are doing the whole thing. 
+# But it woudl be great if they and the predicted traits make sense.
+
+#subs <- na.omit(trait_plot[,c("WD","P50","LS","Ks","TLP","LMA")])
+#pca_with_pretty_biplot(subs, labels = c("WD","-P50","LS","Ks","TLP","LMA" ))
+
 
 #----------------------------------------------------------------------------------------------------------------------
 # Trait sampling for .insfile
@@ -742,16 +764,16 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 # (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4).
 if(spec_group_sel==1){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_2203.RData')
+ # save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_manuscript29042022.RData')
 }
 if(spec_group_sel==2){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_2203.RData')
+#  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_manuscript29042022.RData')
 }
 if(spec_group_sel==3){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_2203.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_0307.RData')
 }
 if(spec_group_sel==4){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BD_2203.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BD_0307.RData')
 }
 #display trait values that will be selected for PFTs(purple), show that their spread is across a wide range of values 
 opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
@@ -816,8 +838,14 @@ traits_PCA$Ks  = log(traits_PCA$Ks)
 traits_PCA$LMA = log(traits_PCA$LMA)
 
 #PCA on optimised trait values (0 = 5 to 7)
-pca_with_pretty_biplot_Pfts(traits_PCA[,c(1,3,4,6,10,12,13,17)])
+pca_with_pretty_biplot_Pfts(traits_PCA[,c(1,3,4,6,10,12,13,17)])#, labels = c("WD","-P50","-P88","LS","Ks","TLP","slope","LMA" ) )
 
+if(spec_group_sel==1){
+  mtext(side=3, 'Broadleaf deciduous')
+}
+if(spec_group_sel ==2){
+  mtext( side=3,'Broadleaf evergreen')
+}
 #----------------------------------------------------------------------------------------------------------------------
 # Write out LPJGuess .ins files
 #----------------------------------------------------------------------------------------------------------------------
@@ -832,7 +860,7 @@ pca_with_pretty_biplot_Pfts(traits_PCA[,c(1,3,4,6,10,12,13,17)])
 basePFTs <- c(1,2,3,4,5)
 
 #(BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4)
-c("outs_LSP50_BDT.RData","outs_LSP50_BE.RData","outs_LSP50_BD.RData","outs_LSP50_BT.RData")
+c("outs_LSP50_BDT0307.RData","outs_LSP50_BE0307.RData","outs_LSP50_BD0307.RData","outs_LSP50_BT0307.RData")
 
 for(basePFT in basePFTs){
 print(basePFT)
@@ -863,21 +891,22 @@ print(basePFT)
                                             as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
                                             leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
   # write output
- # output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles/"
+ # output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles03072022/"
   output_fol="~/Desktop/PFTs/"
-  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_pft)
+  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='global_cf_base_Tom04072022.ins') #mac04072022.ins
   
 }
 
+plot(TLP_e_mean_unlogged,determine_lambda_from_TLP(TLP_e_mean_unlogged,single = TRUE))
 ##Compare range of traits per PFT with observations
 
 trait_plot = trait_BDT
 #TeBE (1), TeBS (2), IBS (3), TrBE (4) or TrBR (5)
-TeBE <- read.csv(file='/Users/annemarie/Library/CloudStorage/OneDrive-LundUniversity/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles/LPJG_PFT_summary_TeBE.csv',header = TRUE)
-TeBS <- read.csv(file='/Users/annemarie/Library/CloudStorage/OneDrive-LundUniversity/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles/LPJG_PFT_summary_TeBS.csv',header = TRUE)
-IBS  <- read.csv(file='/Users/annemarie/Library/CloudStorage/OneDrive-LundUniversity/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles/LPJG_PFT_summary_IBS.csv',header = TRUE)
-TrBE <- read.csv(file='/Users/annemarie/Library/CloudStorage/OneDrive-LundUniversity/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles/LPJG_PFT_summary_TrBE.csv',header = TRUE)
-TrBR <- read.csv(file='/Users/annemarie/Library/CloudStorage/OneDrive-LundUniversity/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles/LPJG_PFT_summary_TrBR.csv',header = TRUE)
+TeBE <- read.csv(file = paste0(output_fol,'LPJG_PFT_summary_TeBE.csv'),header = TRUE)
+TeBS <- read.csv(file = paste0(output_fol,'LPJG_PFT_summary_TeBS.csv'),header = TRUE)
+IBS  <- read.csv(file = paste0(output_fol,'LPJG_PFT_summary_IBS.csv') ,header = TRUE)
+TrBE <- read.csv(file = paste0(output_fol,'LPJG_PFT_summary_TrBE.csv'),header = TRUE)
+TrBR <- read.csv(file = paste0(output_fol,'LPJG_PFT_summary_TrBR.csv'),header = TRUE)
 
 par(mfrow=c(4,4))
 
