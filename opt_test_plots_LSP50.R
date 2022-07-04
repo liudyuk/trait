@@ -30,9 +30,9 @@ opt_test_plots_LSP50 <- function(trait,
   # Small adaptations related to LS and P50 variable and their summary stats.
   
   plot_scatter <- function(traitdf,trait1,trait2){
-    
+    # traitdf : data frame with observed traits
     if(trait2 == 'LMA' ){# plot SLA and not LMA, so do 1/LMA
-      1/trait$LMA
+
       plot(traitdf[[trait1]],1/traitdf[[trait2]],pch=16,xlab=trait1,ylab=trait2,main=paste0(trait1,' vs SLA'), col = makeTransparent('dark grey', alpha=80),axes=FALSE)
     
       
@@ -44,7 +44,26 @@ opt_test_plots_LSP50 <- function(trait,
       points(trait1n[,1], 1/get(trait2_plot_names[2]),     col="red",   pch=16) # Using mean of all bootstrapped estimates 
       points(trait1n[,1], 1/get(trait2_plot_names[4]),     col="green", pch=16)
       points(trait1n[,1], 1/get(trait2_plot_names[5]),     col="green", pch=16)
-      abline( lm( (1/traitdf[[trait2]])             ~ traitdf[[trait1]]), col='grey', lty=2, lwd=1.2 )
+      ### create linear model and also 95% confidence interval
+      
+      traitdf1 <- traitdf[,c(trait1,trait2)]
+      traitdf1[,2] <- 1/traitdf1[,2] #1/LMA to get to sla
+      names(traitdf1) <- c("x","y")
+      x = na.omit(traitdf[[trait1]])
+      lm.out <-  lm( y ~x,data=traitdf1)
+      newx = seq(min(x),max(x),by = 0.05)
+      conf_interval <- predict(lm.out, newdata=data.frame(x=newx), interval="confidence",
+                               level = 0.95)
+      abline( lm.out, col='grey', lty=2, lwd=1.2 )
+      matlines(newx, conf_interval[,2:3], col = "grey", lty=2)
+    
+      #testing
+      #p3 <- ggplot(traitdf1, aes(x=x, y=y)) +
+      #  geom_point() +
+      #  geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE)
+      #print(p3)
+      
+      #estimated traits
       abline( lm( (1/get(trait2_plot_names[1])[,1]) ~ trait1n[,1]), col='dark green', lty=2, lwd=1.2 )
       axis(2, mgp=c(3, .6, 0), tck=-.015, labels=NA)
       axis(side = 2, lwd = 0, line = -0.8, las = 0.5)
@@ -65,8 +84,27 @@ opt_test_plots_LSP50 <- function(trait,
       points(trait1n[,1],get(trait2_plot_names[2]),col="red",pch=16) # Using mean of all bootstrapped estimates 
       points(trait1n[,1],get(trait2_plot_names[4]),col="green",pch=16)
       points(trait1n[,1],get(trait2_plot_names[5]),col="green",pch=16)
-      abline(lm(traitdf[[trait2]]~traitdf[[trait1]]),col='grey',lty=2,lwd=1.2)
-      abline(lm(get(trait2_plot_names[1])[,1]~trait1n[,1]),col='dark green',lty=2,lwd=1.2)
+      
+      # observed values conf. int
+      traitdf1 <- traitdf[,c(trait1,trait2)]
+      names(traitdf1) <- c("x","y")
+        lm.out <-  lm(y~x,data=traitdf1)
+        x = na.omit(traitdf[[trait1]])
+      newx = seq(min(x),max(x),by = 0.05)
+      conf_interval <- predict(lm.out, newdata=data.frame(x=newx), interval="confidence",
+                               level = 0.99)
+      abline( lm.out, col='grey', lty=2, lwd=1.2 )
+      matlines(newx, conf_interval[,2:3], col = "grey", lty=2)
+      
+      #estimated values conf. int
+      traitdf1= data.frame(x=trait1n[,1],y=get(trait2_plot_names[1])[,1])
+      lm.out_est <- lm(y~x,data = traitdf1)
+      x= trait1n[,1]
+      newx = seq(min(x),max(x),by = 0.05)
+      abline(lm.out_est,col='dark green',lty=2,lwd=1.2)
+      conf_interval <- predict(lm.out_est, newdata=data.frame(x=newx), interval="confidence",
+                               level = 0.95)
+      matlines(newx, conf_interval[,2:3], col = "dark green", lty=2)
       axis(2, mgp=c(3, .6, 0), tck=-.015, labels=NA)
       axis(side = 2, lwd = 0, line = -0.8, las = 0.5)
       axis(1, mgp=c(3, .6, 0), tck=-.015, labels=NA)
@@ -77,6 +115,8 @@ opt_test_plots_LSP50 <- function(trait,
     }# end LMA test
     
   }
+  
+  
   
   par(mfrow=c(4,4))
   par(mar=c(2,2,2,2))
@@ -121,6 +161,10 @@ opt_test_plots_LSP50 <- function(trait,
   #plot_scatter(trait_plot,'slope','TLP')
   plot_scatter(trait_plot,'slope','LMA')
   #plot_scatter(trait_plot,'slope','P50')
+  plot.new()
+  legend("center",cex=0.8,legend=c("predicted","observed","predicted","observed"),
+         lty=c(NA,NA,2,2), col=c('green','grey','green','grey'),
+         fill=c(NA,NA,NA,NA),pch=c(16,16,NA,NA),border=NA,box.lwd=NA)
   
   #Set back to single plot
   par(mfrow=c(1,1))
