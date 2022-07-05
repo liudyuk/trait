@@ -114,13 +114,13 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
   # ---
   # Select the LMA relationship to use
   if (spec_group_sel==1) {
-    use_LMA_from_TLP_LS=F
+    use_LMA_from_TLP_LS_WD=F
   } else if (spec_group_sel==2) {
-    use_LMA_from_TLP_LS=T
+    use_LMA_from_TLP_LS_WD=T
   } else if (spec_group_sel==3) {
-    use_LMA_from_TLP_LS=F
+    use_LMA_from_TLP_LS_WD=F
   } else if (spec_group_sel==4) {
-    use_LMA_from_TLP_LS=F
+    use_LMA_from_TLP_LS_WD=F
   }
   
   # ---
@@ -170,7 +170,7 @@ trait_optim_bivar_start_LSP50 <- function(limitdataranges=T, propagate_uncer=T, 
                                             P50_e_start[dd],
                                             LS_e_start[dd],
                                             n_uncer,
-                                            use_LMA_from_TLP_LS,
+                                            use_LMA_from_TLP_LS_WD,
                                             regr_type )
 
     

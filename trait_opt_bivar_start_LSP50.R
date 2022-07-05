@@ -171,10 +171,10 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       #mod_WD_slope_y1_sample    <- WD_from_P50_Ks$mod$boot.y1[ss]
       #mod_WD_slope_y2_sample    <- WD_from_P50_Ks$mod$boot.y2[ss]
       
-      mod_Ks_intercept_sample    <- Ks_from_P50_LS_WD$mod$intercept #Ks_from_P50_LS_WD
-      mod_Ks_slope_y1_sample     <- Ks_from_P50_LS_WD$mod$slope_R.y1
-      mod_Ks_slope_y2_sample     <- Ks_from_P50_LS_WD$mod$slope_R.y2
-      mod_Ks_slope_y3_sample     <- Ks_from_P50_LS_WD$mod$slope_R.y3
+      mod_Ks_intercept_sample    <- Ks_from_P50_LS_WD$mod$boot.intercept[ss] #Ks_from_P50_LS_WD
+      mod_Ks_slope_y1_sample     <- Ks_from_P50_LS_WD$mod$boot.y1[ss]
+      mod_Ks_slope_y2_sample     <- Ks_from_P50_LS_WD$mod$boot.y2[ss]
+      mod_Ks_slope_y3_sample     <- Ks_from_P50_LS_WD$mod$boot.y3[ss]
       
       mod_TLP_intercept_sample <- TLP_from_LS_LMA_P50$mod$boot.intercept[ss] #TLP_from_LS_LMA_P50
       mod_TLP_slope_y1_sample <- TLP_from_LS_LMA_P50$mod$boot.y1[ss]
@@ -189,7 +189,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       mod_slope_slope_y1_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y1[ss]
       mod_slope_slope_y2_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y2[ss]
       mod_slope_slope_y3_sample <- slope_from_P50_TLP_WD_Ks$mod$boot.y3[ss]
-      mod_slope_slope_y4_sample <-  slope_from_P50_TLP_WD_Ks$mod$slope_R.y4[ss]
+      mod_slope_slope_y4_sample <-  slope_from_P50_TLP_WD_Ks$mod$boot.y3[ss]
       
     }
     # These regression coefficients will now be used in the optimisation calculations
@@ -403,7 +403,7 @@ trait_opt_bivar_start_LSP50 <- function(P50,
       #LS_c[niter] <- LS_e[ss]
       Ks_c[niter] <- Ks_e[ss]
       WD_c[niter] <- WD_e[ss]
-      slope_c[niter] <- slope_e[ss]
+     # slope_c[niter] <- slope_e[ss]
       
       # Calculate the difference between the current estimate of a trait value "_e" and the previous estimate "_last"
      # diff_P50 = P50_e[ss]-P50_e_last
