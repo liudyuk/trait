@@ -43,7 +43,7 @@
 # December 2021
 # *new ins-files after bugfix
 # January:
-# outsourced trait-pair starting optimisations for network and the PCA viarual and comparisons into trait_rel_supplementaries.R
+# outsourced other trait-pair starting optimisations for network and the PCA visual and comparisons into trait_rel_supplementaries.R
 # latin hypercube sampling is also in that script
 
 
@@ -149,27 +149,9 @@ library(pls)
 
 #--- Read in the trait data ---
 
-######
-##temporary testing of TLP P50 things:
-#trait_CC<-subset(traits,group=="CC",drop = T)
-#plot(abs(exp(traits$P50)) -abs(traits$TLP) )
-#points( abs(exp(trait_CC$P50)) -abs(trait_CC$TLP), col = 'purple')
-#points(abs(exp(trait_BE$P50)) -abs(trait_BE$TLP), col = 'green')
-#points(abs(exp(trait_BDT$P50)) -abs(trait_BDT$TLP), col = 'brown')
-
-## replace 36 potentially problematic values of P50 with NA. Rather arbitraty cutoff value of 0.5.
-## Conifers don't show these low values, and P50 measurements in them are usually more accurate because Conifers have shorter tracheids.
-## idx <- traits[which(abs(exp(traits$P50)) - abs(traits$TLP) < 0.5),]
-######
-
-
 # Subset only the broadleaf species
-
 trait_B<-subset(traits,group!="CC",drop = T)
 
-#trait_B<-droplevels(trait_B)
-#str(trait_B)
-#attach(trait_B)
 
 #BD = drought deciduous
 #BT = teperature deciduous
@@ -708,7 +690,8 @@ if(spec_group_sel==1){
 # perform PCA ------------------------------------------------------------
 # used as test to see whether starting from different trait combinations has an impact on the PFT-spread.
 
-traits_PCA  <- traits_LSP50.df
+traits_PCA  <- traits_LSP50.df 
+traits_PCA  <- traits_KSLS.df # 04.07.2022 for testing
 
 # T. Pugh
 # 25.10.20

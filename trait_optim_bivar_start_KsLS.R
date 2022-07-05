@@ -3,7 +3,7 @@
 # it then carries out the optimisation. The number of outputs optimised values depends on the subset options parsed into the function
 # if propagate_uncer=T, must provide nbtsrp value
 # This function used to be part of the main analysis script, but is now outsourced
-trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trait_sel= T, n_trait_sel=28, spec_group_sel= 3,est_lhs ){
+trait_optim_bivar_start_KsLS <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trait_sel= T, n_trait_sel=28, spec_group_sel= 3,est_lhs,regr_type ){
   # ---
   if (propagate_uncer) {
     n_uncer=nbtstrp
@@ -101,13 +101,13 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
   # ---
   # Select the LMA relationship to use
   if (spec_group_sel==1) {
-    use_LMA_from_TLP_LS=F
+    use_LMA_from_TLP_LS_WD=F
   } else if (spec_group_sel==2) {
-    use_LMA_from_TLP_LS=T
+    use_LMA_from_TLP_LS_WD=T
   } else if (spec_group_sel==3) {
-    use_LMA_from_TLP_LS=F
+    use_LMA_from_TLP_LS_WD=F
   } else if (spec_group_sel==4) {
-    use_LMA_from_TLP_LS=F
+    use_LMA_from_TLP_LS_WD=F
   }
   
   # ---
@@ -129,7 +129,7 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
     print(dd)
     
     # Carry out the optimisation - based on Ks_e_start and LS_e_start as starting points
-    opt_vals <- trait_opt(traits$P50[ind_spec_group],
+    opt_vals <- trait_opt_bivar_start_KsLS(traits$P50[ind_spec_group],
                           traits$TLP[ind_spec_group],
                           traits$LMA[ind_spec_group],
                           traits$WD[ind_spec_group],
@@ -142,8 +142,8 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
                           LS_multivar_BDT$LS_from_TLP_Ks,
                           Ks_multivar$Ks_from_P50_LS_WD,#Ks_from_P50_LS_slope,
                           TLP_multivar$TLP_from_LS_LMA_P50,
-                          P50_multivar$P50_from_TLP_Ks_WD,
-                          slope_multivar$slope_from_P50_TLP_WD,#slope_from_P50_TLP_Ks,
+                          P50_multivar$P50_from_TLP_Ks,
+                          slope_multivar$slope_from_P50_TLP_WD_Ks,#slope_from_P50_TLP_Ks,
                           WD_multivar_BDT$WD_from_P50_Ks,#WD_from_Ks_P50,#WD_from_slope_P50slope,
                           WD_multivar_BE$WD_from_P50_LMA_Ks,
                           bivar$LMA_from_LS,
@@ -156,7 +156,8 @@ trait_optim <- function(limitdataranges=T, propagate_uncer=T, nbtstrp=1000, trai
                           Ks_e_start[dd],
                           LS_e_start[dd],
                           n_uncer,
-                          use_LMA_from_TLP_LS)
+                          use_LMA_from_TLP_LS_WD,
+                          regr_type)
     
 
     P50_e[dd,]   <- opt_vals$P50_e

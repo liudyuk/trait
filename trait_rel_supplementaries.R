@@ -54,11 +54,11 @@ traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_int
 # related to trait network construction
 source('sma_multivar_regress.R')
 source('lm_regress_multivar.R')
+source('pca_regress_multivar.R')
 source('trait_functions.R')
 source('make_bivar_plots.R')
 source('multivar_model_selection.R')
 source("whittaker_biomes_plot.R")
-
 
 # optimisation starting with KsLS and subsequent diagnostic plots 
 source("trait_opt.R")
@@ -99,96 +99,179 @@ source('write_LPJG_ins.file.R')
 # for sanity checking optimisation results
 source('test_cor_signs.R')
 
+# show PFT-variant location within observed trait space and sample space
+source('opt_test_plots_LSP50_pfts.R')
+
 # pretty plotting of PCA results
 source('pca_with_pretty_biplot.R')
+source('pca_with_pretty_plot_PFTs.R')
+
+# better trait predictions:
+source('determine_lambda_from_TLP.R')
+
 #---------------packages--------------------------
 # PCA plotting
 #install_github("vqv/ggbiplot") # must have devtools installed to use install_github
 library('ggbiplot')
-# systematic sampling for optimisation
-library('hypervolume')
-# efficient sampling of multiple parameter combinations using hypercube sampling
-library('lhs')
-# used to create samples by transforming latin hypercube sampling space
-library('QRM')
+
+#other aesthetics:
+# to distinguish between PFTvariants
+library(RColorBrewer) # to plot the PFTs in different colours
+cols <- c(brewer.pal(9, "Set1") ,brewer.pal(8, "Set2"),brewer.pal(11, "Set3"),brewer.pal(3,'Paired'))
+
+# function to make observations slightly transparent, 
+# to better show where the observed traits cluser (= will appear darker on the plots)
+#note: always pass alpha on the 0-255 scale
+makeTransparent<-function(someColor, alpha=100){
+  newColor<-col2rgb(someColor)
+  apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2],
+                                              blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
+}
+
 #for plotting of hypercube sampling results:
 library(grid)
 library(ggplot2)
 library("ggpubr")
 # to plot PCA ggplots in grid
 library(gridExtra)
-
 # convenience package for ols normality checks, required in function lm_regress_multivar
 library(olsrr)
+# for PCR regression models, now used in the network
+library(pls)
+
 
 #--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
-# multivariate lm and sma regression possible. change option here:
-regr_type = 'lm'
+# multivariate lm, sma, pc(r) or pls(r) regression possible. change option here:
+regr_type = 'plsr'
 
 #--- Read in the trait data ---
-
-######
-##temporary testing of TLP P50 things:
-#trait_CC<-subset(traits,group=="CC",drop = T)
-#plot(abs(exp(traits$P50)) -abs(traits$TLP) )
-#points( abs(exp(trait_CC$P50)) -abs(trait_CC$TLP), col = 'purple')
-#points(abs(exp(trait_BE$P50)) -abs(trait_BE$TLP), col = 'green')
-#points(abs(exp(trait_BDT$P50)) -abs(trait_BDT$TLP), col = 'brown')
-
-## replace 36 potentially problematic values of P50 with NA. Rather arbitraty cutoff value of 0.5.
-## Conifers don't show these low values, and P50 measurements in them are usually more accurate because Conifers have shorter tracheids.
-## idx <- traits[which(abs(exp(traits$P50)) - abs(traits$TLP) < 0.5),]
-######
-
+#--- Read in the trait data ---
 
 # Subset only the broadleaf species
-
 trait_B<-subset(traits,group!="CC",drop = T)
 
-#trait_B<-droplevels(trait_B)
-#str(trait_B)
-#attach(trait_B)
 
 #BD = drought deciduous
 #BT = teperature deciduous
 
 #Also create tables with just BE or BD+BT for later use
-trait_BE<-subset(traits,group=="BE",drop = T)
-trait_BDT<-subset(traits,group=="BD" | group=="BT",drop = T)
+trait_BE  <- subset(traits,group=="BE",drop = T)
+trait_BDT <- subset(traits,group=="BD" | group=="BT",drop = T)
 
 #drought deciduous broadleaves only
-trait_BD<-subset(traits,group=="BD",drop = T)
-trait_BT<-subset(traits,group=="BT",drop = T)
+trait_BD <- subset(traits,group=="BD",drop = T)
+trait_BT <- subset(traits,group=="BT",drop = T)
+
+#----
+# stretch the TLP values
 
 #--- Bivariate plots and statistics with SMA regression ---
 # These are used to fill out the hypothesis framework plot with R
 
 # Calculate for all broadleaf 
-bivar <- make_bivar_plots(trait_B,nbtstrp,regr_type = regr_type)
+bivar <- make_bivar_plots(trait_B,nbtstrp,regr_type = 'lm')
 #View(bivar$all_sma_bivar)
 
 # Calculate for all evergreen broadleaf
-bivar_BE <- make_bivar_plots(trait_BE,nbtstrp,regr_type = regr_type)
-# AHES: negative bivatiate correlation in data, but sma shows positive correlation 
-subs <- na.omit(trait_BDT[,c("WD","slope")])
-
-cor(subs$WD,subs$slope)
-cor.test(subs$LMA,subs$Ks)
-plot(-exp(subs$P50),subs$slope)
-plot(subs$Ks,subs$WD)
+bivar_BE <- make_bivar_plots(trait_BE,nbtstrp,regr_type = 'lm')
 #View(bivar_BE$all_sma_bivar)
 
 # Calculate for all deciduous broadleaf
-bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp, regr_type = regr_type)
+bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp, regr_type = 'lm')
 # View(bivar_BDT$all_sma_bivar)
-# AHES: negative bivatiate correlation in data, but sma shows positive correlation 
-subs <- na.omit(trait_BD[,c("P50","LS")])
-cor(subs$P50,subs$LS)
-cor.test(subs$WD,subs$P50)
+
+
+#--- Experiment with different plausible multivariate linear models, based on our hypotheses ---
+# multivariate lm, sma, pc(r) or pls(r) regression possible. change option here:
+regr_type = 'plsr'
+
+if (regr_type == 'pcr' || regr_type == 'plsr'){
+  
+  traits_sd   = as.data.frame(t(apply(traits[13:44],2,sd,na.rm=TRUE)))
+  traits_mean_unscale = as.data.frame(t(apply(traits[13:44],2,mean,na.rm=TRUE)))
+  # now that centering is se to TRUE, and it is applied to all values, including Y, do not standardise using the mean, but only sd only.
+  #Test that this is the case, setting mean to 0 for now, so that 0 will be subtracted from every X
+  traits_mean = traits[1,13:44]
+  traits_mean[1,] <- 0  # legacy- set traits_mean to 0, as the centering is now done by the pcr() function itself.
+}
+
+# for now here, in to its own file later:
+
+scale_traits <- function(varst, labels, nlabels, traits_mean, traits_sd){ 
+  # input:
+  # varst dataframe of which the first nlables-1 variables will be scaled
+  # labels =names of all traits in the dataframe
+  # nlabels number of traits in the dataframe
+  # traits_mean =  mean trait value from all traits in the dataset. will be subsetted for the correct one using 'labels'.
+  # straits_sd = standard deviation from all traits in the dataset. will be subsetted for the correct one using 'labels'.
+  # scaling is only performed on the explanatory variables X, because scale=TRUE only scales X variables. Therefore I do nlables-1
+  # as index nlabels contains Y.
+  
+  # determine context in which the function is used ( e.g. in generating the model or predictions)
+  # for scaling in generating the models, "varst" is multidimensional:
+  if(!is.null(dim(varst))){ 
+    ns <- names(varst)[1:(nlabels-1)]
+    print(paste('scaling',ns))
+    for (n in 1:length(ns)){ # normalise predictor traits only
+      varst[,ns[n]] <- (varst[,ns[n]] - traits_mean[,labels[n]] ) / traits_sd[,labels[n]] 
+    }
+  }else{  # for scaling of single values during the network predictions, varst is a single value ( could be changed to a list, but done like this for now)
+    if(labels == "TLP_e_last"  || labels == "TLP_e_start" || labels == "TLP_e" ){
+      varst <- (varst - traits_mean[,"TLP"] ) / traits_sd[,"TLP"] 
+    }
+    if(labels == "LS_e_last"   || labels == "LS_e_start" || labels == "LS_e" ){
+      varst <- (varst - traits_mean[,"LS"] ) / traits_sd[,"LS"] 
+    }
+    if(labels == "LMA_e_last"   || labels == "LMA_e_start" || labels == "LMA_e" ){
+      varst <- (varst - traits_mean[,"LMA"] ) / traits_sd[,"LMA"] 
+    }
+    if(labels == "P50_e_last"   || labels == "P50_e_start" || labels == "P50_e" ){
+      varst <- (varst - traits_mean[,"P50"] ) / traits_sd[,"P50"] 
+    }
+    if(labels == "Ks_e_last"   || labels == "Ks_e_start" || labels == "Ks_e" ){
+      varst <- (varst - traits_mean[,"Ks"] ) / traits_sd[,"Ks"] 
+    }
+    if(labels == "WD_e_last"   || labels == "WD_e_start" || labels == "WD_e" ){
+      varst <- (varst - traits_mean[,"WD"] ) / traits_sd[,"WD"] 
+    }
+    if(labels == "slope_e_last"   || labels == "slope_e_start" || labels == "slope_e" ){
+      varst <- (varst - traits_mean[,"slope"] ) / traits_sd[,"slope"] 
+    }
+  }
+  return(varst)
+}
+unscale_traits <- function(varst, labels, nlabels, traits_mean, traits_sd){ 
+  # for unscaling of single values during the network predictions, varst is a single value ( could be changed to a list, but done like this for now)
+  if(labels == "TLP_e_last"  || labels == "TLP_e_start" || labels == "TLP_e" ){
+    varst <- varst * traits_sd[,"TLP"] + traits_mean[,"TLP"] 
+  }
+  if(labels == "LS_e_last"   || labels == "LS_e_start" || labels == "LS_e" ){
+    varst <- varst * traits_sd[,"LS"]  + traits_mean[,"LS"] 
+  }
+  if(labels == "LMA_e_last"   || labels == "LMA_e_start" || labels == "LMA_e" ){
+    varst <- varst * traits_sd[,"LMA"] + traits_mean[,"LMA"] 
+  }
+  if(labels == "P50_e_last"   || labels == "P50_e_start" || labels == "P50_e" ){
+    varst <- varst * traits_sd[,"P50"] + traits_mean[,"P50"] 
+  }
+  if(labels == "Ks_e_last"   || labels == "Ks_e_start" || labels == "Ks_e" ){
+    varst <- varst * traits_sd[,"Ks"] + traits_mean[,"Ks"] 
+  }
+  if(labels == "WD_e_last"   || labels == "WD_e_start" || labels == "WD_e" ){
+    varst <- varst * traits_sd[,"WD"] + traits_mean[,"WD"] 
+  }
+  if(labels == "slope_e_last"   || labels == "slope_e_start" || labels == "slope_e" ){
+    varst <- varst * traits_sd[,"slope"] + - traits_mean[,"slope"] 
+  }
+  
+  return(varst)
+}
+
 
 #----------------------------------------------------------------------------------------------------------------------
 # Test single and multivariate correlation models
 #----------------------------------------------------------------------------------------------------------------------
+
 
 # P50 fits ----------------------------------------------------------------
 
@@ -209,15 +292,13 @@ coeff_P50_from_TLP_Ks <- data.frame(coeffnames_P50_from_TLP_Ks,intercept_P50_fro
 
 TLP_multivar <- TLP_multivar_test(trait_B, regr_type =  regr_type)
 
-
 # LMA fits -----------------------------------------------------------------
 # Separate for BE and BDT (BD + BT) on the basis that LMA has a very different range and set of bivariate relationships for these
 # two different groups, unlike the other traits here.
 
-LMA_multivar_BE <- LMA_multivar_test_BE(trait_BE, regr_type =  regr_type)
+LMA_multivar_BE  <- LMA_multivar_test_BE(trait_BE, regr_type =  regr_type)
 
 LMA_multivar_BDT <- LMA_multivar_test_BDT(trait_BDT, regr_type =  regr_type)
-
 
 
 # WD fits -----------------------------------------------------------------
@@ -226,11 +307,14 @@ WD_multivar_BDT <- WD_multivar_test(trait_BDT,leaf_type='BDT',regr_type = regr_t
 
 WD_multivar_BE <- WD_multivar_test(trait_BE,leaf_type='BE',regr_type = regr_type)
 
+WD_multivar <- WD_multivar_test(trait_B,leaf_type=NULL,regr_type = regr_type)
+
 # slope fits --------------------------------------------------------------
 
 slope_multivar <- slope_multivar_test(trait_B,regr_type = regr_type)
-#hist(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est,xlab ="slope-slope_est", main=paste(" distribution of residuals; model: ", Ks_multivar$Ks_from_P50_L$`regression_type (lm or sma)` ))
-#shapiro.test(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est)
+#[TO DO] trouble-shoot why are 13 points still marked as NA here?
+#AHES hist(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est,xlab ="slope-slope_est", main=paste(" distribution of residuals; model: ", Ks_multivar$Ks_from_P50_L$`regression_type (lm or sma)` ))
+#AHES shapiro.test(trait_B$slope[slope_multivar$slope_from_P50_TLP_Ks$dataused]-slope_multivar$slope_from_P50_TLP_Ks$var_est)
 
 
 # Ks fits ----------------------------------------------------------------
@@ -241,25 +325,61 @@ Ks_multivar     <- Ks_multivar_test(trait_B,regr_type = regr_type)
 # Separate for BE and BDT (BD + BT) on the basis that LS has a very different range and set of bivariate relationships for these
 # two different groups, unlike the other traits here.
 
-LS_multivar_BE <- LS_multivar_test(trait_BE, leaf_type ='BE',regr_type = regr_type) # returns LS_from_LMA_TLP_Ks
+LS_multivar_BE  <- LS_multivar_test(trait_BE, leaf_type ='BE',regr_type = regr_type) # returns LS_from_LMA_TLP_Ks
 
 LS_multivar_BDT <- LS_multivar_test(trait_BDT, leaf_type ='BDT',regr_type = regr_type) # returns LS_from_TLP_Ks
 
 
-
 # Make plots showing quality of fits and climate coverage -----------------
 
-#[TO DO] where has this code gone? retrieve from previous version
+#deprecated: used as start values
+#MATp1 <- trait_B$MAT[P50_multivar$P50_from_TLP_Ks$dataused]
+#MAPp1 <- trait_B$MAP[P50_multivar$P50_from_TLP_Ks$dataused]/10
+#name1 <- rep("P50",length(MATp1))
 
+MATp1 <- trait_B$MAT[Ks_multivar$Ks_from_P50_LS_WD$dataused]
+MAPp1 <- trait_B$MAP[Ks_multivar$Ks_from_P50_LS_WD$dataused]/10
+name1 <- rep("Ks",length(MATp1))
+
+MATp2 <- trait_B$MAT[TLP_multivar$TLP_from_LS_LMA_P50$dataused]
+MAPp2 <- trait_B$MAP[TLP_multivar$TLP_from_LS_LMA_P50$dataused]/10
+name2 <- rep("TLP",length(MATp2))
+
+MATp3 <- trait_BE$MAT[WD_multivar_BE$WD_from_P50_LMA_Ks$dataused]
+MAPp3 <- trait_BE$MAP[WD_multivar_BE$WD_from_P50_LMA_Ks$dataused]/10
+name3 <- rep("WD (BE)",length(MATp3))
+
+MATp4 <- trait_BDT$MAT[WD_multivar_BDT$WD_from_P50_Ks$dataused]
+MAPp4 <- trait_BDT$MAP[WD_multivar_BDT$WD_from_P50_Ks$dataused]/10
+name4 <- rep("WD (BDT)",length(MATp4))
+
+MATp5 <- trait_B$MAT[slope_multivar$slope_from_P50_TLP_WD$dataused]
+MAPp5 <- trait_B$MAP[slope_multivar$slope_from_P50_TLP_WD$dataused]/10
+name5 <- rep("Slope",length(MATp5))
+
+MATp6 <- trait_BE$MAT[LMA_multivar_BE$LMA_from_TLP_LS_WD$dataused]
+MAPp6 <- trait_BE$MAP[LMA_multivar_BE$LMA_from_TLP_LS_WD$dataused]/10
+name6 <- rep("LMA (BE)",length(MATp6))
+
+MATp7 <- trait_BDT$MAT[LMA_multivar_BDT$LMA_from_TLP$dataused]
+MAPp7 <- trait_BDT$MAP[LMA_multivar_BDT$LMA_from_TLP$dataused]/10
+name7 <- rep("LMA (BDT)",length(MATp7))
+
+data_MATp_MAPp <- data.frame("MATp"=c(MATp1,MATp2,MATp3,MATp4,MATp5,MATp6,MATp7),
+                             "MAPp"=c(MAPp1,MAPp2,MAPp3,MAPp4,MAPp5,MAPp6,MAPp7),
+                             "name"=c(name1,name2,name3,name4,name5,name6,name7))
+
+whittaker_biomes_plot(data_MATp_MAPp)
 # Derive traits that are not subject to optimisation--------------------------
 
 # Calculate regression of leafL from LMA ----------------------------------
+# sticking with linear regression here:
 
 leafL_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,log(trait_B$leafL)),c("LMA","leafL"),nbtstrp,T)
 
 
 # Calculate limits of leafN vs LMA to allow estimate of leaf C:N ----------
-
+# sticking with linear regression here:
 leafN_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,trait_B$leafN),c("LMA","leafN"),nbtstrp,T)
 
 leafN_from_LMA_limit <- regress_limit_adjust(trait_B$leafN,trait_B$LMA,leafN_from_LMA,0.05)
@@ -439,52 +559,6 @@ tt
 rm(list=(ls(pattern="_e_")))
 rm(Ks_e,TLP_e)
 
-# Optimisation with LS and P50 ------------------------------------------------------------
-# lowest bivariate relationship in the trait network for evergreen subset: parson cor = 0.23.
-# it is thought to have no functional relationship.
-# Attempt to iteratively converge on the best fit values of Ks, TLP ,slope, WD and LMA, given known LS and P50
-outs_LSP50 <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50)
-
-# to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
-# single objects, 
-list2env(outs_LSP50$predictors , envir = .GlobalEnv) 
-list2env(outs_LSP50$predicted , envir = .GlobalEnv)
-
-# Stats defining the uncertainty range for each point
-create_uncertainty_range_stats(outs_LSP50)
-
-opt_test_plots_LSP50(trait_plot,
-                     Ks_e_mean,
-                     Ks_e_5perc,
-                     Ks_e_95perc,
-                     Ks_e,
-                     TLP_e_mean,
-                     TLP_e_5perc,
-                     TLP_e_95perc,
-                     TLP_e,
-                     LMA_e_mean,
-                     LMA_e_5perc,
-                     LMA_e_95perc,
-                     LMA_e,
-                     WD_e_mean,
-                     WD_e_5perc,
-                     WD_e_95perc,
-                     WD_e,
-                     slope_e_mean,
-                     slope_e_5perc,
-                     slope_e_95perc,
-                     slope_e) 
-
-if(trait_sel==F) {
-  # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
-  ind = which(!is.na(traits$P50) & !is.na(traits$LS))
-  
-  # provide list of trait names which are the predicted traits
-  trait_names = c('Ks','TLP','LMA','WD','slope')
-  RMSE_withLSP50_start <- opt_rmse(traits,trait_names,ind)
-}
-
-# Convert to the values needed in LPJ-GUESS -----------------
 traits_LPJG_LSP50 <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
                                       as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
                                       leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
@@ -494,7 +568,7 @@ traits_LSP50.df <- data.frame(matrix(unlist(traits_LPJG_LSP50), ncol=length(trai
 names(traits_LSP50.df) <- names(traits_LPJG_LSP50)
 
 # # create correlation table to report and test for sign in correlation being correct --------
-tt <- test_cor_signs(trait_BDT,data.frame(LMA=LMA_e_mean,P50=as.vector(P50_e[,1]),TLP=TLP_e_mean,slope=slope_e_mean,LS = as.vector(LS_e[,1]),WD =WD_e_mean,Ks = Ks_e_mean))
+tt <- test_cor_signs(trait_plot,data.frame(LMA=LMA_e_mean,P50=as.vector(P50_e[,1]),TLP=TLP_e_mean,slope=slope_e_mean,LS = as.vector(LS_e[,1]),WD =WD_e_mean,Ks = Ks_e_mean))
 tt
 # clean up to not contaminate the below workflow
 rm(list=(ls(pattern="_e_")))
@@ -504,7 +578,7 @@ rm(LS_e,P50_e)
 # No functional relationship between traits hypothesised (note: high observed correlation, R=0.4, probably via other traits), 
 # so: traits are good 'outer edges' to start the optimisation from.
 # Attempt to iteratively converge on the best fit values of TLP, P50 and LMA given known Ks and LS
-outs_LSKs <- trait_optim(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsKsLS)
+outs_LSKs <- trait_optim_bivar_start_KsLS(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsKsLS, regr_type = 'plsr')
 
 list2env(outs_LSKs$predictors , envir = .GlobalEnv)
 list2env(outs_LSKs$predicted , envir = .GlobalEnv)
@@ -512,7 +586,7 @@ list2env(outs_LSKs$predicted , envir = .GlobalEnv)
 # Stats defining the uncertainty range for each point
 create_uncertainty_range_stats(outs_LSKs)
 
-
+#[TODO] make opt_test_plots work with LsKS output and look like LSP50 output
 opt_test_plots(trait_plot,
                TLP_e_mean,
                TLP_e_5perc,
@@ -560,7 +634,7 @@ traits_e_out <- data.frame(LS_e,Ks_e,
 # Convert to the values needed in LPJ-GUESS,PCA and write out -----------------
 
 traits_LPJG_KSLS <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
-                                     as.vector(LS_e),WD_e_mean,as.vector(Ks_e),
+                                     as.vector(LS_e[,1]),WD_e_mean,as.vector(Ks_e[,1]),
                                      leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
 
 # create data frame of traits for subsequent PCA below -------
