@@ -675,10 +675,10 @@ names(traits_LSP50.df) <- names(traits_LPJG_LSP50)
 tt <- test_cor_signs(trait_plot,data.frame(LMA=LMA_e_mean,P50=as.vector(P50_e[,1]),TLP=TLP_e_mean,slope=slope_e_mean,LS = as.vector(LS_e[,1]),WD =WD_e_mean,Ks = Ks_e_mean))
 
 if(spec_group_sel==2){
-save(tt, file="data/BE/correlation_table.RData")
+#save(tt, file="data/BE/correlation_table.RData")
 }
 if(spec_group_sel==1){
-  save(tt, file="data/BDT/correlation_table.RData")
+#  save(tt, file="data/BDT/correlation_table.RData")
 }
 
 
@@ -691,7 +691,8 @@ if(spec_group_sel==1){
 # used as test to see whether starting from different trait combinations has an impact on the PFT-spread.
 
 traits_PCA  <- traits_LSP50.df 
-traits_PCA  <- traits_KSLS.df # 04.07.2022 for testing
+#traits_PCA  <- traits_KSLS.df # 04.07.2022 for testing
+#traits_PCA  <- traits_KSTLP.df
 
 # T. Pugh
 # 25.10.20
@@ -803,6 +804,12 @@ names(traits_LSP50.df) <- names(traits_LPJG_LSP50_pft)
 
 traits_PCA  <- traits_LSP50.df
 
+
+plot(traits_LPJG_LSP50_pft$P50,traits_LPJG_LSP50_pft$Ks)
+plot(traits_LPJG_LSP50_pft$P50,log(traits_LPJG_LSP50_pft$LS))
+plot(traits_LPJG_LSP50_pft$P50,traits_LPJG_LSP50_pft$SLA)
+plot(traits_LPJG_LSP50_pft$P50,traits_LPJG_LSP50_pft$WD)
+plot(traits_LPJG_LSP50_pft$P50,traits_LPJG_LSP50_pft$TLP)
 # T. Pugh
 # 25.10.20
 # original file: lpjg_strat_mapping_comb.m
@@ -822,6 +829,17 @@ traits_PCA$LMA = log(traits_PCA$LMA)
 
 #PCA on optimised trait values (0 = 5 to 7)
 pca_with_pretty_biplot_Pfts(traits_PCA[,c(1,3,4,6,10,12,13,17)])#, labels = c("WD","-P50","-P88","LS","Ks","TLP","slope","LMA" ) )
+##
+
+#testing PCA
+pca <-  traits_PCA[,c(1,3,4,6,10,12,13,17)]
+pca_res <- prcomp(pca)
+autoplot(pca_res, data = pca, loadings = TRUE, loadings.colour = 'blue', loadings.label = TRUE, loadings.label.size = 3)
+
+df <- iris[1:4]
+pca_res <- prcomp(df, scale. = TRUE)
+
+
 
 if(spec_group_sel==1){
   mtext(side=3, 'Broadleaf deciduous')
@@ -848,10 +866,10 @@ c("outs_LSP50_BDT0307.RData","outs_LSP50_BE0307.RData","outs_LSP50_BD0307.RData"
 for(basePFT in basePFTs){
 print(basePFT)
   if(basePFT ==1 || basePFT == 4){
-    load(file='data/outs_LSP50_hv_BE.RData')
+  #  load(file='data/outs_LSP50_hv_BE.RData')
   }
   if(basePFT ==2 || basePFT == 3 || basePFT == 5){  # TeBE,IBS,TrBR, 
-    load(file='data/outs_LSP50_hv_BDT.RData')
+  #  load(file='data/outs_LSP50_hv_BDT.RData')
   }
   # alternatively, map in more detail( but lose data ranges):
   #if(basePFT ==2 || basePFT == 3 ){ # summergreen shade tolerant and intolerant PFT
@@ -870,12 +888,17 @@ print(basePFT)
   create_uncertainty_range_stats(outs_LSP50_hv)
   
   # convert to LPJ-Guess units
-  traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
-                                            as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
-                                            leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+  #traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
+  #                                          as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
+  #                                          leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+  traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
+                                       as.vector(LS_e[,1]),WD_e_mean,as.vector(Ks_e[,1]),
+                                       leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+  
   # write output
  # output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles03072022/"
   output_fol="~/Desktop/PFTs/"
+  output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles06072022_KsLS/"
   write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='global_cf_base_Tom04072022.ins') #mac04072022.ins
   
 }
@@ -1006,6 +1029,9 @@ for (n in names(IBS)){
   }
 }
 }
+lm_TrBE <- TrBE
+plsr_TrBE <- TrBE
+
 
 plot(rep(2,31),t(lm_TrBE["DeltaPsiWW"]), ylim=c(min(t(plsr_TrBE["DeltaPsiWW"]), t(lm_TrBE["DeltaPsiWW"]) ) , max(t(plsr_TrBE["DeltaPsiWW"]),t(lm_TrBE["DeltaPsiWW"])  )),
      col='black', pch=1,main = expression( Delta~Psi[WW]), xlab='',xaxt='n' ,xlim=c(0,5)) 

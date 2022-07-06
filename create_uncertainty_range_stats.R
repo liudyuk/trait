@@ -2,7 +2,7 @@
 # Original code from T.Pugh main script
 # Enabling of more flexible handling of input and automatised file naming by Annemarie Eckes-Shephard May 2021
 
-# Stats defining the uncertainty range for each point
+# Stats defining the uncertainty range for each point, but only if multiple points were sampled
 # input is the output from trait_optim. 
 # The function will use the optimised (predicted) values and creates summary statistics (sum_stat) on their
 # mean, median and upper and lower 5% of the uncertainty range.

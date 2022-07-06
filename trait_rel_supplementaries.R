@@ -499,7 +499,7 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 # no hypothesised functional link, bivariate correlation coeff: 0.3
 # Attempt to iteratively converge on the best fit values of LS, P50 and LMA, given known Ks and TLP
 
-outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = limitdataranges, propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs= est_lhsKsTLP)
+outs_KsTLP <- trait_optim_bivar_start_KsTLP(limitdataranges = limitdataranges, propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs= est_lhsKsTLP,regr_type='plsr')
 # 'release' the output from function trait_optim_bivar_startKsTLP from a list of objects into single objects
 # single objects into the global environment
 list2env(outs_KsTLP$predictors , envir = .GlobalEnv) 
@@ -647,6 +647,70 @@ tt
 # clean up
 rm(list=(ls(pattern="_e_")))
 rm(Ks_e,LS_e)
+
+# Optimisation with LS and TLP ------------------------------------------------------------
+#  hypothesised functional link, bivariate correlation coeff:
+# Attempt to iteratively converge on the best fit values of LS, P50 and LMA, given known LS and TLP
+
+outs_LSTLP <- trait_optim_bivar_start_LSTLP(limitdataranges = limitdataranges, propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs= est_lhsKsTLP,regr_type='plsr')
+# 'release' the output from function trait_optim_bivar_startKsTLP from a list of objects into single objects
+# single objects into the global environment
+list2env(outs_LSTLP$predictors , envir = .GlobalEnv) 
+list2env(outs_LSTLP$predicted , envir = .GlobalEnv)
+
+# Stats defining the uncertainty range for each point
+create_uncertainty_range_stats(outs_LSTLP)
+
+opt_test_plots_LSTLP(trait_plot,
+                     Ks_e_mean,
+                     Ks_e_5perc,
+                     Ks_e_95perc,
+                     Ks_e,
+                     P50_e_mean,
+                     P50_e_5perc,
+                     P50_e_95perc,
+                     P50_e,
+                     LMA_e_mean,
+                     LMA_e_5perc,
+                     LMA_e_95perc,
+                     LMA_e,
+                     WD_e_mean,
+                     WD_e_5perc,
+                     WD_e_95perc,
+                     WD_e,
+                     slope_e_mean,
+                     slope_e_5perc,
+                     slope_e_95perc,
+                     slope_e) 
+
+
+# Calculate the RMSE (only if running with actual values of Ks and LS [i.e. trait_sel =F in function trait_optim])
+
+if(trait_sel==F) {
+  # Identify all combinations of TLP and LS (do this across full range of broadleaf species)
+  ind = which(!is.na(traits$LS) & !is.na(traits$TLP))
+  
+  # provide list of trait names which are the predicted traits
+  trait_names = c('P50','LS','LMA','WD','slope')
+  RMSE_withLSTLP_start <- opt_rmse(traits,trait_names,ind)
+}
+
+# Convert to the values needed in LPJ-GUESS -----------------
+traits_LPJG_LSTLP <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,as.vector(TLP_e[,1]),slope_e_mean,
+                                      as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
+                                      leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+
+# create data frame of traits for subsequent PCA below -------
+traits_LSTLP.df <- data.frame(matrix(unlist(traits_LPJG_LSTLP), ncol=length(traits_LPJG_LSTLP), byrow=FALSE))
+names(traits_LSTLP.df) <- names(traits_LPJG_LSTLP)
+
+
+# # create correlation table to report and test for sign in correlation being correct --------
+tt <- test_cor_signs(trait_BDT,data.frame(LMA = LMA_e_mean,P50 = P50_e_mean,TLP = as.vector(TLP_e[,1]),slope = slope_e_mean,LS = as.vector(LS_e[,1]),WD = WD_e_mean,Ks = Ks_e_mean))
+tt
+# clean up to not contaminate the below workflow
+rm(list=(ls(pattern="_e_")))
+rm(LS_e,TLP_e)
 
 
 ## sanity checking parameter results plausibility:
