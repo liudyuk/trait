@@ -18,7 +18,8 @@ opt_test_plots_LSP50 <- function(trait,
                                  slope_e_mean,
                                  slope_e_5perc,
                                  slope_e_95perc,
-                                 slope_e) {
+                                 slope_e,
+                                 spec_group_sel) {
   # Make plots which show the quality of the fit between the optimised values and the original data
   #
   # original version:
@@ -29,25 +30,32 @@ opt_test_plots_LSP50 <- function(trait,
   # Code heavily based on T. Pugh's function in opt_test_plots.R
   # Small adaptations related to LS and P50 variable and their summary stats.
   
+  if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
+    spec_out = "BDT"
+  } else if (spec_group_sel==2) {
+    spec_out = "BE"
+  }
+  
+  
   plot_scatter <- function(traitdf,trait1,trait2){
     # traitdf : data frame with observed traits
-    if(trait2 == 'LMA' ){# plot SLA and not LMA, so do 1/LMA
-
-      plot(traitdf[[trait1]],1/traitdf[[trait2]],pch=16,xlab=trait1,ylab=trait2,main=paste0(trait1,' vs SLA'), col = makeTransparent('dark grey', alpha=80),axes=FALSE)
-    
-      
+    if(trait2 == 'LMA1' ){# plot SLA and not log(LMA), so do 1/exp(LMA) 
+  #[TODO]note: this switch is now turned off, maybe plotting log LMA is better anyways, for consistency between the plots and the manuscrips
+      plot(traitdf[[trait1]],1/exp(traitdf[[trait2]]),pch=16,xlab=trait1,ylab=trait2, col = makeTransparent('dark grey', alpha=80),axes=FALSE)
+  
+        
       extended_names <- c('_e','_e_mean','_e_median','_e_5perc','_e_95perc')
       trait2_plot_names <- paste0(trait2,extended_names )
       trait1n <- get(paste0(trait1,'_e'))
       
-      points(trait1n[,1], 1/get(trait2_plot_names[1])[,1], col="blue",  pch=16) # Using central estimate coefficients
-      points(trait1n[,1], 1/get(trait2_plot_names[2]),     col="red",   pch=16) # Using mean of all bootstrapped estimates 
-      points(trait1n[,1], 1/get(trait2_plot_names[4]),     col="green", pch=16)
-      points(trait1n[,1], 1/get(trait2_plot_names[5]),     col="green", pch=16)
+      points(trait1n[,1], 1/exp(get(trait2_plot_names[1])[,1]), col="blue",  pch=16) # Using central estimate coefficients
+      points(trait1n[,1], 1/exp(get(trait2_plot_names[2])),     col="red",   pch=16) # Using mean of all bootstrapped estimates 
+      points(trait1n[,1], 1/exp(get(trait2_plot_names[4])),     col="green", pch=16)
+      points(trait1n[,1], 1/exp(get(trait2_plot_names[5])),     col="green", pch=16)
       ### create linear model and also 95% confidence interval
       
       traitdf1 <- traitdf[,c(trait1,trait2)]
-      traitdf1[,2] <- 1/traitdf1[,2] #1/LMA to get to sla
+      traitdf1[,2] <- 1/exp(traitdf1[,2]) #1/exp(LMA) to get to sla
       names(traitdf1) <- c("x","y")
       x = na.omit(traitdf[[trait1]])
       lm.out <-  lm( y ~x,data=traitdf1)
@@ -64,16 +72,16 @@ opt_test_plots_LSP50 <- function(trait,
       #print(p3)
       
       #estimated traits
-      abline( lm( (1/get(trait2_plot_names[1])[,1]) ~ trait1n[,1]), col='dark green', lty=2, lwd=1.2 )
+      abline( lm( (1/exp(get(trait2_plot_names[1])[,1])) ~ trait1n[,1]), col='dark green', lty=2, lwd=1.2 )
       axis(2, mgp=c(3, .6, 0), tck=-.015, labels=NA)
       axis(side = 2, lwd = 0, line = -0.8, las = 0.5)
       axis(1, mgp=c(3, .6, 0), tck=-.015, labels=NA)
       axis(side = 1, lwd = 0, line = -0.8, las = 0.5)
       box()
-      mtext(side = 1,trait1, line=1.1 ,cex=0.9)
+      mtext(side = 1,paste0("log(",trait1,")"), line=1.1 ,cex=0.9)
       mtext(side = 2,'SLA', line=1 ,cex=0.9)
     }else{ # plot all other traits as normal
-      plot(traitdf[[trait1]],traitdf[[trait2]],pch=16,xlab=trait1,ylab=trait2,main=paste0(trait1,' vs ',trait2), col = makeTransparent('dark grey', alpha=80),axes=FALSE)
+      plot(traitdf[[trait1]],traitdf[[trait2]],pch=16,xlab=trait1,ylab=trait2, col = makeTransparent('dark grey', alpha=80),axes=FALSE)
     
       
       extended_names <- c('_e','_e_mean','_e_median','_e_5perc','_e_95perc')
@@ -110,17 +118,15 @@ opt_test_plots_LSP50 <- function(trait,
       axis(1, mgp=c(3, .6, 0), tck=-.015, labels=NA)
       axis(side = 1, lwd = 0, line = -0.8, las = 0.5)
       box()
-      mtext(side = 1,trait1, line=1.1 ,cex=0.9)
-      mtext(side = 2,trait2, line=1 ,cex=0.9)
+      mtext(side = 1,paste0("log(",trait1,")"), line=1.1 ,cex=0.9)
+      mtext(side = 2,paste0("log(",trait2,")"), line=1 ,cex=0.9)
     }# end LMA test
     
   }
   
   
   
-  par(mfrow=c(4,4))
-  par(mar=c(2,2,2,2))
-  
+
   #plot(trait$P50,trait$LS,pch=16,xlab="P50",ylab="LS",main="P50 vs LS", col = makeTransparent('dark grey', alpha=80))
   #abline(lm(trait$LS~trait$P50),col='black',lty=2)
   #points(P50_e[,1],LS_e[,1],col="blue",pch=16,cex=0.4) # Using central estimate coefficients
@@ -128,7 +134,10 @@ opt_test_plots_LSP50 <- function(trait,
   #points(P50_e[,1],LS_e[,1],col="green",pch=16,cex=0.4)
   #points(P50_e[,1],LS_e[,1],col="green",pch=16,cex=0.4)
   
-
+  png(filename = paste0("Figures/core_params_scatterS3_1",spec_out,".png") )
+  par(mfrow=c(4,4))
+  par(mar=c(2,2,0.4,1), oma=c(0.1,0.1,0.1,0.1))
+  
   plot_scatter(trait_plot,'P50','slope')
   plot_scatter(trait_plot,'P50','WD')
   plot_scatter(trait_plot,'P50','TLP')
@@ -150,6 +159,11 @@ opt_test_plots_LSP50 <- function(trait,
   plot_scatter(trait_plot,'Ks','slope')
   plot_scatter(trait_plot,'Ks','WD')
   #plot_scatter(trait_plot,'Ks','TLP')
+  dev.off()
+  png(filename = paste0("Figures/core_params_scatterS3_2",spec_out,".png") )
+  par(mfrow=c(4,4))
+  par(mar=c(2,2,0.4,1), oma=c(0.1,0.1,0.1,0.1))
+  
   plot_scatter(trait_plot,'Ks','LMA')
   
   plot_scatter(trait_plot,'WD','slope')
@@ -162,10 +176,10 @@ opt_test_plots_LSP50 <- function(trait,
   plot_scatter(trait_plot,'slope','LMA')
   #plot_scatter(trait_plot,'slope','P50')
   plot.new()
-  legend("center",cex=0.8,legend=c("predicted","observed","predicted","observed"),
-         lty=c(NA,NA,2,2), col=c('green','grey','green','grey'),
+  legend("center",cex=1.4,legend=c("predicted","observed","predicted","observed"),
+         lty=c(NA,NA,2,2), col=c('green','grey','dark green','grey'),
          fill=c(NA,NA,NA,NA),pch=c(16,16,NA,NA),border=NA,box.lwd=NA)
-  
+  dev.off()
   #Set back to single plot
   par(mfrow=c(1,1))
   par(mar=c(5.1,4.1,4.1,2.1))

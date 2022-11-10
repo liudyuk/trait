@@ -48,14 +48,14 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line3 <- "\t !Hydraulics"
   Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
   Line5 <- paste("\t delta_psi_max ",traits_LPJG$DeltaPsiWW[nn],sep="")
-  Line6 <- paste("\t cav_slope ",traits_LPJG$polyslope[nn],sep="")
+  Line6 <- paste("\t cav_slope ",traits_LPJG$polyslope[nn],sep="") #done
   Line7 <- paste("\t psi50_xylem ",traits_LPJG$P50[nn],sep="")
   Line8 <- paste("\t ks_max ",traits_LPJG$Ks[nn],sep="")
   Line9 <- paste("\t kr_max ",11.2e-4,sep="") # LPJ-GUESS default from Hickler et al. (2006)
   Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
-  Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
+  Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="") # done
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
-  Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
+  Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="") # done
   Line14 <- paste("\t cton_leaf_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
   if (basePFT==1 | basePFT==4) {
     Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")

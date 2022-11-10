@@ -17,8 +17,8 @@ determine_lambda_from_TLP <- function(TLP_unlogged, plot=FALSE,single=FALSE){
   #(see Fu et al=:
   # large hydroscapes are associated with more anisohydric behaviour, and figure 3 a) shows that anisohydric behaviour is associated with low TLP)
   # https://academic-oup-com.ludwig.lub.lu.se/treephys/article/39/1/122/5107063
-  y2 =  1.0  # extreme isohydric
-  y1 =  -0.3 # anisohydric
+  y2 =  1.0  # extreme isohydric # 𝛌max
+  y1 =  -0.3 # anisohydric   #𝛌min
   x1 =  min(TLP_unlogged)
   x2 =  max(TLP_unlogged)
   

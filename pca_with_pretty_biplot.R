@@ -6,7 +6,8 @@
 # based on biplot function, but aesthetics are changed.
 # based on super helpful post by
 # https://stats.stackexchange.com/questions/276645/arrows-of-underlying-variables-in-pca-biplot-in-r
-CEN = scale(traits_PCA, center = center, scale = scale) # Centered and scaled
+traits_PCA_only <- traits_PCA[,c(1:length(labels))]
+CEN = scale(traits_PCA_only, center = center, scale = scale) # Centered and scaled
 PCA = prcomp(CEN)                                       # PCA analysis
 
 
