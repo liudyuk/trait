@@ -30,11 +30,11 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   Ks_e_mean_unlogged <- exp(Ks_e)
   
   # Unit conversions or analytical transformations
-  WD_LPJG  <- (WD_e_mean*1000)/2 # From g cm-3 to kgC m-3
+  WD_LPJG <- (WD_e_mean*1000)/2 # From g cm-3 to kgC m-3
   SLA_LPJG <- (1/LMA_e_mean_unlogged)*1000*2 # From log g m-2 to m2 kgC-1
   P88_LPJG <- P50_e_mean_unlogged - (38/slope_e_mean_unlogged)
   polyslope_LPJG <- 2/(log(P50_e_mean_unlogged/P88_LPJG)) # Hill/polynomial slope for input into LPJ-GUESS using equation from Phillip Papastefanou
-  LS_LPJG  <- LS_e_mean_unlogged*10000 # From m2 (leaf) cm-2 (sap) to m2 (leaf) m-2 (sap)
+  LS_LPJG <- LS_e_mean_unlogged*10000 # From m2 (leaf) cm-2 (sap) to m2 (leaf) m-2 (sap)
   
   # Empirical transformations
   if (is.null(leafL_from_LMA)) {
@@ -47,33 +47,16 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
     #leaflong_LPJG <- pmax(leaflong_LPJG,0.5)
   }
   
-  
-  #print the intercept and slope values for the empirically transformed auxiliary parameters, needed in Table S4
-  print("intercept and slope values for the empirically transformed auxiliary parameters, needed in Table S4")
-  if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
-    spec_print = "Broadleaf deciduous"
-  } else if (spec_group_sel==2) {
-    spec_print = "Broadleaf evergreen"
-    # only valid for evergreens:
-    print(paste(spec_print, "leafL  intercept = ",round(leafL_from_LMA$mod$intercept_R,digits=3),
-                "LeafL slope= ",round(leafL_from_LMA$mod$slope_R.y1,digits=3)) )
-  }
-  print(paste("LeafN intercept =", round(leafN_from_LMA$mod$intercept_R,digits=3), 
-              "LeafN slope=",round(leafN_from_LMA$mod$slope_R.y1,digits=3)) )
-  print(paste("LeafNmax intercept =", round(leafN_from_LMA_limit$intercept_upper, digits=3), 
-              "LeafNmax slope=", round(leafN_from_LMA_limit$slope,digits=3)) )
-
-  #The below doesn't seem to be used in write_LPJG_ins.file.R
   leafN_LPJG <- exp(leafN_from_LMA$mod$intercept_R + leafN_from_LMA$mod$slope_R.y1*LMA_e_mean) # mg N per g leaf
-  CtoN_LPJG  <- 1000/(leafN_LPJG*2) #Assume 0.5 g C per g leaf
+  CtoN_LPJG <- 1000/(leafN_LPJG*2) #Assume 0.5 g C per g leaf
   
   leafNmax_LPJG <- exp(leafN_from_LMA_limit$intercept_upper + leafN_from_LMA_limit$slope*LMA_e_mean) # mg N per g leaf
-  CtoNmin_LPJG  <- 1000/(leafNmax_LPJG*2) #Assume 0.5 g C per g leaf   gC/mgN /gleaf
+  CtoNmin_LPJG <- 1000/(leafNmax_LPJG*2) #Assume 0.5 g C per g leaf
 
   lambda_LPJG <- determine_lambda_from_TLP(TLP_e_mean_unlogged) # see function for infos
   DeltaPsiWW_LPJG <- -0.5571 + (2.9748*WD_e_mean) # Based on https://docs.google.com/spreadsheets/d/1KvB97vt6OVdy3GPUdOdlxd8c9TdjEk9z4qIl2mcfPHk/edit#gid=51069844
-  Kleaf_LPJG  <- 3.3682 + (-1.21*TLP_e_mean_unlogged) #### [TODO] Check relationship between TLP and Kleaf using other regression methods
- 
+  Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged) #### [TODO] Check relationship between TLP and Kleaf using other regression methods
+  
   #Limit ranges
   lambda_LPJG[lambda_LPJG  < -0.3] = -0.3 # From Papastefanou et al. (2020, Front. Plant Sci.)
   lambda_LPJG[lambda_LPJG  > 1.0]  = 1.0  # From Papastefanou et al. (2020, Front. Plant Sci.)
@@ -199,96 +182,3 @@ TrBR_header <- c(  "\t ! Tropical broadleaved raingreen tree",
                    "\t eps_mon 0.95 0.26 0.22 0.18 0.18 0.13 0.12 0.22 0.14",
                    "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
                    "")
-
-
-
-
-TeNE_header <- c( "\t ! Temperate needleleaved evergreen tree",
-                  "",
-                  "\t include 1",
-                  "\t tree",
-                  "\t needleleaved",
-                  "\t shade_intolerant ! cf Jun_oxy, Pin_hal in europe.ins",
-                  "\t evergreen",
-                  "\t temperate",
-                  "\t leaflong 3",
-                  "\t turnover_leaf 0.33",
-                  "\t tcmin_surv -2 		! As in Sitch et al. (2003), a little lower than TeBE",
-                  "\t tcmin_est -2 		! As in Sitch et al. (2003), a little lower than TeBE",
-                  "\t tcmax_est 10 		! Hickler et al. (2012) have 9 degC for Pin_hal",
-                  "\t twmin_est 5  		! low, since Hickler et al. (2012) have -1000 for Jun_oxy",
-                  "\t gdd5min_est 2000 	! Changed 2013-04-30 from value 900. As TeBE, a little lower than Jun_oxy, Pin_hal in europe.ins",
-                  "\t longevity 300  		! Hickler et al. (2012) have 350 for Pin_hal",
-                  "\t fireresist 0.3 		! Hickler et al. (2012) have 0.2 for Pin_hal and 0.4 for Jun_oxy",
-                  "\t eps_iso 8.0		! Values set to be the same as those for BNE and BINE",
-                  "\t seas_iso 0		! Values set to be the same as those for BNE and BINE",
-                  "\t eps_mon 1.7 0.7 0.4 0.24 0.24 0.2 0.84 0.26 0.22	! Values set to be the same as those for BNE and BINE",
-                  "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5	! Values set to be the same as those for BNE and BINE",
-                   "")
-                   
-BNS_header  <- c( "\t ! Boreal needleleaved summergreen tree",
-                  "\t include 1",
-                  "\t tree",
-                  "\t needleleaved",
-                  "\t shade_intolerant",
-                  "\t summergreen",
-                  "\t boreal",
-                  "\t tcmin_surv -1000	! no limit",
-                  "\t tcmin_est -1000		! no limit",
-                  "\t tcmax_est -2",
-                  "\t twmin_est -1000		! no limit",
-                  "\t twminusc 43		! AA from TH 03-11 added this",
-                  "\t gdd5min_est 350		! Changed 2013-04-30 from value 500",
-                  "\t phengdd5ramp 100	! Changed 2013-04-30 from value 200",
-                  "\t longevity 300",
-                  "\t fireresist 0.3",
-                  "\t eps_iso 8.0",
-                  "\t seas_iso 1",
-                  "\t eps_mon 3.18 0.72 0.18 0.12 0.14 0.11 0.2 0.13 0.02",
-                  "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
-                  "")
-
-BINE_header  <- c("\t ! Boreal needleleaved evergreen tree",
-                  "\t include 1",
-                  "\t tree",
-                  "\t needleleaved",
-                  "\t shade_intolerant",
-                  "\t evergreen",
-                  "\t boreal",
-                  "\t leaflong 3",
-                  "\t turnover_leaf 0.33",
-                  "\t tcmin_surv -31",
-                  "\t tcmin_est -30",
-                  "\t tcmax_est -1",
-                  "\t twmin_est 5",
-                  "\t gdd5min_est 500",
-                  "\t longevity 500",
-                  "\t fireresist 0.3",
-                  "\t eps_iso 8.0",
-                  "\t seas_iso 0",
-                  "\t eps_mon 1.7 0.7 0.4 0.24 0.24 0.2 0.84 0.26 0.22",
-                  "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
-                  "")
-
-
-BNE_header  <- c("\t ! Boreal needleleaved evergreen tree",
-           "\t include 1",
-           "\t tree",
-           "\t needleleaved",
-           "\t shade_tolerant",
-           "\t evergreen",
-           "\t boreal",
-           "\t leaflong 3",
-           "\t turnover_leaf 0.33",
-           "\t tcmin_surv -31",
-           "\t tcmin_est -30",
-           "\t tcmax_est -1",
-           "\t twmin_est 5",
-           "\t gdd5min_est 500",
-           "\t longevity 500",
-           "\t fireresist 0.3",
-           "\t eps_iso 8.0",
-           "\t seas_iso 0",
-           "\t eps_mon 1.7 0.7 0.4 0.24 0.24 0.2 0.84 0.26 0.22",
-           "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
-           "")
