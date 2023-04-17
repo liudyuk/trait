@@ -1,7 +1,7 @@
  make_bivar_plots <- function(trait,nbtstrp,regr_type = 'lm') {
   # Make the bivariate regressions necessary to populate the hypothesis framework
   #
-  # Dependencies: trait_functions.R
+  # Dependencies: sma_plot_stats.R
   #
   # T. Pugh
   # 12.12.20

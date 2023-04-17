@@ -4,8 +4,13 @@
 # output_fol : specify output folder location as string
 # basePFT: number between 1 and 5, to reflect PFTs:  'TeBE'(1),'TeBS'(2),'IBS'(3),'TrBE'(4),'TrBR'(5)
 # traits_LPJG: list object of traits derived from function  lpjg_traits_conv()
-write_LPJG_ins.file <- function(output_fol,basePFT,traits_LPJG,insfile_template="global_cf_base_Tom.ins"){
+write_LPJG_ins.file <- function(output_fol,basePFT,traits_LPJG,insfile_template="global_cf_base_Tom.ins",lpjg_version=4.1){
   basePFT_names <- c('TeBE','TeBS','IBS','TrBE','TrBR')
+  
+  if(lpjg_version!=4.1){
+    error("this output file creator can only write insfiles for 4.1 versions of LPJ-GUESS. 
+          Pleasemodify the headers (i.e. TeBE_header in lpjg_traits_conv.R")
+  }
 # Set the name for the output file  
 if (basePFT==1) {
   LPJG_outfile <- paste(output_fol,"/LPJG_PFT_insfile_TeBE.ins",sep="")
@@ -33,17 +38,24 @@ for (nn in 1:length(traits_LPJG$Ks)) {
     PFTfile <- file(LPJG_outfile,open="append")
   }
   
+  
+  # 'TeBE'(1),'TeBS'(2),'IBS'(3),'TrBE'(4),'TrBR'(5)
   Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
   if (basePFT==1) {
     Line2 <- TeBE_header
+    Line10 <- paste("\t kL_max 4.5") # Sack et Holbrook 2006 Fig 2, mean for Temp woody angiosperms
   } else if (basePFT==2) {
     Line2 <- TeBS_header
+    Line10 <- paste("\t kL_max 4.5")# Fig 2, mean for Temp woody angiosperms
   } else if (basePFT==3) {
     Line2 <- IBS_header
+    Line10 <- paste("\t kL_max 4.5")# Fig 2, mean for Temp woody angiosperms
   } else if (basePFT==4) {
     Line2 <- TrBE_header
+    Line10 <- paste("\t kL_max 6.5")# Fig 2, mean for Trop. woody angiosperms
   } else if (basePFT==5) {
     Line2 <- TrBR_header
+    Line10 <- paste("\t kL_max 6.5")# Fig 2, mean for Trop. woody angiosperms
   }
   Line3 <- "\t !Hydraulics"
   Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
@@ -52,7 +64,7 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line7 <- paste("\t psi50_xylem ",traits_LPJG$P50[nn],sep="")
   Line8 <- paste("\t ks_max ",traits_LPJG$Ks[nn],sep="")
   Line9 <- paste("\t kr_max ",11.2e-4,sep="") # LPJ-GUESS default from Hickler et al. (2006)
-  Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
+  #Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
   Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="") # done
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
   Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="") # done

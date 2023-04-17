@@ -35,7 +35,7 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
     # apply pcr/plsr model, DF2formula helps to remain flexible with input variables:
     varnames <- names(yy)
     if(regr_type =='pcr'){
-      print('in pcr_regress_multivar - pcr method')
+      #print('in pcr_regress_multivar - pcr method')
       #sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
       #mintraits =  apply(yy[varnames],2,min,na.rm=TRUE) # Account for fact that some traits in their current transformation cluster around 0
       #yy = yy/sdtraits # scaling is done manually here, and then set to FALSE below.
@@ -44,7 +44,7 @@ pca_regress_multivar <- function(yy,nbtrstrp=10000,bootout=F, regr_type='pcr'){
       
     }
     if(regr_type =='plsr'){
-      print('in pcr_regress_multivar - plsr method')
+      #print('in pcr_regress_multivar - plsr method')
       #sdtraits = apply(yy[varnames],2,sd,na.rm=TRUE)
       # mintraits =  apply(yy[varnames],2,min,na.rm=TRUE)
       #yy = yy/sdtraits # scaling is done manually here, and then set to FALSE below.

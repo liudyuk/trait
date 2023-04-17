@@ -1,4 +1,4 @@
-opt_test_plots <- function(trait,
+opt_test_plots_KsLS <- function(trait,
                            TLP_e_mean,
                            TLP_e_5perc,
                            TLP_e_95perc,

@@ -33,6 +33,7 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   WD_LPJG <- (WD_e_mean*1000)/2 # From g cm-3 to kgC m-3
   SLA_LPJG <- (1/LMA_e_mean_unlogged)*1000*2 # From log g m-2 to m2 kgC-1
   P88_LPJG <- P50_e_mean_unlogged - (38/slope_e_mean_unlogged)
+  # (log⁡(-1+1/0.88))/(log⁡(ψ_88/ψ_50 )  )can be approximated as the
   polyslope_LPJG <- 2/(log(P50_e_mean_unlogged/P88_LPJG)) # Hill/polynomial slope for input into LPJ-GUESS using equation from Phillip Papastefanou
   LS_LPJG <- LS_e_mean_unlogged*10000 # From m2 (leaf) cm-2 (sap) to m2 (leaf) m-2 (sap)
   
@@ -101,6 +102,9 @@ TeBE_header <- c("\t ! Temperate broadleaved evergreen tree",
                  "\t seas_iso 0",
                  "\t eps_mon 0.74 0.2 0.2 0.09 0.13 0.08 0.02 0.08 0.08",
                  "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
+                 "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                 "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                 "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                  "")
 
 TeBS_header <- c(  "\t ! Shade-tolerant temperate broadleaved summergreen tree",
@@ -122,6 +126,9 @@ TeBS_header <- c(  "\t ! Shade-tolerant temperate broadleaved summergreen tree",
                    "\t seas_iso 1",
                    "\t eps_mon 0.52 0.14 0.1 0.04 0.49 0.01 0.04 0.18 0.08",
                    "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
+                   "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                   "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                   "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                    "")
 
 IBS_header <- c(  "\t ! Shade-intolerant broadleaved summergreen tree",
@@ -144,6 +151,9 @@ IBS_header <- c(  "\t ! Shade-intolerant broadleaved summergreen tree",
                   "\t eps_mon 0.52 0.14 0.1 0.04 0.49 0.01 0.04 0.18 0.08",
                   "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.",
                   "\t greff_min 0.135 		! Version 4.1 update. Improves B(I)NE/IBS balance in boreal regions.",
+                  "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                  "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                  "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                   "")
 
 TrBE_header <- c(  "\t ! Tropical broadleaved evergreen tree",
@@ -162,6 +172,9 @@ TrBE_header <- c(  "\t ! Tropical broadleaved evergreen tree",
                    "\t seas_iso 0",
                    "\t eps_mon 0.32 0.09 0.07 0.06 0.06 0.04 0.04 0.07 0.05",
                    "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
+                   "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                   "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                   "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                    "")
 
 TrBR_header <- c(  "\t ! Tropical broadleaved raingreen tree",
@@ -181,4 +194,7 @@ TrBR_header <- c(  "\t ! Tropical broadleaved raingreen tree",
                    "\t seas_iso 0",
                    "\t eps_mon 0.95 0.26 0.22 0.18 0.18 0.13 0.12 0.22 0.14",
                    "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
+                   "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                   "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                   "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                    "")
