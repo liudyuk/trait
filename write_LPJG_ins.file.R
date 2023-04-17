@@ -107,7 +107,7 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line7 <- paste("\t psi50_xylem ",traits_LPJG$P50[nn],sep="")
   Line8 <- paste("\t ks_max ",traits_LPJG$Ks[nn],sep="")
   Line9 <- paste("\t kr_max ",11.2e-4,sep="") # LPJ-GUESS default from Hickler et al. (2006)
-  Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
+  #Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
   Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
   Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
