@@ -43,19 +43,19 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
   if (basePFT==1) {
     Line2 <- TeBE_header
-    Line10 <- paste("\t kL_max 4.5") # Sack et Holbrook 2006 Fig 2, mean for Temp woody angiosperms
+    Line10 <- paste("\t kL_max 9") # Sack et Holbrook 2006 Fig 2, mean for Temp woody angiosperms
   } else if (basePFT==2) {
     Line2 <- TeBS_header
-    Line10 <- paste("\t kL_max 4.5")# Fig 2, mean for Temp woody angiosperms
+    Line10 <- paste("\t kL_max 9")# Fig 2, mean for Temp woody angiosperms
   } else if (basePFT==3) {
     Line2 <- IBS_header
-    Line10 <- paste("\t kL_max 4.5")# Fig 2, mean for Temp woody angiosperms
+    Line10 <- paste("\t kL_max 9")# Fig 2, mean for Temp woody angiosperms
   } else if (basePFT==4) {
     Line2 <- TrBE_header
-    Line10 <- paste("\t kL_max 6.5")# Fig 2, mean for Trop. woody angiosperms
+    Line10 <- paste("\t kL_max 13")# Fig 2, mean for Trop. woody angiosperms
   } else if (basePFT==5) {
     Line2 <- TrBR_header
-    Line10 <- paste("\t kL_max 6.5")# Fig 2, mean for Trop. woody angiosperms
+    Line10 <- paste("\t kL_max 13")# Fig 2, mean for Trop. woody angiosperms
   }
   Line3 <- "\t !Hydraulics"
   Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
