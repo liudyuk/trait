@@ -715,7 +715,7 @@ traits_PCA$Ks  = log(traits_PCA$Ks)
 traits_PCA$LMA = log(traits_PCA$LMA)
 
 #PCA on optimised trait values (0 = 5 to 7)
-pca_with_pretty_biplot(traits_PCA[,c(1,3,4,6,10,12,13,17)], labels = c("WD","-P50","-P88","LS","Ks","TLP","slope","LMA" ))
+#pca_with_pretty_biplot(traits_PCA[,c(1,3,4,6,10,12,13,17)], labels = c("WD","-P50","-P88","LS","Ks","TLP","slope","LMA" ))
 
 if(spec_group_sel==1){
   mtext(side=3, 'Broadleaf deciduous')
@@ -728,7 +728,7 @@ if(spec_group_sel ==2){
 # But it woudl be great if they and the predicted traits make sense.
 
 #subs <- na.omit(trait_plot[,c("WD","P50","LS","Ks","TLP","LMA")])
-#pca_with_pretty_biplot(subs, labels = c("WD","-P50","LS","Ks","TLP","LMA" ))
+##pca_with_pretty_biplot(subs, labels = c("WD","-P50","LS","Ks","TLP","LMA" ))
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -751,16 +751,16 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 # (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4).
 if(spec_group_sel==1){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_10012023.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_17042023.RData')
 }
 if(spec_group_sel==2){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_10012023.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_17042023.RData')
 }
 if(spec_group_sel==3){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_10012023.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_17042023.RData')
 }
 if(spec_group_sel==4){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_10012023.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_17042023.RData')
 }
 #display trait values that will be selected for PFTs(purple), show that their spread is across a wide range of values 
 opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
@@ -836,7 +836,7 @@ if(spec_group_sel ==2){
 }
 png(filename= paste0("Figures/PCA_PFTtype",PFTtype,".png"),width = 18,height=18,units = "cm",res=350)
 
-pca_with_pretty_biplot_Pfts(traits_PCA_pred[,c(1,3,4,6,10,12,13,17)])#, labels = c("WD","-P50","-P88","LS","Ks","TLP","slope","LMA" ) )
+#pca_with_pretty_biplot_Pfts(traits_PCA_pred[,c(1,3,4,6,10,12,13,17)])#, labels = c("WD","-P50","-P88","LS","Ks","TLP","slope","LMA" ) )
 
 if(spec_group_sel==1){
   mtext(side=3, 'Broadleaf deciduous')
@@ -865,10 +865,10 @@ basePFTs <- c(1,2,3,4,5)
 for(basePFT in basePFTs){
 print(basePFT)
   if(basePFT ==1 || basePFT == 4){
-    load(file='data/outs_LSP50_hv_BE_10012023.RData') 
+    load(file='data/outs_LSP50_hv_BE_17042023.RData') 
   }
   if(basePFT ==2 || basePFT == 3 || basePFT == 5){  # TeBE,IBS,TrBR, 
-    load(file='data/outs_LSP50_hv_BDT_10012023.RData')
+    load(file='data/outs_LSP50_hv_BDT_17042023.RData')
   }
   # alternatively, map in more detail( but lose data ranges):
   #if(basePFT ==2 || basePFT == 3 ){ # summergreen shade tolerant and intolerant PFT
@@ -895,10 +895,11 @@ print(basePFT)
                                        leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
   
   # write output
- # output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles03072022/"
-  output_fol="~/Desktop/PFTs_simba_hyd_svn/"
+  #output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles03072022/"
+  #output_fol="~/Desktop/PFTs_simba_hyd_svn/"
+  output_fol = "/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles17042023_Kleafnetwork/"
   #output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles06072022_KsLS/"
-  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='global_cf_base_Tom17042023.ins', lpjg_version=4.1)#insfiles_4.1_template_simba #mac04072022.ins, global_cf_base_Tom17042023.ins, Tom04072022.ins # global_cf_base_mac04072022.ins
+  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='new_header.ins', lpjg_version=4.1)#insfiles_4.1_template_simba #mac04072022.ins, global_cf_base_Tom17042023.ins, Tom04072022.ins # global_cf_base_mac04072022.ins
   
 }
 
