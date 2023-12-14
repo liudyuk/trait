@@ -31,7 +31,7 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   
   # Unit conversions or analytical transformations
   WD_LPJG <- (WD_e_mean*1000)/2 # From g cm-3 to kgC m-3
-  SLA_LPJG <- (1/LMA_e_mean_unlogged)*1000*2 # From log g m-2 to m2 kgC-1
+  SLA_LPJG <- (1/LMA_e_mean_unlogged)*1000/2 # From log g m-2 to m2 kgC-1
   P88_LPJG <- P50_e_mean_unlogged - (38/slope_e_mean_unlogged)
   # (log⁡(-1+1/0.88))/(log⁡(ψ_88/ψ_50 )  )can be approximated as the
   polyslope_LPJG <- 2/(log(P50_e_mean_unlogged/P88_LPJG)) # Hill/polynomial slope for input into LPJ-GUESS using equation from Phillip Papastefanou
@@ -46,7 +46,7 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
     leaflong_LPJG <- exp(leafL_from_LMA$mod$intercept_R + leafL_from_LMA$mod$slope_R.y1*LMA_e_mean)
     #Apply a minimum of 0.5 for LPJ-GUESS
     #leaflong_LPJG <- pmax(leaflong_LPJG,0.5)
-  }
+    }
   
   leafN_LPJG <- exp(leafN_from_LMA$mod$intercept_R + leafN_from_LMA$mod$slope_R.y1*LMA_e_mean) # mg N per g leaf
   CtoN_LPJG <- 1000/(leafN_LPJG*2) #Assume 0.5 g C per g leaf
@@ -72,6 +72,7 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   Ks_LPJG <- Ks_e_mean_unlogged
   P50_LPJG <- P50_e_mean_unlogged
   
+
   traits_LPJG <- list("WD"=round(WD_LPJG,digits=4),"SLA"=round(SLA_LPJG,digits=4),"P50"=round(P50_LPJG,digits=4),
                       "P88"=round(P88_LPJG,digits=4),"polyslope"=round(polyslope_LPJG,digits=4),"LS"=round(LS_LPJG,digits=4),
                       "leaflong"=round(leaflong_LPJG,digits=4),"lambda"=round(lambda_LPJG,digits=4),
@@ -79,6 +80,7 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
                       "Kleaf"=round(Kleaf_LPJG,digits=4),"TLP"=round(TLP_e_mean_unlogged,digits=4),
                       "slope"=round(slope_e_mean_unlogged,digits=4),"leafN_LPJG"=round(leafN_LPJG,digits=4),
                       "CtoN_LPJG"=round(CtoN_LPJG,digits=4),"CtoNmin_LPJG"=round(CtoNmin_LPJG,digits=4))
+
   return(traits_LPJG)
 }
 
@@ -206,3 +208,4 @@ TrBR_header <- c(  "\t ! Tropical broadleaved raingreen tree",
                  # "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
                  #  "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                    "")
+
