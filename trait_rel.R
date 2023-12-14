@@ -415,7 +415,7 @@ if(testing==TRUE){
   
   # model construction and coefficient exctraction
   pcr_model <- plsr(P50~., data = train[c("TLP","Ks","WD","P50")], scale = TRUE,center=TRUE, validation = "LOO",
-                     na.action = na.omit,x=TRUE,y=TRUE)
+                    na.action = na.omit,x=TRUE,y=TRUE)
   #opls_model = oscorespls.fit(X=as.matrix(train[c("TLP","Ks","WD")]) ,Y = as.matrix(train[c("P50")]),ncomp=3)
   l_model <- lm(P50~., data = train[c("TLP","Ks","WD","P50")], na.action = na.omit)
   l_coef   <- coef(l_model)
@@ -429,7 +429,7 @@ if(testing==TRUE){
   P50pred_pcr <- pcr_coef[1] + pcr_coef[2]*test$TLP + pcr_coef[3]*test$Ks + pcr_coef[4]*test$WD
   P50pred_l   <-  l_coef[1] + l_coef[2]*test$TLP +  l_coef[3]*test$Ks +  l_coef[4]*test$WD
   P50pred_pcr_auto <- predict(pcr_model,newdata = test,ncomp=1 )
- 
+  
   # plot
   plot(test$P50,P50pred_pcr_auto,pch=10,ylim=c(-0.5,2),xlim=c(-0.5,2))
   # centering = TRUE is the default in pcr, applied to X and Ys.  # therefore,if center?TRUE I thought I must 'uncenter' Y ( by doing + mtraits$P50)
@@ -473,7 +473,7 @@ if(testing==TRUE){
   P50_from_TLP_Ks_WD_pca  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'pcr')
   P50_from_TLP_Ks_WD_lm   <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'lm')
   #P50_from_TLP_Ks_WD_sma  <- sma_plot_stats(data.frame(trait$TLP,trait$Ks,trait$WD,trait$P50),c("TLP","Ks","WD","P50"),nbtstrp,T, regression_type= 'sma')
- 
+  
   P50_from_TLP_Ks_WD_pca$mod$intercept_R ==  P50_from_TLP_Ks_WD_lm$mod$intercept_R
   P50_from_TLP_Ks_WD_pca$mod$slope_R.y1  ==  P50_from_TLP_Ks_WD_lm$mod$slope_R.y1
   P50_from_TLP_Ks_WD_pca$mod$slope_R.y2  ==  P50_from_TLP_Ks_WD_lm$mod$slope_R.y2
@@ -484,10 +484,7 @@ if(testing==TRUE){
   P50_from_TLP_Ks_WD_lm$mod$slope_R.y2
   P50_from_TLP_Ks_WD_lm$mod$slope_R.y3
   
-  # 490
-  [1] 4.599416
-  [1] -0.324917
-  [1] "plsr"
+  
   
   LS_multivar_BDT <- LS_multivar_test(LS~.,trait_BDT[c('P50','TLP','Ks','LS')], leaf_type ='BDT',regr_type = regr_type) # returns LS_from_TLP_Ks
   
@@ -597,19 +594,19 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 outs_LSP50      <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = trait_sel, n_trait_sel = n_trait_sel, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 
 if(testing==TRUE){
-if(spec_group_sel==1){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BDTManuscript14122023.RData')
-}
-if(spec_group_sel==2){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BEManuscript14122023.RData')
-   #load('data/outs_LSP50_BEManuscript29042022.RData')
+  if(spec_group_sel==1){
+    save(outs_LSP50 , file= 'data/outs_LSP50_BDTManuscript14122023.RData')
   }
-if(spec_group_sel==3){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BTManuscript14122023.RData')
-}
-if(spec_group_sel==4){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BDManuscript14122023.RData')
-}
+  if(spec_group_sel==2){
+    save(outs_LSP50 , file= 'data/outs_LSP50_BEManuscript14122023.RData')
+    #load('data/outs_LSP50_BEManuscript29042022.RData')
+  }
+  if(spec_group_sel==3){
+    save(outs_LSP50 , file= 'data/outs_LSP50_BTManuscript14122023.RData')
+  }
+  if(spec_group_sel==4){
+    save(outs_LSP50 , file= 'data/outs_LSP50_BDManuscript14122023.RData')
+  }
 }
 #save(outs_LSP50 , file= 'data/outs_LSP50_BD.RData')
 # to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
@@ -677,10 +674,10 @@ names(traits_LSP50.df) <- names(traits_LPJG_LSP50)
 tt <- test_cor_signs(trait_plot,data.frame(LMA=LMA_e_mean,P50=as.vector(P50_e[,1]),TLP=TLP_e_mean,slope=slope_e_mean,LS = as.vector(LS_e[,1]),WD =WD_e_mean,Ks = Ks_e_mean))
 
 if(spec_group_sel==2){
-#save(tt, file="data/BE/correlation_table.RData")
+  #save(tt, file="data/BE/correlation_table.RData")
 }
 if(spec_group_sel==1){
-#  save(tt, file="data/BDT/correlation_table.RData")
+  #  save(tt, file="data/BDT/correlation_table.RData")
 }
 
 
@@ -738,67 +735,67 @@ if(spec_group_sel ==2){
 # do network sampling for all different phenology types
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 for(spec_group_sel in c(1:4)){
-
-#Based on the above decision, determine trait dataset to use for plotting against optimised data later
-if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
-  trait_plot = trait_BDT
-} else if (spec_group_sel==2) {
-  trait_plot = trait_BE
-}
-
-
-# hyper-volume sampled PFTs, alongside extreme-value outer edges:
-outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
-# (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4).
-if(spec_group_sel==1){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_14122023.RData')
-}
-if(spec_group_sel==2){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_14122023.RData')
-}
-if(spec_group_sel==3){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_14122023.RData')
-}
-if(spec_group_sel==4){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BD_1412023.RData')
-}
-#display trait values that will be selected for PFTs(purple), show that their spread is across a wide range of values 
-opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
-                          Ks_e_mean,
-                          Ks_e_5perc,
-                          Ks_e_95perc,
-                          Ks_e,
-                          TLP_e_mean,
-                          TLP_e_5perc,
-                          TLP_e_95perc,
-                          TLP_e,
-                          LMA_e_mean,
-                          LMA_e_5perc,
-                          LMA_e_95perc,
-                          LMA_e,
-                          WD_e_mean,
-                          WD_e_5perc,
-                          WD_e_95perc,
-                          WD_e,
-                          slope_e_mean,
-                          slope_e_5perc,
-                          slope_e_95perc,
-                          slope_e,
-                          outs_LSP50_hv = outs_LSP50_hv,
-                          cols=cols) 
-
-# to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
-# single objects, 
-list2env(outs_LSP50_hv$predictors , envir = .GlobalEnv) 
-list2env(outs_LSP50_hv$predicted , envir = .GlobalEnv)
-
-# Stats defining the uncertainty range for each point
-create_uncertainty_range_stats(outs_LSP50_hv)
-
-traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
-                                      as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
-                                      leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
-
+  
+  #Based on the above decision, determine trait dataset to use for plotting against optimised data later
+  if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
+    trait_plot = trait_BDT
+  } else if (spec_group_sel==2) {
+    trait_plot = trait_BE
+  }
+  
+  
+  # hyper-volume sampled PFTs, alongside extreme-value outer edges:
+  outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
+  # (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4).
+  if(spec_group_sel==1){
+    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_14122023.RData')
+  }
+  if(spec_group_sel==2){
+    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_14122023.RData')
+  }
+  if(spec_group_sel==3){
+    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_14122023.RData')
+  }
+  if(spec_group_sel==4){
+    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BD_1412023.RData')
+  }
+  #display trait values that will be selected for PFTs(purple), show that their spread is across a wide range of values 
+  opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
+                            Ks_e_mean,
+                            Ks_e_5perc,
+                            Ks_e_95perc,
+                            Ks_e,
+                            TLP_e_mean,
+                            TLP_e_5perc,
+                            TLP_e_95perc,
+                            TLP_e,
+                            LMA_e_mean,
+                            LMA_e_5perc,
+                            LMA_e_95perc,
+                            LMA_e,
+                            WD_e_mean,
+                            WD_e_5perc,
+                            WD_e_95perc,
+                            WD_e,
+                            slope_e_mean,
+                            slope_e_5perc,
+                            slope_e_95perc,
+                            slope_e,
+                            outs_LSP50_hv = outs_LSP50_hv,
+                            cols=cols) 
+  
+  # to 'release' the output from function trait_optim_bivar_startLSP50 from a list of objects into single objects
+  # single objects, 
+  list2env(outs_LSP50_hv$predictors , envir = .GlobalEnv) 
+  list2env(outs_LSP50_hv$predicted , envir = .GlobalEnv)
+  
+  # Stats defining the uncertainty range for each point
+  create_uncertainty_range_stats(outs_LSP50_hv)
+  
+  traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
+                                            as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
+                                            leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+  
 }# stop sampling all different phenology types
 
 
@@ -864,7 +861,7 @@ basePFTs <- c(1,2,3,4,5)
 #c("outs_LSP50_BDT0307.RData","outs_LSP50_BE0307.RData","outs_LSP50_BD0307.RData","outs_LSP50_BT0307.RData")
 
 for(basePFT in basePFTs){
-print(basePFT)
+  print(basePFT)
   if(basePFT ==1 || basePFT == 4){
     load(file='data/outs_LSP50_hv_BE_14122023.RData') 
   }
@@ -892,8 +889,8 @@ print(basePFT)
   #                                          as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
   #                                          leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
   traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
-                                       as.vector(LS_e[,1]),WD_e_mean,as.vector(Ks_e[,1]),
-                                       leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+                                            as.vector(LS_e[,1]),WD_e_mean,as.vector(Ks_e[,1]),
+                                            leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
   
   # write output
   #output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles03072022/"
@@ -947,13 +944,13 @@ if(testing==TRUE){
                          BDT_m = c(t(lm_TrBE[n])/1000*2, rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE[n]))))), 
                          BE_o  = c(na.omit(trait_BE[[n]])),
                          BE_m  = c(t(plsr_TrBE[n])/1000*2, rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(plsr_TrBE[n]))))))
-               
+        
         boxplot(df,xlab = '',ylab = '',col = boxplot_cols,xaxt='n',xlim = c(0,5),main = n, names = boxplot_names) 
         axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
         points(rep(2,length(df$BDT_m)),df$BDT_m)
         points(rep(4,length(df$BE_m)),df$BE_m)
         mtext(paste0("n = ", length(c(na.omit(trait_BE[[n]])) )),side= 1, line =-7.5,adj= 0.05,cex=0.5 )
-              
+        
       }else if(n=='P50'){
         df <- data.frame(BDT_o = c(-exp(na.omit(trait_BDT[[n]])), rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) ) ),
                          BDT_m = c((t(lm_TrBE[n])), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE[n]))))), 
@@ -1008,7 +1005,7 @@ if(testing==TRUE){
                          BE_m  = c( (t(plsr_TrBE[n]) ), rep(NA,length(c(na.omit(trait_BE[['LMA']])))-length(c(t(plsr_TrBE[n]))))) )
         
         boxplot(df,xlab = '',ylab = '',col = boxplot_cols,xaxt='n',xlim = c(0,5),
-                 main=paste0(n), names = boxplot_names)  # m2 kgC-1
+                main=paste0(n), names = boxplot_names)  # m2 kgC-1
         axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
         points(rep(2,length(df$BDT_m)),df$BDT_m)
         points(rep(4,length(df$BE_m)),df$BE_m) 
@@ -1053,9 +1050,9 @@ if(testing==TRUE){
       points(rep(2,length(df$BDT_m)),df$BDT_m)
       points(rep(4,length(df$BE_m)),df$BE_m)
     }
-      
-    }
+    
   }
+}
 dev.off()
 
 
