@@ -4,6 +4,8 @@
 # output_fol : specify output folder location as string
 # basePFT: number between 1 and 5, to reflect PFTs:  'TeBE'(1),'TeBS'(2),'IBS'(3),'TrBE'(4),'TrBR'(5)
 # traits_LPJG: list object of traits derived from function  lpjg_traits_conv()
+# insfile_template: contains all instructions you want for LPJG to run except for the below and
+# the PFT headers in lpjg_traits_conv.R
 write_LPJG_ins.file <- function(output_fol,basePFT,traits_LPJG,insfile_template="global_cf_base_Tom.ins",lpjg_version=4.1){
   basePFT_names <- c('TeBE','TeBS','IBS','TrBE','TrBR')
   
@@ -37,25 +39,40 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   if (nn>1) {
     PFTfile <- file(LPJG_outfile,open="append")
   }
-  
-  
+
   # 'TeBE'(1),'TeBS'(2),'IBS'(3),'TrBE'(4),'TrBR'(5)
   Line1 <- paste("pft \"PFT",nn,"\" (",sep="")
   if (basePFT==1) {
     Line2 <- TeBE_header
-    Line10 <- paste("\t kL_max 9") # Sack et Holbrook 2006 Fig 2, mean for Temp woody angiosperms
+    Line10 <- paste("\t kL_max 7.24") # mean value from Daijun's literature screening,
+    # generated in extract_Kleaf_instances_for_trait_network.R
+    #previous value (temporarily used): 9  from Sack et Holbrook 2006 Fig 2, mean for Temp woody angiosperms
+    traits_LPJG$Kleaf <- 7.24
   } else if (basePFT==2) {
     Line2 <- TeBS_header
-    Line10 <- paste("\t kL_max 9")# Fig 2, mean for Temp woody angiosperms
+    Line10 <- paste("\t kL_max 11.6")# mean value from Daijun's literature screening,
+    # generated in extract_Kleaf_instances_for_trait_network.R
+    # prev. value: 9, Fig 2, mean for Temp woody angiosperms
+    # make sure KL_max is correctly assigned a constant value, also in this output:
+    traits_LPJG$Kleaf <- 11.6
   } else if (basePFT==3) {
     Line2 <- IBS_header
-    Line10 <- paste("\t kL_max 9")# Fig 2, mean for Temp woody angiosperms
+    Line10 <- paste("\t kL_max 11.6")# mean value from Daijun's literature screening,
+    # generated in extract_Kleaf_instances_for_trait_network.R
+    #previous value (temporarily used): 9, Fig 2, mean for Temp woody angiosperms
+    traits_LPJG$Kleaf <- 11.6
   } else if (basePFT==4) {
     Line2 <- TrBE_header
-    Line10 <- paste("\t kL_max 13")# Fig 2, mean for Trop. woody angiosperms
+    Line10 <- paste("\t kL_max 7.24")# mean value from Daijun's literature screening,
+    # generated in extract_Kleaf_instances_for_trait_network.R
+    # prev. value (temporarily used): 13 .  Fig 2, mean for Trop. woody angiosperms
+    traits_LPJG$Kleaf <- 7.24
   } else if (basePFT==5) {
     Line2 <- TrBR_header
-    Line10 <- paste("\t kL_max 13")# Fig 2, mean for Trop. woody angiosperms
+    Line10 <- paste("\t kL_max 17.3")# mean value from Daijun's literature screening,
+    # generated in extract_Kleaf_instances_for_trait_network.R
+    #previous value (temporarily used): Fig 2, mean for Trop. woody angiosperms
+    traits_LPJG$Kleaf <- 17.3
   }
   Line3 <- "\t !Hydraulics"
   Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
