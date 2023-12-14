@@ -59,7 +59,6 @@ nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samp
 
 #traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
-<<<<<<< HEAD
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/woody_trait.0827.txt",sep="\t")
 traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/mytrait-data/woody_trait.0827.txt",sep="\t")
 
@@ -80,13 +79,6 @@ traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_int
 #Slope:logged
 
 # related to trait network construction
-=======
-
-#traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/woody_trait.0827.txt",sep="\t")
-traits=read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/woody_trait.0827.txt",sep="\t")
-
-
->>>>>>> master
 source('sma_multivar_regress.R')
 source('lm_regress_multivar.R')
 source('pca_regress_multivar.R')
@@ -240,14 +232,9 @@ if (regr_type == 'pcr' || regr_type == 'plsr'){
 
 
 
-<<<<<<< HEAD
 #----------------------------------------------------------------------------------------------------------------------
 # Test single and multivariate correlation models
 #----------------------------------------------------------------------------------------------------------------------
-=======
-
-#--- Experiment with different plausible multivariate SMA models, based on our theory ---
->>>>>>> master
 
 
 # P50 fits ----------------------------------------------------------------
@@ -256,15 +243,10 @@ P50_multivar <- P50_multivar_test(trait_B, regr_type =  regr_type)
 
 
 coeffnames_P50_from_TLP_Ks <- c("Coefficient","L95","U95")
-<<<<<<< HEAD
+
 intercept_P50_from_TLP_Ks <- c(P50_multivar$P50_from_TLP_Ks$mod$intercept_R,P50_multivar$P50_from_TLP_Ks$mod$L95_R.intercept,P50_multivar$P50_from_TLP_Ks$mod$U95_R.intercept)
 y1_P50_from_TLP_Ks <- c(P50_multivar$P50_from_TLP_Ks$mod$slope_R.y1,P50_multivar$P50_from_TLP_Ks$mod$L95_R.y1,P50_multivar$P50_from_TLP_Ks$mod$U95_R.y1)
 y2_P50_from_TLP_Ks <- c(P50_multivar$P50_from_TLP_Ks$mod$slope_R.y2,P50_multivar$P50_from_TLP_Ks$mod$L95_R.y2,P50_multivar$P50_from_TLP_Ks$mod$U95_R.y2)
-=======
-intercept_P50_from_TLP_Ks  <- c(P50_multivar$P50_from_TLP_Ks$mod$intercept_R,P50_multivar$P50_from_TLP_Ks$mod$L95_R.intercept,P50_multivar$P50_from_TLP_Ks$mod$U95_R.intercept)
-y1_P50_from_TLP_Ks         <- c(P50_multivar$P50_from_TLP_Ks$mod$slope_R.y1,P50_multivar$P50_from_TLP_Ks$mod$L95_R.y1,P50_multivar$P50_from_TLP_Ks$mod$U95_R.y1)
-y2_P50_from_TLP_Ks         <- c(P50_multivar$P50_from_TLP_Ks$mod$slope_R.y2,P50_multivar$P50_from_TLP_Ks$mod$L95_R.y2,P50_multivar$P50_from_TLP_Ks$mod$U95_R.y2)
->>>>>>> master
 
 coeff_P50_from_TLP_Ks <- data.frame(coeffnames_P50_from_TLP_Ks,intercept_P50_from_TLP_Ks,y1_P50_from_TLP_Ks,y2_P50_from_TLP_Ks)
 #View(coeff_P50_from_TLP_Ks)
@@ -280,12 +262,8 @@ TLP_multivar <- TLP_multivar_test(trait_B, regr_type =  regr_type)
 # Separate for BE and BDT (BD + BT) on the basis that LMA has a very different range and set of bivariate relationships for these
 # two different groups, unlike the other traits here.
 
-<<<<<<< HEAD
-LMA_multivar_BE  <- LMA_multivar_test_BE(trait_BE, regr_type =  regr_type)
-=======
 
-LMA_multivar_BE <- LMA_multivar_test_BE(trait_BE)
->>>>>>> master
+LMA_multivar_BE  <- LMA_multivar_test_BE(trait_BE, regr_type =  regr_type)
 
 LMA_multivar_BDT <- LMA_multivar_test_BDT(trait_BDT, regr_type =  regr_type)
 
@@ -594,48 +572,25 @@ limitdataranges=T # Currently does not converge in uncertainty propagation if no
 # Decide whether to run the uncertainty propagation (T) or not (F)
 propagate_uncer= F
 
-<<<<<<< HEAD
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T), T useful for generating output for LPJ-Guess
 # and useful for testing different sampling methods  ( e.g. latin hypercube vs. systematic vs. hypervolume)
 trait_sel= F # set to F for network verification. Set to T for PFT selection
-=======
-
-# Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T)
-trait_sel=F
-# Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified
-n_trait_sel=-1
->>>>>>> master
 
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified, we have created 28 PFTs.
 # or (deprecatded) set = 4 for a predefined (above) hypercube sample 
 n_trait_sel= -1
 
-<<<<<<< HEAD
+
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel = 1
 
 #Based on the above decision, determine trait dataset to use for plotting against optimised data later
 if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
   trait_plot = trait_BDT
-=======
-
-# ---
-if (propagate_uncer) {
-  n_uncer=nbtstrp
-} else {
-  n_uncer=1
-}
-
-# Get index for selected species group
-if (spec_group_sel==1) {
-
-  ind_spec_group=which(traits$group=='BT' | traits$group=='BD')
->>>>>>> master
 } else if (spec_group_sel==2) {
   trait_plot = trait_BE
 }
 
-<<<<<<< HEAD
 
 # Optimisation with LS and P50 ------------------------------------------------------------
 # lowest bivariate relationship in the trait network for evergreen subset: pearson cor = 0.23.
@@ -656,59 +611,6 @@ if(testing==TRUE){
   }
   if(spec_group_sel==4){
     save(outs_LSP50 , file= 'data/outs_LSP50_BDManuscript14122023.RData')
-=======
-# Identify all combinations of Ks and LS (do this across full range of broadleaf species)
-
-ind=which(!is.na(traits$Ks) & !is.na(traits$LS))
-
-LS_comb <- traits$LS[ind]
-Ks_comb <- traits$Ks[ind]
-
-
-if (trait_sel) {
-  if (n_trait_sel>0) {
-    # Random selection of LS and Hmax values to be tested
-    set.seed(1234)
-    index = 1:length(ind)
-    trait_samp = sample(index, n_trait_sel, replace=F) 
-    LS_e = LS_comb[trait_samp] 
-    Ks_e = Ks_comb[trait_samp] 
-    # Plot sample against all data as a check for sampling density
-    plot(LS_comb,Ks_comb)
-    points(LS_e,Ks_e,col="red")
-    
-  } else {
-    # Systematic sample
-
-    #install.packages("hypervolume")
-
-    library(hypervolume)
-    # Fit a hypervolume (KDE at 95%)
-    # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
-    hv = hypervolume(data.frame(LS_comb,Ks_comb),method="gaussian",quantile.requested=0.95)
-    plot(hv)
-    
-    # Set the number of points distributed systematically across LS and Hmax space to test for inclusion in the hypervolume
-    sampKs=8
-    sampLS=8
-    
-    maxLS=max(LS_comb,na.rm=T)
-    minLS=min(LS_comb,na.rm=T)
-    maxKs=max(Ks_comb,na.rm=T)
-    minKs=min(Ks_comb,na.rm=T)
-    intLS=(maxLS-minLS)/sampLS
-    intKs=(maxKs-minKs)/sampKs
-    
-    LS_seq <- seq(minLS+intLS,maxLS-intLS,by=intLS)
-    Ks_seq <- seq(minKs+intKs,maxKs-intKs,by=intKs)
-    LS_Ks_seq <- expand.grid(LS_seq,Ks_seq)
-    
-    # Test those points for inclusion in the hypervolume
-    in_hv <- hypervolume_inclusion_test(hv,LS_Ks_seq,fast.or.accurate = "accurate")
-    
-    LS_e <- LS_Ks_seq$Var1[in_hv]
-    Ks_e <- LS_Ks_seq$Var2[in_hv]
->>>>>>> master
   }
 }
 #save(outs_LSP50 , file= 'data/outs_LSP50_BD.RData')
@@ -746,8 +648,6 @@ opt_test_plots_LSP50(trait_plot,
                      slope_e,
                      spec_group_sel)
 
-<<<<<<< HEAD
-
 
 if(trait_sel==F) {
   # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
@@ -763,72 +663,6 @@ if(trait_sel==F) {
     save(RMSE_withLSP50_start, file="data/BDT/RMSE_withLSP50_start.RData")
   }
 }
-=======
-
-# ---
-# Select the LMA relationship to use
-if (spec_group_sel==1) {
-  use_LMA_from_TLP_LS=F
-} else if (spec_group_sel==2) {
-  use_LMA_from_TLP_LS=T
-} else if (spec_group_sel==3) {
-  use_LMA_from_TLP_LS=F
-} else if (spec_group_sel==4) {
-  use_LMA_from_TLP_LS=F
-}
-
-# ---
-# Do the optimisation
-
-
-ndata=length(LS_e)
-
-P50_e <- matrix(NA, nrow= ndata, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
-LMA_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-TLP_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-WD_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-slope_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
-
-
-# Loop over all the combinations of Hmax and LS
-# The new estimates of traits use the suffix "_e"
-for (dd in 1:ndata) {
-  print(dd)
-  
-  # Carry out the optimisation
-  opt_vals <- trait_opt(traits$P50[ind_spec_group],
-                        traits$TLP[ind_spec_group],
-                        traits$LMA[ind_spec_group],
-                        traits$WD[ind_spec_group],
-                        traits$slope[ind_spec_group],
-                        LMA_multivar_BDT$LMA_from_TLP,
-                        LMA_multivar_BE$LMA_from_TLP_LS,
-                        TLP_multivar$TLP_from_LS_LMA_P50,
-                        P50_multivar$P50_from_TLP_Ks,
-                        slope_multivar$slope_from_P50_TLP_Ks,
-                        WD_multivar$WD_from_slope_P50slope,
-                        bivar$LMA_from_TLP,
-                        bivar$P50_from_Ks,
-                        bivar$TLP_from_P50,
-                        Ks_e[dd],
-                        LS_e[dd],
-                        n_uncer,
-                        use_LMA_from_TLP_LS)
-  
-  P50_e[dd,] <- opt_vals$P50_e
-  TLP_e[dd,] <- opt_vals$TLP_e
-  LMA_e[dd,] <- opt_vals$LMA_e
-  WD_e[dd,] <- opt_vals$WD_e
-  slope_e[dd,] <- opt_vals$slope_e
-}
-  
-
-#Stats defining the uncertainty range for each point
-TLP_e_mean=unname(apply(TLP_e, 1, mean,na.rm=T))
-TLP_e_median=unname(apply(TLP_e, 1, median,na.rm=T))
-TLP_e_5perc=unname(apply(TLP_e, 1, quantile,0.05,na.rm=T))
-TLP_e_95perc=unname(apply(TLP_e, 1, quantile,0.95,na.rm=T))
->>>>>>> master
 
 
 # Convert to the values needed in LPJ-GUESS -----------------
@@ -992,13 +826,6 @@ traits_PCA_pred$LS  = log(traits_PCA_pred$LS)
 traits_PCA_pred$Ks  = log(traits_PCA_pred$Ks)
 traits_PCA_pred$LMA = log(traits_PCA_pred$LMA)
 
-
-<<<<<<< HEAD
-=======
-
-# Calculate limits of leafN vs LMA to allow estimate of leaf C:N ----------
->>>>>>> master
-
 #plot PFT-specific PCA on optimised trait values (0 = 5 to 7) ----------------
 if(spec_group_sel==1){
   PFTtype="BDT"
@@ -1043,7 +870,7 @@ for(basePFT in basePFTs){
   if(basePFT ==2 || basePFT == 3 || basePFT == 5){  # TeBS,IBS,TrBR, 
     load(file='data/outs_LSP50_hv_BDT_14122023.RData')
   }
-<<<<<<< HEAD
+
   # alternatively, map in amore detail( but lose data ranges):
   #if(basePFT ==2 || basePFT == 3 ){ # summergreen shade tolerant and intolerant PFT
   #  load(file='data/outs_LSP50_BT.RData')
@@ -1080,32 +907,7 @@ for(basePFT in basePFTs){
   #global_cf_base_Tom26062023.ins
   #10.07.2023: no longer the gc_bug branch ( different insfile specs), as it was decided that this was not the way forward. 
   # run with a merge of develoop and raingreen_phenology.
-=======
-  Line3 <- "\t !Hydraulics"
-  Line4 <- paste("\t isohydricity ",traits_LPJG$lambda[nn],sep="")
-  Line5 <- paste("\t delta_psi_max ",traits_LPJG$DeltaPsiWW[nn],sep="")
-  Line6 <- paste("\t cav_slope ",traits_LPJG$polyslope[nn],sep="")
-  Line7 <- paste("\t psi50_xylem ",traits_LPJG$P50[nn],sep="")
-  Line8 <- paste("\t ks_max ",traits_LPJG$Ks[nn],sep="")
-  Line9 <- paste("\t kr_max ",11.2e-4,sep="") # LPJ-GUESS default from Hickler et al. (2006)
-  Line10 <- paste("\t kL_max ",traits_LPJG$Kleaf[nn],sep="")
-  Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
-  Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
-  Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
 
-  Line14 <- paste("\t cton_leaf_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
-  if (basePFT==1 | basePFT==4) {
-    Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
-    Line16 <- paste("\t turnover_leaf ",1/traits_LPJG$leaflong[nn],sep="")
-  } else {
-    #Use LPJ-GUESS standard values for deciduous
-    Line15 <- paste("\t leaflong 0.5")
-    Line16 <- paste("\t turnover_leaf 1.0")
-  } 
-  
-  writeLines(c(Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,Line10,Line11,Line12,Line13,Line14,Line15,Line16,"",")",""),PFTfile)
-  close(PFTfile)
->>>>>>> master
 }
 
 
@@ -1257,8 +1059,3 @@ if(testing==TRUE){
 }
 dev.off()
 
-
-<<<<<<< HEAD
-
-=======
->>>>>>> master
