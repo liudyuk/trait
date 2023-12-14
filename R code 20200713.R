@@ -2,6 +2,8 @@
 #libarary
 library(ggplot2)
 library(cowplot)
+#source("https://raw.githubusercontent.com/pughtam/hydtraits/master/sma_multivar_regress.R?token=AKLOZR4DY7RZQOFYJ7VZHGK7B37HM")
+source("sma_multivar_regress.R")
 
 #import the file
 trait<-read.table('woody_trait.0625.txt',header=TRUE, stringsAsFactors=FALSE, sep="\t", dec=".",fileEncoding="latin1")
@@ -154,10 +156,10 @@ fig3
 ggsave(fig3,filename = '/Users/liudy/Downloads/broadleaf.tiff',width = 16,height = 16)
 #######################################################################################################################################
 #2_3) Multi-bivariiate Broadleaf
-#LMA~TLP #only one variable and do not test
+#2_3-1 LMA~TLP #only one variable and do not test
 ###################################################################
 #run the function from Tom's developed multivariable
-#TLP ~other traits
+#2_3_2. TLP ~other traits
 trait_g<-trait[trait$group!="CC",]
 xy<-trait_g
 names(xy)
@@ -261,5 +263,17 @@ plot_pre<-ggplot(result, aes(x=pre, y=pred)) +geom_point(color="red") +labs(titl
   geom_abline(slope=1)
 plot_pre
 #####test the other traits that are working
+
+#read online data into local laptop
+library(httr)
+nuts <-read.csv("https://raw.githubusercontent.com/opetchey/RREEBES/master/Beninca_etal_2008_Nature/data/nutrients_original.csv", skip=7, header=T)
+str(nuts)
+
+library(RCurl)
+script <- getURL("https://raw.githubusercontent.com/opetchey/RREEBES/Beninca_development/Beninca_etal_2008_Nature/report/functions/indirect_method_functions.R", 
+                 ssl.verifypeer = FALSE)
+eval(parse(text = script))
+
+source("https://raw.githubusercontent.com/opetchey/RREEBES/Beninca_development/Beninca_etal_2008_Nature/report/functions/indirect_method_functions.R")
 
 

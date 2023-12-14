@@ -19,8 +19,10 @@ nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samp
 
 #traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
+
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/woody_trait.0827.txt",sep="\t")
 traits=read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/woody_trait.0827.txt",sep="\t")
+
 
 source('sma_multivar_regress.R')
 source('trait_functions.R')
@@ -59,12 +61,14 @@ bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp)
 View(bivar_BDT$all_sma_bivar)
 
 
+
 #--- Experiment with different plausible multivariate SMA models, based on our theory ---
 
 
 # P50 fits ----------------------------------------------------------------
 
 P50_multivar <- P50_multivar_test(trait_B)
+
 
 coeffnames_P50_from_TLP_Ks <- c("Coefficient","L95","U95")
 intercept_P50_from_TLP_Ks  <- c(P50_multivar$P50_from_TLP_Ks$mod$intercept_R,P50_multivar$P50_from_TLP_Ks$mod$L95_R.intercept,P50_multivar$P50_from_TLP_Ks$mod$U95_R.intercept)
@@ -86,9 +90,11 @@ TLP_multivar <- TLP_multivar_test(trait_B)
 # Separate for BE and BDT (BD + BT) on the basis that LMA has a very different range and set of bivariate relationships for these
 # two different groups, unlike the other traits here.
 
+
 LMA_multivar_BE <- LMA_multivar_test_BE(trait_BE)
 
 LMA_multivar_BDT <- LMA_multivar_test_BDT(trait_BDT)
+
 
 
 # WD fits -----------------------------------------------------------------
@@ -143,6 +149,7 @@ limitdataranges=T # Currently does not converge in uncertainty propagation if no
 # Decide whether to run the uncertainty propagation (T) or not (F)
 propagate_uncer=T
 
+
 # Decide whether to run all trait combinations in the database for LS and Ks (F), or just a selection (T)
 trait_sel=F
 # Number of combinations to select if trait_sel=T. Set to -1 for a systematic sample, >0 for a random sample of the size specified
@@ -150,6 +157,7 @@ n_trait_sel=-1
 
 # Run for all deciduous (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4). This is used to set the maximum and minimum bounds in trait_opt().
 spec_group_sel=2
+
 
 # ---
 if (propagate_uncer) {
@@ -160,6 +168,7 @@ if (propagate_uncer) {
 
 # Get index for selected species group
 if (spec_group_sel==1) {
+
   ind_spec_group=which(traits$group=='BT' | traits$group=='BD')
 } else if (spec_group_sel==2) {
   ind_spec_group=which(traits$group=='BE')
@@ -170,10 +179,12 @@ if (spec_group_sel==1) {
 }
 
 # Identify all combinations of Ks and LS (do this across full range of broadleaf species)
+
 ind=which(!is.na(traits$Ks) & !is.na(traits$LS))
 
 LS_comb <- traits$LS[ind]
 Ks_comb <- traits$Ks[ind]
+
 
 if (trait_sel) {
   if (n_trait_sel>0) {
@@ -189,8 +200,9 @@ if (trait_sel) {
     
   } else {
     # Systematic sample
-    
+
     #install.packages("hypervolume")
+
     library(hypervolume)
     # Fit a hypervolume (KDE at 95%)
     # Have not rescaled trait before fitting hypervolume as the ranges of both are very similar
@@ -224,6 +236,7 @@ if (trait_sel) {
   LS_e=LS_comb
 }
 
+
 # ---
 # Select the LMA relationship to use
 if (spec_group_sel==1) {
@@ -239,6 +252,7 @@ if (spec_group_sel==1) {
 # ---
 # Do the optimisation
 
+
 ndata=length(LS_e)
 
 P50_e <- matrix(NA, nrow= ndata, ncol = n_uncer) #Array now expanded to hold multiple replicate estimates based on regression coefficient uncertainty
@@ -246,6 +260,7 @@ LMA_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 TLP_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 WD_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
 slope_e <- matrix(NA, nrow= ndata, ncol = n_uncer)
+
 
 # Loop over all the combinations of Hmax and LS
 # The new estimates of traits use the suffix "_e"
@@ -279,6 +294,7 @@ for (dd in 1:ndata) {
   slope_e[dd,] <- opt_vals$slope_e
 }
   
+
 #Stats defining the uncertainty range for each point
 TLP_e_mean=unname(apply(TLP_e, 1, mean,na.rm=T))
 TLP_e_median=unname(apply(TLP_e, 1, median,na.rm=T))
@@ -360,6 +376,7 @@ write.table(format(traits_e_out, digits=3), "traits_e_out_systtraits_260820.csv"
 leafL_from_LMA <- sma_plot_stats(data.frame(LMA,log(leafL)),c("LMA","leafL"),nbtstrp,T)
 
 
+
 # Calculate limits of leafN vs LMA to allow estimate of leaf C:N ----------
 
 leafN_from_LMA <- sma_plot_stats(data.frame(LMA,leafN),c("LMA","leafN"),nbtstrp,T)
@@ -433,6 +450,7 @@ for (nn in 1:length(traits_LPJG$Ks)) {
   Line11 <- paste("\t wooddens ",traits_LPJG$WD[nn],sep="")
   Line12 <- paste("\t k_latosa ",traits_LPJG$LS[nn],sep="")
   Line13 <- paste("\t sla ",traits_LPJG$SLA[nn],sep="")
+
   Line14 <- paste("\t cton_leaf_min ",traits_LPJG$CtoNmin_LPJG[nn],sep="")
   if (basePFT==1 | basePFT==4) {
     Line15 <- paste("\t leaflong ",traits_LPJG$leaflong[nn],sep="")
@@ -493,5 +511,3 @@ for (nn in 1:length(traits_LPJG$Ks)) {
 # Write out a trait values table by PFT to be used for post-processing of LPJ-GUESS output
 write.table(traits_LPJG,file=LPJG_summaryfile,sep=",",row.names = F)
 
-
-  
