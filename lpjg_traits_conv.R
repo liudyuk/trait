@@ -56,7 +56,11 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
 
   lambda_LPJG <- determine_lambda_from_TLP(TLP_e_mean_unlogged) # see function for infos
   DeltaPsiWW_LPJG <- -0.5571 + (2.9748*WD_e_mean) # Based on https://docs.google.com/spreadsheets/d/1KvB97vt6OVdy3GPUdOdlxd8c9TdjEk9z4qIl2mcfPHk/edit#gid=51069844
-  Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged) #### [TODO] Check relationship between TLP and Kleaf using other regression methods
+  Kleaf_LPJG <- 3.3682 + (-1.21*TLP_e_mean_unlogged) #### [TODO] Check relationship between TLP and Kleaf using other regression methods. 
+  # Note that Kleaf will be overwritten with PFT-specific mean value in function write_LPKG_ins.file.R, 
+  # Since the relationship used here does not look functionally right, even though the data this is how it should be. But the data was very scarse ( see google doc).
+  # there was also a unit and definition problem, if I remember correctly (found by Wim Verbruggen)
+  
   
   #Limit ranges
   lambda_LPJG[lambda_LPJG  < -0.3] = -0.3 # From Papastefanou et al. (2020, Front. Plant Sci.)
@@ -102,10 +106,12 @@ TeBE_header <- c("\t ! Temperate broadleaved evergreen tree",
                  "\t seas_iso 0",
                  "\t eps_mon 0.74 0.2 0.2 0.09 0.13 0.08 0.02 0.08 0.08",
                  "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
-                 "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
-                 "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
-                 "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
+                # "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                # "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                # "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                  "")
+                #AHES 17072023: commented out the above because they are not part of the branch we use for running. For us they remain
+                # at default values anyways and are  used for sensitivity tests in other branches (I think).
 
 TeBS_header <- c(  "\t ! Shade-tolerant temperate broadleaved summergreen tree",
                    "",
@@ -126,9 +132,9 @@ TeBS_header <- c(  "\t ! Shade-tolerant temperate broadleaved summergreen tree",
                    "\t seas_iso 1",
                    "\t eps_mon 0.52 0.14 0.1 0.04 0.49 0.01 0.04 0.18 0.08",
                    "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
-                   "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
-                   "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
-                   "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
+                  # "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                  # "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                  # "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                    "")
 
 IBS_header <- c(  "\t ! Shade-intolerant broadleaved summergreen tree",
@@ -151,9 +157,9 @@ IBS_header <- c(  "\t ! Shade-intolerant broadleaved summergreen tree",
                   "\t eps_mon 0.52 0.14 0.1 0.04 0.49 0.01 0.04 0.18 0.08",
                   "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.",
                   "\t greff_min 0.135 		! Version 4.1 update. Improves B(I)NE/IBS balance in boreal regions.",
-                  "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
-                  "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
-                  "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
+                 # "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                 # "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                 # "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                   "")
 
 TrBE_header <- c(  "\t ! Tropical broadleaved evergreen tree",
@@ -172,9 +178,10 @@ TrBE_header <- c(  "\t ! Tropical broadleaved evergreen tree",
                    "\t seas_iso 0",
                    "\t eps_mon 0.32 0.09 0.07 0.06 0.06 0.04 0.04 0.07 0.05",
                    "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
-                   "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
-                   "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
-                   "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
+                   "\t crownarea_max 130",
+                  # "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                  # "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                  # "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                    "")
 
 TrBR_header <- c(  "\t ! Tropical broadleaved raingreen tree",
@@ -194,7 +201,8 @@ TrBR_header <- c(  "\t ! Tropical broadleaved raingreen tree",
                    "\t seas_iso 0",
                    "\t eps_mon 0.95 0.26 0.22 0.18 0.18 0.13 0.12 0.22 0.14",
                    "\t storfrac_mon 0.4 0.8 0.8 0.4 0.4 0.5 0.8 0.2 0.5",
-                   "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
-                   "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
-                   "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
+                   "\t crownarea_max 130",
+                 #  "\t psi50_leaf -3.2 ! value from TrBE_grasses.ins.txt",
+                 # "\t psi50_root -3.2! value from TrBE_grasses.ins.txt",
+                 #  "\t b_leaf_soil_xylem 0.5 ! default value from Rosie Fisher et al",
                    "")
