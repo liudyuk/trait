@@ -62,7 +62,7 @@ nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samp
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/woody_trait.0827.txt",sep="\t")
 traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/mytrait-data/woody_trait.0827.txt",sep="\t")
 
-#Explanation for trait data 0803 version
+#Explanation for trait data 0803 or 0827 version
 #If "logged", we used the natural log. (note: in R, log() takes the natural logarithm)
 #P50: First multiplied -1 and then logged.
 #TLP: First multiplied -1 and then logged.
@@ -222,14 +222,12 @@ bivar_BDT <- make_bivar_plots(trait_BDT,nbtstrp, regr_type = 'lm')
 regr_type = 'plsr'
 
 
-#[TODO] check whether this is still needed - it i sin theory not, but traits_mean must be removed from some functions
+#[TODO] check whether this is still needed - it is in theory not, but traits_mean must be removed from some functions
 # now that centering is set to TRUE in plsr, and it is applied to all values, including Y, do not standardise using the mean, 
 # but only sd only.
 if (regr_type == 'pcr' || regr_type == 'plsr'){
- 
   traits_sd   = as.data.frame(t(apply(traits[13:44],2,sd,na.rm=TRUE)))
   traits_mean_unscale = as.data.frame(t(apply(traits[13:44],2,mean,na.rm=TRUE)))
-
 }
 
 
@@ -379,7 +377,7 @@ leafN_from_LMA <- sma_plot_stats(data.frame(trait_B$LMA,trait_B$leafN),c("LMA","
 leafN_from_LMA_limit <- regress_limit_adjust(trait_B$leafN,trait_B$LMA,leafN_from_LMA,0.05)
 
 #for Supplementary Materials: 
-# Plots of regressions of auxiliary parameters which had their relationships derived from TRY data
+# Plots of regressions of auxiliary parameters which had their relationships derived from TRY data ( auxiliary parameters are not used in the trait network)
 # leafN_from_LMA_limit, for the calculation of CtoNmin.
 # makeplot_Suppl =T for the above two aux-vars.
 png(filename= "Figures/aux_params.png",width = 12,height=16,units = "cm",res=350)
@@ -600,17 +598,17 @@ outs_LSP50      <- trait_optim_bivar_start_LSP50(limitdataranges = limitdatarang
 
 if(testing==TRUE){
 if(spec_group_sel==1){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BDTManuscript02112022.RData')
+  save(outs_LSP50 , file= 'data/outs_LSP50_BDTManuscript14122023.RData')
 }
 if(spec_group_sel==2){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BEManuscript02112022.RData')
+  save(outs_LSP50 , file= 'data/outs_LSP50_BEManuscript14122023.RData')
    #load('data/outs_LSP50_BEManuscript29042022.RData')
   }
 if(spec_group_sel==3){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BTManuscript29042022.RData')
+  save(outs_LSP50 , file= 'data/outs_LSP50_BTManuscript14122023.RData')
 }
 if(spec_group_sel==4){
-  save(outs_LSP50 , file= 'data/outs_LSP50_BDManuscript29042022.RData')
+  save(outs_LSP50 , file= 'data/outs_LSP50_BDManuscript14122023.RData')
 }
 }
 #save(outs_LSP50 , file= 'data/outs_LSP50_BD.RData')
@@ -623,7 +621,8 @@ list2env(outs_LSP50$predicted , envir = .GlobalEnv)
 create_uncertainty_range_stats(outs_LSP50)
 
 #trait_BE = trait_BE_save
-
+# [TODO] the plots function creates Figures that are saved in "Figures/".
+# maybe make a switch that allows for writeout vs. write to figure.
 opt_test_plots_LSP50(trait_plot,
                      Ks_e_mean,
                      Ks_e_5perc,
@@ -715,6 +714,7 @@ traits_PCA$Ks  = log(traits_PCA$Ks)
 traits_PCA$LMA = log(traits_PCA$LMA)
 
 #PCA on optimised trait values (0 = 5 to 7)
+#[TODO] currently not working:
 #pca_with_pretty_biplot(traits_PCA[,c(1,3,4,6,10,12,13,17)], labels = c("WD","-P50","-P88","LS","Ks","TLP","slope","LMA" ))
 
 if(spec_group_sel==1){
@@ -724,8 +724,8 @@ if(spec_group_sel ==2){
   mtext( side=3,'Broadleaf evergreen')
 }
 #
-# superimpose PCA from observations on top. Observations are v. scarce, which is why we are doing the whole thing. 
-# But it woudl be great if they and the predicted traits make sense.
+# superimpose PCA from complete cases of observations on top. Observations are v. scarce, which is why we are doing the whole thing above.
+# But it would be great if these observations and the predicted traits make sense (overlap well on the PCA)
 
 #subs <- na.omit(trait_plot[,c("WD","P50","LS","Ks","TLP","LMA")])
 ##pca_with_pretty_biplot(subs, labels = c("WD","-P50","LS","Ks","TLP","LMA" ))
@@ -751,16 +751,16 @@ if (spec_group_sel==1 | spec_group_sel==3 | spec_group_sel==4) {
 outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
 # (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4).
 if(spec_group_sel==1){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_17042023.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_14122023.RData')
 }
 if(spec_group_sel==2){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_17042023.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_14122023.RData')
 }
 if(spec_group_sel==3){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_17042023.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_14122023.RData')
 }
 if(spec_group_sel==4){
-  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_17042023.RData')
+  save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BD_1412023.RData')
 }
 #display trait values that will be selected for PFTs(purple), show that their spread is across a wide range of values 
 opt_test_plots_LSP50_pfts(traits,#trait_B,#trait_plot,
@@ -836,6 +836,7 @@ if(spec_group_sel ==2){
 }
 png(filename= paste0("Figures/PCA_PFTtype",PFTtype,".png"),width = 18,height=18,units = "cm",res=350)
 
+#[TODO] currently not working:
 #pca_with_pretty_biplot_Pfts(traits_PCA_pred[,c(1,3,4,6,10,12,13,17)])#, labels = c("WD","-P50","-P88","LS","Ks","TLP","slope","LMA" ) )
 
 if(spec_group_sel==1){
@@ -865,12 +866,12 @@ basePFTs <- c(1,2,3,4,5)
 for(basePFT in basePFTs){
 print(basePFT)
   if(basePFT ==1 || basePFT == 4){
-    load(file='data/outs_LSP50_hv_BE_17042023.RData') 
+    load(file='data/outs_LSP50_hv_BE_14122023.RData') 
   }
-  if(basePFT ==2 || basePFT == 3 || basePFT == 5){  # TeBE,IBS,TrBR, 
-    load(file='data/outs_LSP50_hv_BDT_17042023.RData')
+  if(basePFT ==2 || basePFT == 3 || basePFT == 5){  # TeBS,IBS,TrBR, 
+    load(file='data/outs_LSP50_hv_BDT_14122023.RData')
   }
-  # alternatively, map in more detail( but lose data ranges):
+  # alternatively, map in amore detail( but lose data ranges):
   #if(basePFT ==2 || basePFT == 3 ){ # summergreen shade tolerant and intolerant PFT
   #  load(file='data/outs_LSP50_BT.RData')
   #}
@@ -897,10 +898,15 @@ print(basePFT)
   # write output
   #output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles03072022/"
   #output_fol="~/Desktop/PFTs_simba_hyd_svn/"
-  output_fol = "/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles17042023_Kleafnetwork/"
+  output_fol = "/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles14042023/"
   #output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles06072022_KsLS/"
-  write_LPJG_ins.file(output_fol,basePFT = basePFT ,traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='new_header.ins', lpjg_version=4.1)#insfiles_4.1_template_simba #mac04072022.ins, global_cf_base_Tom17042023.ins, Tom04072022.ins # global_cf_base_mac04072022.ins
+  write_LPJG_ins.file(output_fol, basePFT = basePFT, traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='global_cf_base_Tom14072023_noforcingpaths.ins', lpjg_version=4.1)#global_cf_base_Tom12072023_wstressstd.ins global_cf_base_Tom26062023.ins# new_header.ins#insfiles_4.1_template_simba #mac04072022.ins, global_cf_base_Tom17042023.ins, Tom04072022.ins # global_cf_base_mac04072022.ins
   
+  #output_fol = "/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles12072023/wstress_hyd"
+  #write_LPJG_ins.file(output_fol, basePFT = basePFT, traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='mac12072023.ins', lpjg_version=4.1) # global_cf_base_Tom12072023_wstressstd.ins
+  #global_cf_base_Tom26062023.ins
+  #10.07.2023: no longer the gc_bug branch ( different insfile specs), as it was decided that this was not the way forward. 
+  # run with a merge of develoop and raingreen_phenology.
 }
 
 
@@ -1034,7 +1040,7 @@ if(testing==TRUE){
         points(rep(4,length(df$BE_m)),df$BE_m)
       }
       
-    }else if(n == 'Kleaf'){
+    }else if(n == 'Kleaf'){ 
       print(n)
       df <- data.frame(BDT_o = c(na.omit(trait_BDT[[n]]) ,rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) )),
                        BDT_m = c( log((t(lm_TrBE['leafN_LPJG']) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE['leafN_LPJG']))))), 
@@ -1051,8 +1057,6 @@ if(testing==TRUE){
     }
   }
 dev.off()
-
-}
 
 
 
