@@ -92,21 +92,6 @@ source("whittaker_biomes_plot.R")
 source('scale_traits.R')
 source('unscale_traits.R')
 
-# optimisation starting with KsLS and subsequent diagnostic plots 
-source("trait_opt_bivar_start_KsLS.R")
-source('trait_optim_bivar_start_KsLS.R')
-source("opt_test_plots_KsLS.R")
-
-# for testing multiple starting variables for the optimisation
-# optimisation starting with LSTLP and subsequent diagnostic plots  
-source('trait_optim_bivar_startLSTLP.R') 
-source('trait_opt_bivar_start_LSTLP.R')
-source('opt_test_plots_LSTLP.R')
-
-# optimisation starting with KsTLP and subsequent diagnostic plots 
-source('trait_optim_bivar_start_KsTLP.R')
-source('trait_opt_bivar_start_KsTLP.R')
-source('opt_test_plots_KsTLP.R')
 
 # optimisation starting with LSP50 and subsequent diagnostic plots 
 source('trait_optim_bivar_start_LSP50.R')
