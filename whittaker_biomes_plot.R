@@ -1,11 +1,5 @@
 whittaker_biomes_plot <- function(data_MATp_MAPp) {
 
-#check the details frrom page
-#https://valentinitnelav.github.io/plotbiomes/
-
-#install packages
-#devtools::install_github("valentinitnelav/plotbiomes")
-library(plotbiomes)
 
 whittaker_base_plot()+
   # add the temperature - precipitation data points

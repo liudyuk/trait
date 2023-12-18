@@ -1,0 +1,12 @@
+# README
+
+
+This repository contains code related to exploring how to create hydrological trait-based PFTs, to subsequently assess their global distribution in LPJ-GUESS-HYD.
+
+
+Kleaf is no longer simulated by the trait network, but will be provided based on mean or median values from the file Kleaf_mining_rough_template-DL_updated_v3.xlsx
+
+Gdrive folder with trait descriptions
+
+https://drive.google.com/drive/folders/1-I1JKPQ7P8uDAnqwi7VToif0MgpE8x-R
+
