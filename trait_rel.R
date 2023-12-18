@@ -873,16 +873,16 @@ for(basePFT in basePFTs){
   create_uncertainty_range_stats(outs_LSP50_hv)
   
   # convert to LPJ-Guess units
-  #traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
-  #                                          as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
-  #                                          leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
-  traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
-                                            as.vector(LS_e[,1]),WD_e_mean,as.vector(Ks_e[,1]),
+  traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,as.vector(P50_e[,1]),TLP_e_mean,slope_e_mean,
+                                            as.vector(LS_e[,1]),WD_e_mean,Ks_e_mean,
                                             leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
+  #traits_LPJG_LSP50_pft <- lpjg_traits_conv(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
+  #                                          as.vector(LS_e[,1]),WD_e_mean,as.vector(Ks_e[,1]),
+  #                                          leafL_from_LMA,leafN_from_LMA,leafN_from_LMA_limit)
   
   # write output
   #output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles03072022/"
-  #output_fol="~/Desktop/PFTs_simba_hyd_svn/"
+  output_fol="~/Desktop/"
   output_fol = "/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles14042023/"
   #output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles06072022_KsLS/"
   write_LPJG_ins.file(output_fol, basePFT = basePFT, traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='global_cf_base_Tom14072023_noforcingpaths.ins', lpjg_version=4.1)#global_cf_base_Tom12072023_wstressstd.ins global_cf_base_Tom26062023.ins# new_header.ins#insfiles_4.1_template_simba #mac04072022.ins, global_cf_base_Tom17042023.ins, Tom04072022.ins # global_cf_base_mac04072022.ins
@@ -985,19 +985,7 @@ if(testing==TRUE){
         axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
         points(rep(2,length(df$BDT_m)),df$BDT_m)
         points(rep(4,length(df$BE_m)),df$BE_m) 
-        
-      }else if (n == 'SLA'){
-        
-        df <- data.frame(BDT_o = c( (1/exp(na.omit(trait_BDT[['LMA']]))*1000*2), rep(NA, length(c(na.omit(trait_BE[['LMA']])))-length(na.omit(trait_BDT[['LMA']])) ) ), # From log g m-2 to m2 kgC-1
-                         BDT_m = c( (t(lm_TrBE[n]) ), rep(NA,length(c(na.omit(trait_BE[['LMA']])))-length(c(t(lm_TrBE[n]))))), 
-                         BE_o  = c( (1/exp(na.omit(trait_BE[['LMA']]))*1000*2) ),      # From log g m-2 to m2 kgC-1
-                         BE_m  = c( (t(plsr_TrBE[n]) ), rep(NA,length(c(na.omit(trait_BE[['LMA']])))-length(c(t(plsr_TrBE[n]))))) )
-        
-        boxplot(df,xlab = '',ylab = '',col = boxplot_cols,xaxt='n',xlim = c(0,5),
-                main=paste0(n), names = boxplot_names)  # m2 kgC-1
-        axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
-        points(rep(2,length(df$BDT_m)),df$BDT_m)
-        points(rep(4,length(df$BE_m)),df$BE_m) 
+      
         
       }else if(n=='slope'){
         print(n)
@@ -1014,10 +1002,10 @@ if(testing==TRUE){
         
       }else if(n == 'leafN_LPJG'){
         print(n)
-        df <- data.frame(BDT_o = c(na.omit(trait_BDT[[n]]) ,rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) )),
-                         BDT_m = c( log((t(lm_TrBE['leafN_LPJG']) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE['leafN_LPJG']))))), 
-                         BE_o  = c(na.omit(trait_BE[[n]]) ),
-                         BE_m  = c( log((t(plsr_TrBE['leafN_LPJG']) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(plsr_TrBE['leafN_LPJG']))))))
+        df <- data.frame(BDT_o = c(na.omit(trait_BDT[["leafN"]]) ,rep(NA, length(c(na.omit(trait_BE[["leafN"]])))-length(na.omit(trait_BDT[["leafN"]])) )),
+                         BDT_m = c( log((t(lm_TrBE['leafN_LPJG']) )), rep(NA,length(c(na.omit(trait_BE[["leafN"]])))-length(c(t(lm_TrBE['leafN_LPJG']))))), 
+                         BE_o  = c(na.omit(trait_BE[["leafN"]]) ),
+                         BE_m  = c( log((t(plsr_TrBE['leafN_LPJG']) )), rep(NA,length(c(na.omit(trait_BE[["leafN"]])))-length(c(t(plsr_TrBE['leafN_LPJG']))))))
         
         boxplot(df,xlab = '',ylab = '',col = boxplot_cols,xaxt='n',xlim = c(0,5),main = paste0('log(leafN)'), 
                 names = boxplot_names) # m2 kgC-1
@@ -1026,12 +1014,40 @@ if(testing==TRUE){
         points(rep(4,length(df$BE_m)),df$BE_m)
       }
       
-    }else if(n == 'Kleaf'){ 
+    }else if (n == 'SLA'){
+      
+      df <- data.frame(BDT_o = c( (1/exp(na.omit(trait_BDT[['LMA']]))*1000/2), rep(NA, length(c(na.omit(trait_BE[['LMA']])))-length(na.omit(trait_BDT[['LMA']])) ) ), # From log g m-2 to m2 kgC-1
+                       BDT_m = c( (t(lm_TrBE[n]) ), rep(NA,length(c(na.omit(trait_BE[['LMA']])))-length(c(t(lm_TrBE[n]))))), 
+                       BE_o  = c( (1/exp(na.omit(trait_BE[['LMA']]))*1000/2) ),      # From log g m-2 to m2 kgC-1
+                       BE_m  = c( (t(plsr_TrBE[n]) ), rep(NA,length(c(na.omit(trait_BE[['LMA']])))-length(c(t(plsr_TrBE[n]))))) )
+      
+      boxplot(df,xlab = '',ylab = '',col = boxplot_cols,xaxt='n',xlim = c(0,5),
+              main=paste0(n), names = boxplot_names)  # m2 kgC-1 # Note that this is not a normal "observations" unit. #observations have this as per drymass. 
+      # Typical units are m2 · kg−1 or mm2 · mg−1. 
+      #LPJG uses SLA with units of carbon, so /2 in the observations.
+      #deciduous tree 
+      axis(labels=c('deciduous','evergreen'),side = 1,at = c(1.2,3.5),tick =FALSE, cex.axis = 0.8,line=-0.9)
+      points(rep(2,length(df$BDT_m)),df$BDT_m)
+      points(rep(4,length(df$BE_m)),df$BE_m) 
+      
+    }else if(n == 'nnsd'){ #leafNfromLMA: leafN_from_LMA_limit. - CtoNmin_LPJG
       print(n)
+      
+      #[TODO] Test whether this should be split by leaf type or not here ( must check how it was derived from data (is there a split there? )
+      # and  whether a split occurs when LPJG-parameters are created from it.)
+      #LMA_e_mean IS leaf type specific. must get the correct one here to make sense
+      leafN_LPJG <- exp(leafN_from_LMA$mod$intercept_R + leafN_from_LMA$mod$slope_R.y1*LMA_e_mean) # mg N per g leaf
+      CtoN_LPJG <- 1000/(leafN_LPJG*2) #Assume 0.5 g C per g leaf
+      
+      leafNmax_LPJG <- exp(leafN_from_LMA_limit$intercept_upper + leafN_from_LMA_limit$slope*LMA_e_mean) # mg N per g leaf
+      CtoNmin_LPJG <- 1000/(leafNmax_LPJG*2) #Assume 0.5 g C per g leaf
+      
+      
+     
       df <- data.frame(BDT_o = c(na.omit(trait_BDT[[n]]) ,rep(NA, length(c(na.omit(trait_BE[[n]])))-length(na.omit(trait_BDT[[n]])) )),
-                       BDT_m = c( log((t(lm_TrBE['leafN_LPJG']) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE['leafN_LPJG']))))), 
+                       BDT_m = c( log((t(lm_TrBE[n]) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(lm_TrBE['leafN_LPJG']))))), 
                        BE_o  = c(na.omit(trait_BE[[n]]) ),
-                       BE_m  = c( log((t(plsr_TrBE['leafN_LPJG']) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(plsr_TrBE['leafN_LPJG']))))))
+                       BE_m  = c( log((t(plsr_TrBE[n]) )), rep(NA,length(c(na.omit(trait_BE[[n]])))-length(c(t(plsr_TrBE['leafN_LPJG']))))))
       
       boxplot(df,xlab = '',ylab = '',col = boxplot_cols,xaxt='n',xlim = c(0,5),main = paste0('log(leafN)'), 
               names = boxplot_names) # m2 kgC-1
