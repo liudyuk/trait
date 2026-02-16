@@ -31,7 +31,7 @@ lpjg_traits_conv <- function(LMA_e_mean,P50_e_mean,TLP_e_mean,slope_e_mean,
   
   # Unit conversions or analytical transformations
   WD_LPJG <- (WD_e_mean*1000)/2 # From g cm-3 to kgC m-3
-  SLA_LPJG <- (1/LMA_e_mean_unlogged)*1000/2 # From log g m-2 to m2 kgC-1
+  SLA_LPJG <- (1/LMA_e_mean_unlogged)*1000*2 # From log g m-2 to m2 kgC-1
   P88_LPJG <- P50_e_mean_unlogged - (38/slope_e_mean_unlogged)
   # (log⁡(-1+1/0.88))/(log⁡(ψ_88/ψ_50 )  )can be approximated as the
   polyslope_LPJG <- 2/(log(P50_e_mean_unlogged/P88_LPJG)) # Hill/polynomial slope for input into LPJ-GUESS using equation from Phillip Papastefanou
