@@ -52,6 +52,9 @@
 # April 2023
 # additional .insfile features for merged git branch version bugfix/gc_patch_directET_Formula
 
+#some trouble-shooting about Kleaf
+# and sla
+
 # clear working space
 rm(list=ls())
 
@@ -60,7 +63,12 @@ nbtstrp=1000 # Number of bootstrap samples to take in sma_multivar_regress (samp
 #traits=read.table("/Users/liudy/trait_data/woody_trait.0625.txt")
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/mytrait-data/woody_trait.0803.txt",sep="\t")
 #traits=read.csv("/Users/pughtam/Documents/TreeMort/Analyses/Hydraulic_modelling/Traits/woody_trait.0827.txt",sep="\t")
-traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/mytrait-data/woody_trait.0827.txt",sep="\t")
+traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/all.traits-new_PFT_2026.03.11_checked_annemarie.csv",sep=",")
+#traits_old = read.table("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_intermediate/woody_trait.0827.txt")
+
+names(traits)[9] <- "slope"
+names(traits)[5] <- "group"
+
 
 #Explanation for trait data 0803 or 0827 version
 #If "logged", we used the natural log. (note: in R, log() takes the natural logarithm)
@@ -72,11 +80,11 @@ traits = read.csv("/Users/annemarie/Documents/1_TreeMort/2_Analysis/2_data/2_int
 #leafNa: logged
 #LMA: logged
 #Ks: logged
-#Kl_xy:logg
+#Kl_xy:logged
 #Kl_area:logged
 #GR: logged
 #LS: logged
-#Slope:logged
+#slope:logged
 
 # related to trait network construction
 source('sma_multivar_regress.R')
@@ -156,7 +164,7 @@ makeTransparent<-function(someColor, alpha=100){
 #for plotting of hypercube sampling results:
 library(grid)
 library(ggplot2)
-library("ggpubr")
+#library(ggpubr)
 # to plot PCA ggplots in grid
 library(gridExtra)
 # convenience package for ols normality checks, required in function lm_regress_multivar
@@ -585,17 +593,17 @@ outs_LSP50      <- trait_optim_bivar_start_LSP50(limitdataranges = limitdatarang
 
 if(testing==TRUE){
   if(spec_group_sel==1){
-    save(outs_LSP50 , file= 'data/outs_LSP50_BDTManuscript14122023.RData')
+    save(outs_LSP50 , file= 'data/outs_LSP50_BDTManuscript16022026.RData')
   }
   if(spec_group_sel==2){
-    save(outs_LSP50 , file= 'data/outs_LSP50_BEManuscript14122023.RData')
+    save(outs_LSP50 , file= 'data/outs_LSP50_BEManuscript16022026.RData')
     #load('data/outs_LSP50_BEManuscript29042022.RData')
   }
   if(spec_group_sel==3){
-    save(outs_LSP50 , file= 'data/outs_LSP50_BTManuscript14122023.RData')
+    save(outs_LSP50 , file= 'data/outs_LSP50_BTManuscript16022026.RData')
   }
   if(spec_group_sel==4){
-    save(outs_LSP50 , file= 'data/outs_LSP50_BDManuscript14122023.RData')
+    save(outs_LSP50 , file= 'data/outs_LSP50_BDManuscript16022026.RData')
   }
 }
 #save(outs_LSP50 , file= 'data/outs_LSP50_BD.RData')
@@ -737,13 +745,13 @@ for(spec_group_sel in c(1:4)){
   outs_LSP50_hv  <- trait_optim_bivar_start_LSP50(limitdataranges = limitdataranges ,propagate_uncer = propagate_uncer,trait_sel = T, n_trait_sel = -1, spec_group_sel = spec_group_sel,est_lhs = est_lhsLSP50,regr_type = regr_type)
   # (BT + BD) (=1), or BE (=2), or BT (=3), or BD (=4).
   if(spec_group_sel==1){
-    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_14122023.RData')
+    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BDT_18072024.RData')
   }
   if(spec_group_sel==2){
-    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_14122023.RData')
+    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BE_18072024.RData')
   }
   if(spec_group_sel==3){
-    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_14122023.RData')
+    save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BT_18072024.RData')
   }
   if(spec_group_sel==4){
     save(outs_LSP50_hv , file= 'data/outs_LSP50_hv_BD_1412023.RData')
@@ -850,10 +858,10 @@ basePFTs <- c(1,2,3,4,5)
 for(basePFT in basePFTs){
   print(basePFT)
   if(basePFT ==1 || basePFT == 4){
-    load(file='data/outs_LSP50_hv_BE_14122023.RData') 
+    load(file='data/outs_LSP50_hv_BE_18072024.RData') 
   }
   if(basePFT ==2 || basePFT == 3 || basePFT == 5){  # TeBS,IBS,TrBR, 
-    load(file='data/outs_LSP50_hv_BDT_14122023.RData')
+    load(file='data/outs_LSP50_hv_BDT_18072024.RData')
   }
 
   # alternatively, map in amore detail( but lose data ranges):
@@ -883,10 +891,10 @@ for(basePFT in basePFTs){
   # write output
   #output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles03072022/"
   output_fol="~/Desktop/"
-  output_fol = "/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles14042023/"
+  output_fol = "/Users/annemarie/Library/CloudStorage/OneDrive-LundUniversity/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles10042026/"
   #output_fol="/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles06072022_KsLS/"
-  write_LPJG_ins.file(output_fol, basePFT = basePFT, traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='global_cf_base_Tom14072023_noforcingpaths.ins', lpjg_version=4.1)#global_cf_base_Tom12072023_wstressstd.ins global_cf_base_Tom26062023.ins# new_header.ins#insfiles_4.1_template_simba #mac04072022.ins, global_cf_base_Tom17042023.ins, Tom04072022.ins # global_cf_base_mac04072022.ins
-  
+  #write_LPJG_ins.file(output_fol, basePFT = basePFT, traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='global_cf_base_Tom14072023_noforcingpaths.ins', lpjg_version=4.1)#global_cf_base_Tom12072023_wstressstd.ins global_cf_base_Tom26062023.ins# new_header.ins#insfiles_4.1_template_simba #mac04072022.ins, global_cf_base_Tom17042023.ins, Tom04072022.ins # global_cf_base_mac04072022.ins
+  write_LPJG_ins.file(output_fol, basePFT = basePFT, traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='global_cf_base_Tom18072024.ins', lpjg_version=4.1)#hydraulics_ms)#global_cf_base_Tom12072023_wstressstd.ins global_cf_base_Tom26062023.ins# new_header.ins#insfiles_4.1_template_simba #mac04072022.ins, global_cf_base_Tom17042023.ins, Tom04072022.ins # global_cf_base_mac04072022.ins
   #output_fol = "/Users/annemarie/OneDrive - Lund University/1_TreeMort_onedrive/3_Dissemination/5_inputs/insfiles12072023/wstress_hyd"
   #write_LPJG_ins.file(output_fol, basePFT = basePFT, traits_LPJG = traits_LPJG_LSP50_pft,insfile_template='mac12072023.ins', lpjg_version=4.1) # global_cf_base_Tom12072023_wstressstd.ins
   #global_cf_base_Tom26062023.ins
